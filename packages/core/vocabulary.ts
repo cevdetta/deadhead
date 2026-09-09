@@ -20,7 +20,12 @@ export const STANDARDS_BASIS = [
 export const DETECTABILITY = ["yes", "partial", "no"] as const;
 export const KIND = ["element", "document"] as const;
 export const SCOPE = ["head", "body", "any"] as const;
-export const FIX_OP = ["remove-element", "remove-attribute", "none"] as const;
+export const FIX_OP = [
+  "remove-element",
+  "remove-attribute",
+  "remove-token",
+  "none",
+] as const;
 export const IMPACTS = [
   "performance",
   "interop",
@@ -97,11 +102,13 @@ export type RuleMeta = {
   selector: string | null;
   match: "logic" | null;
   /**
-   * `attr` names the attribute a `remove-attribute` fix deletes, and is `null`
-   * for every other op. Without it the op is not actionable: knowing a rule
-   * removes *an* attribute says nothing about which one.
+   * `attr` names the attribute a `remove-attribute` or `remove-token` fix acts
+   * on, and `token` the whitespace-separated keyword `remove-token` deletes
+   * from it. Both are `null` for the ops that do not take them. Without them
+   * the op is not actionable: knowing a rule removes *an* attribute says
+   * nothing about which one.
    */
-  fix: { op: FixOp; attr: string | null };
+  fix: { op: FixOp; attr: string | null; token: string | null };
   replacement: string;
   tags: Tag[];
   impacts: Impact[];

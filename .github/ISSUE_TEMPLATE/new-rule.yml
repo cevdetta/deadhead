@@ -128,9 +128,11 @@ body:
     id: fix
     attributes:
       label: Fix
+      description: remove-attribute also needs `attr`; remove-token needs `attr` and `token`. A fix must never change behaviour — if the element is doing something, choose none.
       options:
         - remove-element
         - remove-attribute
+        - remove-token
         - none
     validations:
       required: true

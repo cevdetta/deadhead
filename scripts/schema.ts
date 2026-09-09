@@ -346,35 +346,55 @@ export function validateFrontmatter(data: unknown): FrontmatterResult {
   const fixRaw: unknown = data["fix"];
   let fixOp: FixOp | null = null;
   let fixAttr: string | null = null;
+  let fixToken: string | null = null;
   if (fixRaw === undefined || fixRaw === null) {
     // already reported as missing
   } else if (!isPlainObject(fixRaw)) {
     issues.push(field(["fix"], "must be a mapping, e.g. `fix: { op: remove-element }`"));
   } else {
     for (const key of Object.keys(fixRaw)) {
-      if (key !== "op" && key !== "attr") {
+      if (key !== "op" && key !== "attr" && key !== "token") {
         issues.push(field(["fix", key], `unknown fix field \`${key}\``));
       }
     }
     fixOp = oneOf(fixRaw["op"], FIX_OP, ["fix", "op"], issues);
 
-    // `remove-attribute` is not actionable without knowing which attribute,
-    // and naming one for any other op is a contradiction the fixer would
-    // silently ignore.
+    // An op is not actionable without the thing it acts on, and naming one for
+    // an op that does not take it is a contradiction the fixer would silently
+    // ignore.
+    const NEEDS_ATTR = new Set(["remove-attribute", "remove-token"]);
     const attrRaw: unknown = fixRaw["attr"];
-    if (fixOp === "remove-attribute") {
+    if (fixOp !== null && NEEDS_ATTR.has(fixOp)) {
       if (typeof attrRaw !== "string" || !/^[a-z][a-z0-9-]*$/.test(attrRaw)) {
         issues.push(
           field(
             ["fix", "attr"],
-            'required for `remove-attribute`: the lowercase attribute name to delete, e.g. `fix: { op: "remove-attribute", attr: "type" }`',
+            `required for \`${fixOp}\`: the lowercase attribute name to act on, e.g. \`fix: { op: "remove-attribute", attr: "type" }\``,
           ),
         );
       } else {
         fixAttr = attrRaw;
       }
     } else if (attrRaw !== undefined) {
-      issues.push(field(["fix", "attr"], `only \`remove-attribute\` takes an \`attr\``));
+      issues.push(
+        field(["fix", "attr"], `only ${[...NEEDS_ATTR].join(" and ")} take an \`attr\``),
+      );
+    }
+
+    const tokenRaw: unknown = fixRaw["token"];
+    if (fixOp === "remove-token") {
+      if (typeof tokenRaw !== "string" || !/^\S+$/.test(tokenRaw)) {
+        issues.push(
+          field(
+            ["fix", "token"],
+            'required for `remove-token`: the whitespace-separated keyword to delete, e.g. `fix: { op: "remove-token", attr: "rel", token: "shortcut" }`',
+          ),
+        );
+      } else {
+        fixToken = tokenRaw;
+      }
+    } else if (tokenRaw !== undefined) {
+      issues.push(field(["fix", "token"], `only \`remove-token\` takes a \`token\``));
     }
   }
 
@@ -429,7 +449,7 @@ export function validateFrontmatter(data: unknown): FrontmatterResult {
       scope: scope as Scope,
       selector,
       match,
-      fix: { op: fixOp as FixOp, attr: fixAttr },
+      fix: { op: fixOp as FixOp, attr: fixAttr, token: fixToken },
       replacement: replacement as string,
       tags,
       impacts,

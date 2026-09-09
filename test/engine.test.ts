@@ -23,7 +23,7 @@ const meta = (overrides: Partial<RuleMeta> & { ruleId: string }): RuleMeta => ({
   scope: "any",
   selector: null,
   match: null,
-  fix: { op: "none", attr: null },
+  fix: { op: "none", attr: null, token: null },
   replacement: "Delete it.",
   tags: [],
   impacts: [],
