@@ -1,0 +1,15 @@
+* text=auto eol=lf
+
+# Load-bearing, not boilerplate: fixes are byte ranges into the source file.
+# A CRLF checkout on Windows shifts every offset by one per line and the
+# expected ranges in the tests stop matching. Fixtures must be LF everywhere.
+# The first line already forces LF repo-wide; the two below pin the paths the
+# tests actually depend on so they survive any future narrowing of that rule.
+*.html text eol=lf
+test/fixtures/** text eol=lf
+
+pnpm-lock.yaml linguist-generated=true -diff
+
+# The repo is mostly markdown by volume. Without this GitHub calls it a
+# Markdown project and hides the language it is actually written in.
+content/** linguist-documentation

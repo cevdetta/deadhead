@@ -1,0 +1,22 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.md]
+trim_trailing_whitespace = false
+
+# Same reason as .gitattributes. An editor helpfully trimming trailing
+# whitespace in a fixture changes the byte offsets the tests assert on.
+# end_of_line/charset repeat [*] on purpose: these paths must stay LF/UTF-8
+# even if the global section ever changes.
+[test/fixtures/**]
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = false
+insert_final_newline = false

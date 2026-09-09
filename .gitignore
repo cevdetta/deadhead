@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+*.tsbuildinfo
+
+# Generated from content/rules/**/*.md by scripts/build-rules.ts
+packages/rules/rules.json
+packages/browser/deadhead.css
+packages/browser/bookmarklet.js
+
+# Test coverage
+coverage/
+*.lcov
+
+# Logs
+*.log
+
+# Package tarballs from `pnpm pack`
+*.tgz
+
+# Secrets. ANTHROPIC_API_KEY lives here when testing the GitHub Action locally.
+.env
+.env.*
+!.env.example

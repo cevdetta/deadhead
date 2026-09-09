@@ -1,0 +1,9 @@
+packages:
+  - packages/*
+
+# pnpm 10+ blocks dependency lifecycle scripts unless they are listed here.
+# An empty list is deliberate: nothing we depend on needs to run code at install
+# time, and a project that rejected gray-matter over an RCE should not hand
+# arbitrary postinstall execution to its own dependency tree.
+# If a dependency genuinely needs it, add it here in its own PR with a reason.
+onlyBuiltDependencies: []

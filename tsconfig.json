@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    // Runtime: ESM-only on Node >= 24. nodenext gives real ESM semantics
+    // (import attributes, package.json "type"/"exports" resolution).
+    "target": "esnext",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    // Every file is a module, even without imports/exports. Prevents
+    // accidental globals in scripts/tests.
+    "moduleDetection": "force",
+    // No DOM: packages/browser has its own tsconfig. Node globals only.
+    "lib": ["esnext"],
+    "types": ["node"],
+
+    // Node runs .ts directly via type stripping: ban anything it cannot
+    // strip (enums, namespaces, parameter properties), enforce import/export
+    // discipline so each file transpiles in isolation.
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    // Relative imports carry the .ts extension (Node requires it at runtime);
+    // rewriteRelativeImportExtensions fixes them to .js when emitting
+    // declarations for publish.
+    "allowImportingTsExtensions": true,
+    "rewriteRelativeImportExtensions": true,
+    // Typecheck only (tsgo --noEmit). Publishing strips types via
+    // stripTypeScriptTypes, never via this config.
+    "noEmit": true,
+
+    // Ergonomic default imports from CJS deps (parse5, yaml, linkedom).
+    // No emit effect under noEmit; only affects typechecking.
+    "esModuleInterop": true,
+
+    // Strictest type safety.
+    "strict": true,
+    "exactOptionalPropertyTypes": true,
+    "noUncheckedIndexedAccess": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noUncheckedSideEffectImports": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+
+    // No dead weight in a linter that complains about dead weight.
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+
+    // Portable across case-sensitive Linux CI / case-insensitive dev machines.
+    "forceConsistentCasingInFileNames": true,
+    // Speed: don't recheck @types/node and other .d.ts.
+    "skipLibCheck": true
+  },
+  "include": ["packages", "scripts", "test"],
+  "exclude": ["packages/browser", "**/node_modules", "**/dist"]
+}

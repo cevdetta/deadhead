@@ -1,0 +1,43 @@
+{
+  "name": "deadhead",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Documentation-driven linter for HTML <head>: finds deprecated, unnecessary and harmful markup and explains why. One rule set, three runtimes (CLI, browser, ESLint).",
+  "license": "MIT",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "packageManager": "pnpm@12.3.4",
+  "scripts": {
+    "build": "node scripts/build-rules.ts",
+    "build:css": "node scripts/build-css.ts",
+    "build:bookmarklet": "node scripts/build-bookmarklet.ts",
+    "test": "node --test",
+    "test:conformance": "node --test test/conformance/",
+    "check": "node packages/cli/bin/deadhead.ts",
+    "check:self": "node packages/cli/bin/deadhead.ts --fail-on=deprecated test/fixtures",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p packages/browser/tsconfig.json",
+    "validate:rules": "node scripts/validate-rules.ts",
+    "lint:deps": "pnpm dlx @e18e/cli@latest",
+    "prepublishOnly": "publint"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "linkedom": "^0.18.13",
+    "parse5": "^8.0.1",
+    "publint": "^0.3.24",
+    "typescript": "^7.0.2",
+    "yaml": "^2.9.0"
+  },
+  "keywords": [
+    "html",
+    "head",
+    "linter",
+    "meta-tags",
+    "deprecated",
+    "eslint-plugin",
+    "bookmarklet",
+    "static-analysis"
+  ]
+}
