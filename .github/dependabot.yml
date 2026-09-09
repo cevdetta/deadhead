@@ -1,0 +1,21 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: "chore(ci)"
+
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: "chore(deps)"
+    # Every dependency here is dev-only tooling, so one grouped PR a month is
+    # less noise than six. A production dependency would deserve its own PR,
+    # and adding one should be a deliberate decision anyway.
+    groups:
+      tooling:
+        patterns: ["*"]
