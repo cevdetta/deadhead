@@ -23,7 +23,9 @@
     "prepublishOnly": "publint"
   },
   "devDependencies": {
+    "@html-eslint/parser": "^0.65.0",
     "@types/node": "^24.0.0",
+    "eslint": "^10.10.0",
     "linkedom": "^0.18.13",
     "parse5": "^8.0.1",
     "publint": "^0.3.24",
