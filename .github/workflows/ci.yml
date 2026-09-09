@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # pnpm must be set up BEFORE setup-node, or `cache: pnpm` has no store
+      # path to cache. Version is read from "packageManager" in package.json.
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          # Single version: 24 is the floor declared in engines. If it passes
+          # on the floor it passes above; a second runner doubles minutes
+          # for no signal on this codebase.
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # Rules first: a malformed frontmatter field should fail in two seconds,
+      # not after the whole suite has run.
+      - run: pnpm validate:rules
+      - run: pnpm build
+      - run: pnpm typecheck
+      - run: pnpm test
+      # `pnpm check:self` (lint our own fixtures with our own CLI) joins here
+      # in M1, once packages/cli/bin/deadhead.ts exists.
+
+      # Folded into this job instead of a second runner: one checkout, one
+      # install. A linter about shipping things you do not need should hold
+      # itself to it. Pinned rather than @latest: `dlx` executes whatever was
+      # published minutes ago, and a project that rejected a dependency over
+      # an RCE should not hand CI an unpinned one.
+      #
+      # Gated on errors, not warnings. Every current warning is a duplicate
+      # transitive version inside parse5/linkedom's own tree — dev-only, never
+      # shipped, and not ours to fix. They still print. Revisit when the
+      # packages are published and the analysis has real output to judge.
+      - run: pnpm lint:deps
