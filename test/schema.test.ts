@@ -74,7 +74,7 @@ test("a minimal rule validates and optional fields widen to null/[]", () => {
   assert.deepEqual(result.meta.tags, []);
   assert.deepEqual(result.meta.impacts, []);
   assert.deepEqual(result.meta.related, []);
-  assert.deepEqual(result.meta.fix, { op: "remove-element", attr: null });
+  assert.deepEqual(result.meta.fix, { op: "remove-element", attr: null, token: null });
 });
 
 test("unknown frontmatter fields are rejected", () => {
@@ -160,18 +160,42 @@ test("remove-attribute must name the attribute it removes", () => {
   );
   const ok = validateFrontmatter({ ...base(), fix: { op: "remove-attribute", attr: "type" } });
   assert.ok(ok.ok);
-  assert.deepEqual(ok.meta.fix, { op: "remove-attribute", attr: "type" });
+  assert.deepEqual(ok.meta.fix, { op: "remove-attribute", attr: "type", token: null });
 });
 
-test("only remove-attribute takes an attr", () => {
+test("only the attribute ops take an attr", () => {
+  for (const op of ["remove-element", "none"]) {
+    assert.match(messages({ fix: { op, attr: "type" } }).join("\n"), /take an `attr`/, op);
+  }
+});
+
+test("remove-token needs both the attribute and the keyword", () => {
   assert.match(
-    messages({ fix: { op: "remove-element", attr: "type" } }).join("\n"),
-    /only `remove-attribute` takes an `attr`/,
+    messages({ fix: { op: "remove-token", attr: "rel" } }).join("\n"),
+    /required for `remove-token`/,
   );
   assert.match(
-    messages({ fix: { op: "none", attr: "type" } }).join("\n"),
-    /only `remove-attribute` takes an `attr`/,
+    messages({ fix: { op: "remove-token", token: "shortcut" } }).join("\n"),
+    /required for `remove-token`/,
   );
+  // A keyword is one whitespace-separated token by definition.
+  assert.match(
+    messages({ fix: { op: "remove-token", attr: "rel", token: "shortcut icon" } }).join("\n"),
+    /required for `remove-token`/,
+  );
+  const ok = validateFrontmatter({
+    ...base(),
+    fix: { op: "remove-token", attr: "rel", token: "shortcut" },
+  });
+  assert.ok(ok.ok);
+  assert.deepEqual(ok.meta.fix, { op: "remove-token", attr: "rel", token: "shortcut" });
+});
+
+test("only remove-token takes a token", () => {
+  for (const op of ["remove-element", "remove-attribute", "none"]) {
+    const fix = op === "remove-attribute" ? { op, attr: "type", token: "x" } : { op, token: "x" };
+    assert.match(messages({ fix }).join("\n"), /only `remove-token` takes a `token`/, op);
+  }
 });
 
 test("match only accepts \"logic\"", () => {

@@ -76,6 +76,11 @@ character references across the whole file — turning a one-line fix into a tho
 diff. The same property is what makes ESLint autofix free, and the conformance suite
 asserts the two produce byte-identical output.
 
+A fix is one of `remove-element`, `remove-attribute`, `remove-token` or `none`. They all
+subtract: nothing asserts a value the rule was never asked about. `remove-token` drops a
+single keyword from a space-separated attribute — `rel="shortcut icon mask-icon"` becomes
+`rel="icon mask-icon"` — and edits inside the quotes, so the delimiter you chose survives.
+
 Two things are never fixed automatically: a rule that declares `fix: { op: "none" }`, and
 any rule whose `detectability` is `partial` — if the rule is not certain, it does not get
 to edit your file. Overlapping fixes are skipped rather than merged, and a second pass

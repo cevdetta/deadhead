@@ -10,7 +10,7 @@ detectability: "yes"
 kind: "element"
 scope: "head"
 selector: 'link[rel~="shortcut" i]'
-fix: { op: "none" }
+fix: { op: "remove-token", attr: "rel", token: "shortcut" }
 replacement: "Drop the shortcut token: <link rel=\"icon\" href=\"/favicon.ico\" sizes=\"32x32\">."
 tags: ["head", "link", "favicon"]
 impacts: ["maintainability"]
@@ -52,13 +52,11 @@ browser parses `rel`, so the selector agrees with the parser rather than approxi
 it. The `i` flag is load-bearing: link types are ASCII case-insensitive and older
 boilerplate is full of `rel="Shortcut Icon"`.
 
-This rule ships without an automatic fix, and not because the edit is risky — it is one
-of the safest available, since browsers already treat the two spellings identically. The
-repair is to rewrite the attribute's *value*, and `fix.op` can currently only delete: it
-offers `remove-element`, which would delete the favicon, and `remove-attribute`, which
-would delete `rel` and also delete the favicon. Rewriting is proposed separately, and
-`fix.op` is a mutable field, so this rule can gain a fix later without its `ruleId`
-changing.
+The fix removes the single token rather than asserting a new value for `rel`, so a
+`rel="shortcut icon mask-icon"` keeps its `mask-icon`, and the quoting is left exactly
+as written — the edit happens inside the delimiter. If `shortcut` is somehow the only
+token, no fix is offered: emptying `rel` would say something different from what the
+author wrote, and that is a decision for a person.
 
 ## Resources
 
