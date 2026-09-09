@@ -19,7 +19,7 @@ import { parseHTML } from "linkedom";
 
 import { fromDocument } from "../../packages/browser/adapter.ts";
 import { collectFiles } from "../../packages/cli/lint.ts";
-import { loadRules } from "../../packages/cli/load.ts";
+import { loadRules } from "../../packages/rules/load.ts";
 import { run } from "../../packages/core/index.ts";
 import type { Finding } from "../../packages/core/types.ts";
 

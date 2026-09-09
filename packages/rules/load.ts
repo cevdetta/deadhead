@@ -2,10 +2,13 @@
  * Assemble the runnable rule set: `rules.json` plus the logic modules the
  * rules that need code point at.
  *
- * The CLI imports logic dynamically because it can — it has a filesystem and a
- * module loader. The bookmarklet cannot, which is why this lives in the CLI
- * and not in `@deadhead/rules`: M2's build step will statically inline the
- * same modules into a single IIFE.
+ * Lives here because both the CLI and the ESLint plugin need it, and it is
+ * about this package's own contents. Node built-ins only, so `@deadhead/rules`
+ * keeps its zero-runtime-dependency guarantee.
+ *
+ * The browser cannot use this at all: it has no filesystem and no module
+ * loader it may reach for, so `scripts/build-bookmarklet.ts` statically inlines
+ * the same rules and logic into a single IIFE instead.
  */
 
 import { readFile } from "node:fs/promises";
@@ -15,8 +18,8 @@ import type { Rule } from "../core/engine.ts";
 import type { CheckFn, MatchFn } from "../core/types.ts";
 import type { RuleMeta } from "../core/vocabulary.ts";
 
-const RULES_JSON = new URL("../rules/rules.json", import.meta.url);
-const LOGIC_DIR = new URL("../rules/logic/", import.meta.url);
+const RULES_JSON = new URL("./rules.json", import.meta.url);
+const LOGIC_DIR = new URL("./logic/", import.meta.url);
 
 type RulesFile = { schemaVersion: number; rules: RuleMeta[] };
 

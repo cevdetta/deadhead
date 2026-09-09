@@ -4,7 +4,7 @@ import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
 
-import { loadRules } from "../packages/cli/load.ts";
+import { loadRules } from "../packages/rules/load.ts";
 import { collectFiles, lintFiles } from "../packages/cli/lint.ts";
 import { ROOT, loadRules as loadMarkdown } from "../scripts/rules-source.ts";
 

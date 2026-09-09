@@ -14,7 +14,7 @@
 import { parseArgs, styleText } from "node:util";
 
 import { SEVERITY, SEVERITY_RANK, type Severity } from "../../core/vocabulary.ts";
-import { RulesNotBuiltError, loadRules } from "../load.ts";
+import { RulesNotBuiltError, loadRules } from "../../rules/load.ts";
 import { UsageError, collectFiles, lintFiles } from "../lint.ts";
 import { type Reporter, tally, total } from "../reporters/index.ts";
 import { json } from "../reporters/json.ts";

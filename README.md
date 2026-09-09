@@ -91,7 +91,9 @@ pnpm lint:deps        # dependency hygiene check
 - **CLI** for CI and pre-commit: `npx deadhead dist`
 - **Bookmarklet** to inspect any page you are looking at, including pages you did not
   build. It reads the rendered DOM, which is the ground truth for what shipped.
-- **ESLint plugin** for editor feedback while you type.
+- **ESLint plugin** for editor feedback while you type. A convenience, not the
+  foundation: for framework users the head tags often live in JSX, Vue or Svelte where
+  an HTML parser never sees them.
 
 All three run the same rule set and are tested against each other, so they cannot
 disagree. `pnpm test:conformance` runs every fixture through every adapter and fails
@@ -115,6 +117,30 @@ give head elements a box to draw. Only selector-backed rules can appear in it: a
 included but drawn with a dashed outline and labelled `(approximate)`, because the
 stylesheet cannot run the refinement.
 
+### ESLint
+
+```js
+// eslint.config.js
+import htmlParser from "@html-eslint/parser";
+import deadhead from "eslint-plugin-deadhead";
+
+export default [
+  {
+    files: ["**/*.html"],
+    languageOptions: { parser: htmlParser },
+    plugins: { deadhead },
+    rules: deadhead.configs.recommended.rules,
+  },
+];
+```
+
+Rule names are the `ruleId` verbatim — `deadhead/meta/http-equiv-x-ua-compatible` —
+because ESLint splits an unscoped rule id on its first slash. The ESLint config, the CLI
+output, your suppression comments and the markdown all say the same permanent string.
+
+`configs.recommended` enables everything above `unnecessary`; `configs.all` enables every
+rule. Severity stays yours to set.
+
 ### What the DOM cannot see
 
 A rendered document has no source text, so `range()` and `loc()` are `null` in the
@@ -126,9 +152,9 @@ become drift.
 
 ## Status
 
-Early in development. The rule pipeline and the CLI work; the bookmarklet and the
-ESLint plugin do not exist yet, so `pnpm test:conformance` has nothing to compare and
-the rule set is deliberately small. Progress is tracked per milestone in the issue
+Early in development. All three runtimes work and are checked against each other; the
+rule set is deliberately small while the foundations settle. Autofix, a config file and
+a baseline file are the next milestone. Progress is tracked per milestone in the issue
 tracker.
 
 ## Contributing

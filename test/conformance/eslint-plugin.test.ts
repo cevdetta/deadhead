@@ -1,0 +1,136 @@
+/**
+ * The plugin, executed by real ESLint.
+ *
+ * The adapter is covered by the three-way conformance suite, but that proves
+ * only that the tree is read correctly. Everything between the adapter and a
+ * user's editor — whether `deadhead/meta/http-equiv-x-ua-compatible` resolves
+ * to this plugin at all, whether `context.report` is called with a shape
+ * ESLint accepts, whether positions survive — is only proven by running it.
+ */
+
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import test from "node:test";
+
+import * as htmlParser from "@html-eslint/parser";
+import { type ESLint, Linter } from "eslint";
+
+import { collectFiles, lintFiles } from "../../packages/cli/lint.ts";
+import { loadRules } from "../../packages/rules/load.ts";
+import plugin from "../../packages/eslint-plugin/index.ts";
+
+const rules = await loadRules();
+const linter = new Linter();
+
+const allRules = Object.fromEntries(
+  rules.map((rule) => [`deadhead/${rule.meta.ruleId}`, "error" as const]),
+);
+
+/**
+ * ESLint's `Plugin` type is specialised for JavaScript ASTs — its `Node` is
+ * `JSSyntaxElement` and its `SourceCode` is the JS one — so a plugin that
+ * operates on an HTML AST cannot satisfy it structurally, however correct it
+ * is. The cast is confined to this line, and everything below verifies the
+ * behaviour it is standing in for.
+ */
+const asPlugin = plugin as unknown as ESLint.Plugin;
+
+const lint = (source: string, enabled: Record<string, "error"> = allRules) =>
+  linter.verify(source, {
+    plugins: { deadhead: asPlugin },
+    languageOptions: { parser: htmlParser },
+    rules: enabled,
+  });
+
+test("every rule id resolves to this plugin", () => {
+  // An unresolved rule surfaces as a message with a null ruleId, which is easy
+  // to miss if you only look at the count.
+  const messages = lint('<html><head><meta charset="utf-8"></head><body></body></html>');
+  for (const message of messages) {
+    assert.notEqual(message.ruleId, null, `unresolved rule: ${message.message}`);
+    assert.doesNotMatch(message.message, /Definition for rule/);
+  }
+});
+
+test("ESLint reports exactly what the CLI reports, at the same positions", async () => {
+  const files = await collectFiles(["test/fixtures"]);
+  const results = await lintFiles(files, rules);
+
+  for (const { file, findings } of results) {
+    const source = await readFile(file, "utf8");
+    const expected = findings.map((f) => `${f.ruleId}@${f.loc?.line}:${f.loc?.col}`);
+    const actual = lint(source).map(
+      (m) => `${(m.ruleId ?? "").replace(/^deadhead\//, "")}@${m.line}:${m.column}`,
+    );
+    assert.deepEqual(actual, expected, file);
+  }
+});
+
+test("a finding carries the explanation and the replacement, not just a code", () => {
+  const messages = lint(
+    '<html><head><meta charset="utf-8"><title>t</title>' +
+      '<meta http-equiv="X-UA-Compatible" content="IE=edge"></head><body></body></html>',
+  );
+  assert.equal(messages.length, 1);
+  const message = messages[0];
+  assert.ok(message);
+  assert.match(message.message, /Internet Explorer document modes/);
+  assert.match(message.message, /Delete it\./);
+  // The range is reported, so editors can underline the element, not the file.
+  assert.ok((message.endColumn ?? 0) > message.column);
+});
+
+test("a rule's detail reaches the message", async () => {
+  const source = await readFile("test/fixtures/head/charset-position/invalid.html", "utf8");
+  const messages = lint(source);
+  assert.equal(messages.length, 1);
+  assert.match(messages[0]?.message ?? "", /past the 1024-byte prescan window/);
+});
+
+test("clean fixtures produce nothing", async () => {
+  for (const file of await collectFiles(["test/fixtures/*/*/valid.html"])) {
+    assert.deepEqual(lint(await readFile(file, "utf8")), [], file);
+  }
+});
+
+test("suppression comments work through ESLint too", () => {
+  const markup = (comment: string) =>
+    '<html><head><meta charset="utf-8"><title>t</title>' +
+    comment +
+    '<meta http-equiv="X-UA-Compatible" content="IE=edge"></head><body></body></html>';
+  assert.equal(lint(markup("")).length, 1);
+  assert.equal(
+    lint(markup("\n<!-- deadhead-disable-next-line meta/http-equiv-x-ua-compatible -->\n")).length,
+    0,
+  );
+});
+
+test("only the enabled rule runs, so severity stays the user's to configure", async () => {
+  const source = await readFile("test/fixtures/script/type-javascript-mime/invalid.html", "utf8");
+  const only = { "deadhead/meta/http-equiv-x-ua-compatible": "error" as const };
+  assert.deepEqual(lint(source, only), []);
+  assert.equal(lint(source).length, 3);
+});
+
+test("the shipped configs reference rules that exist", () => {
+  const names = new Set(Object.keys(plugin.rules).map((id) => `deadhead/${id}`));
+  for (const [config, body] of Object.entries(plugin.configs)) {
+    const referenced = Object.keys(body.rules);
+    assert.ok(referenced.length > 0, `${config} enables nothing`);
+    for (const id of referenced) assert.ok(names.has(id), `${config} references unknown ${id}`);
+  }
+  // `recommended` is the subset that is not merely dead weight.
+  assert.ok(
+    Object.keys(plugin.configs.recommended.rules).length <
+      Object.keys(plugin.configs.all.rules).length,
+    "recommended should be narrower than all",
+  );
+});
+
+test("every ESLint rule advertises its documentation URL", () => {
+  for (const [ruleId, rule] of Object.entries(plugin.rules)) {
+    const docs = rule.meta["docs"] as { url?: string; description?: string } | undefined;
+    assert.equal(docs?.url, `https://deadhead.dev/rules/${ruleId}`);
+    assert.ok((docs?.description ?? "").length > 0);
+  }
+});
