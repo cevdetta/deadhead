@@ -88,6 +88,7 @@ const el = (tag: string, attrs: Record<string, string> = {}): ElementPort => ({
   attr: (name) => attrs[name.toLowerCase()],
   hasAttr: (name) => name.toLowerCase() in attrs,
   attrNames: () => Object.keys(attrs),
+  attrRange: () => null,
   text: () => "",
   parent: () => null,
   children: () => [],

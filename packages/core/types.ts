@@ -7,6 +7,7 @@
  * extend the port for all three adapters at once.
  */
 
+import type { Fix } from "./fix.ts";
 import type { Severity } from "./vocabulary.ts";
 
 export type Loc = { line: number; col: number };
@@ -22,6 +23,12 @@ export type ElementPort = {
   hasAttr(name: string): boolean;
   /** Lowercase attribute names. */
   attrNames(): string[];
+  /**
+   * Source range of one attribute, name and value together, for the fixer to
+   * splice out. `null` when the attribute is absent, and always `null` in the
+   * DOM adapter, which has no source text.
+   */
+  attrRange(name: string): Range | null;
   /** Concatenated text of all descendants. */
   text(): string;
   /** Element-only parent. */
@@ -55,6 +62,13 @@ export type Finding = {
   /** `snippet` is truncated to 90 characters. */
   node: { tag: string; snippet: string };
   detail?: string;
+  /**
+   * The edit that resolves this finding, or `null` where there is not one —
+   * `fix: { op: "none" }`, a `partial` rule that must not guess, or an adapter
+   * with no source text. Carried on the finding so the CLI and ESLint can both
+   * offer it without walking the document a second time.
+   */
+  fix: Fix | null;
 };
 
 export type RuleContext = {

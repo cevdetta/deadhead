@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { readFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
 
@@ -154,4 +156,120 @@ test("directories are walked, globs are expanded by the CLI, files are taken as 
 test("node_modules is never walked", async () => {
   const files = await collectFiles(["."]);
   assert.deepEqual(files.filter((f) => f.includes("node_modules")), []);
+});
+
+// --- --fix, --config, --baseline --------------------------------------------
+
+const sandbox = async (run: (dir: string) => Promise<void>): Promise<void> => {
+  const dir = await mkdtemp(join(tmpdir(), "deadhead-cli-"));
+  try {
+    await run(dir);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+};
+
+const copyFixture = async (ruleId: string, into: string, as: string): Promise<string> => {
+  const target = join(into, as);
+  await writeFile(target, await readFile(`test/fixtures/${ruleId}/invalid.html`, "utf8"));
+  return target;
+};
+
+test("--fix rewrites the file and leaves it clean", async () => {
+  await sandbox(async (dir) => {
+    const file = await copyFixture("script/type-javascript-mime", dir, "page.html");
+    const run = deadhead("--fix", file);
+    assert.equal(run.status, 0, run.stderr);
+    assert.match(run.stdout, /fixed 3 findings/);
+
+    const after = await readFile(file, "utf8");
+    assert.ok(!after.includes("text/javascript"), "the type attribute is gone");
+    assert.match(after, /<script src="\/legacy\.js"><\/script>/, "the rest of the tag survives");
+    // Running again finds nothing and rewrites nothing.
+    assert.equal(deadhead(file).status, 0);
+  });
+});
+
+test("--fix does not touch a file it has no fixes for", async () => {
+  await sandbox(async (dir) => {
+    // charset-position is `fix: { op: "none" }`, so the file must be left alone.
+    const file = await copyFixture("head/charset-position", dir, "page.html");
+    const before = await readFile(file, "utf8");
+    const run = deadhead("--fix", "--fail-on=none", file);
+    assert.equal(run.status, 0);
+    assert.doesNotMatch(run.stdout, /fixed/);
+    assert.equal(await readFile(file, "utf8"), before);
+  });
+});
+
+test("a config file supplies defaults, and flags beat it", async () => {
+  await sandbox(async (dir) => {
+    await mkdir(join(dir, "site", "vendor"), { recursive: true });
+    await copyFixture("script/type-javascript-mime", join(dir, "site"), "page.html");
+    await copyFixture("meta/http-equiv-x-ua-compatible", join(dir, "site", "vendor"), "old.html");
+    await writeFile(
+      join(dir, "deadhead.config.ts"),
+      `export default {
+         include: ["site"],
+         ignore: ["**/vendor/**"],
+         rules: { "head/charset-position": "off" },
+         failOn: "harmful",
+       };`,
+    );
+
+    const run = spawnSync(process.execPath, [BIN, "--format=json"], { cwd: dir, encoding: "utf8" });
+    const report = JSON.parse(run.stdout) as { results: { file: string }[] };
+    assert.deepEqual(report.results.map((r) => r.file), [join("site", "page.html")], "vendor ignored");
+    assert.equal(run.status, 0, "failOn: harmful is not met by unnecessary findings");
+
+    // An explicit flag overrides the config's failOn.
+    const stricter = spawnSync(process.execPath, [BIN, "--fail-on=unnecessary"], {
+      cwd: dir,
+      encoding: "utf8",
+    });
+    assert.equal(stricter.status, 1);
+  });
+});
+
+test("a baseline absorbs the backlog and still fails on anything new", async () => {
+  await sandbox(async (dir) => {
+    const file = await copyFixture("script/type-javascript-mime", dir, "page.html");
+    const base = join(dir, "baseline.json");
+
+    assert.equal(deadhead("--baseline", base, "--update-baseline", file).status, 0);
+    assert.equal(deadhead("--baseline", base, file).status, 0, "the backlog is accounted for");
+
+    // A finding from a different rule is new, and must break the build.
+    const source = await readFile(file, "utf8");
+    await writeFile(
+      file,
+      source.replace("<title>", '<meta http-equiv="X-UA-Compatible" content="IE=edge">\n    <title>'),
+    );
+    const run = deadhead("--baseline", base, file);
+    assert.equal(run.status, 1);
+    assert.match(run.stdout, /meta\/http-equiv-x-ua-compatible/);
+    assert.doesNotMatch(run.stdout, /script\/type-javascript-mime/, "the backlog stays quiet");
+  });
+});
+
+test("a baseline that is no longer needed says so instead of failing", async () => {
+  await sandbox(async (dir) => {
+    const file = await copyFixture("script/type-javascript-mime", dir, "page.html");
+    const base = join(dir, "baseline.json");
+    deadhead("--baseline", base, "--update-baseline", file);
+    deadhead("--fix", "--fail-on=none", file);
+
+    const run = deadhead("--baseline", base, file);
+    assert.equal(run.status, 0);
+    assert.match(run.stdout, /3 baseline entries are no longer needed/);
+  });
+});
+
+test("config and baseline errors exit 2, like every other usage error", async () => {
+  await sandbox(async (dir) => {
+    const file = await copyFixture("script/type-javascript-mime", dir, "page.html");
+    assert.equal(deadhead("--baseline", join(dir, "missing.json"), file).status, 2);
+    assert.equal(deadhead("--config", join(dir, "missing.config.ts"), file).status, 2);
+    assert.equal(deadhead("--update-baseline", file).status, 2, "--update-baseline needs a path");
+  });
 });

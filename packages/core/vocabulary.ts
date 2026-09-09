@@ -96,7 +96,12 @@ export type RuleMeta = {
   scope: Scope;
   selector: string | null;
   match: "logic" | null;
-  fix: { op: FixOp };
+  /**
+   * `attr` names the attribute a `remove-attribute` fix deletes, and is `null`
+   * for every other op. Without it the op is not actionable: knowing a rule
+   * removes *an* attribute says nothing about which one.
+   */
+  fix: { op: FixOp; attr: string | null };
   replacement: string;
   tags: Tag[];
   impacts: Impact[];

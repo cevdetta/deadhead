@@ -345,15 +345,37 @@ export function validateFrontmatter(data: unknown): FrontmatterResult {
 
   const fixRaw: unknown = data["fix"];
   let fixOp: FixOp | null = null;
+  let fixAttr: string | null = null;
   if (fixRaw === undefined || fixRaw === null) {
     // already reported as missing
   } else if (!isPlainObject(fixRaw)) {
     issues.push(field(["fix"], "must be a mapping, e.g. `fix: { op: remove-element }`"));
   } else {
     for (const key of Object.keys(fixRaw)) {
-      if (key !== "op") issues.push(field(["fix", key], `unknown fix field \`${key}\``));
+      if (key !== "op" && key !== "attr") {
+        issues.push(field(["fix", key], `unknown fix field \`${key}\``));
+      }
     }
     fixOp = oneOf(fixRaw["op"], FIX_OP, ["fix", "op"], issues);
+
+    // `remove-attribute` is not actionable without knowing which attribute,
+    // and naming one for any other op is a contradiction the fixer would
+    // silently ignore.
+    const attrRaw: unknown = fixRaw["attr"];
+    if (fixOp === "remove-attribute") {
+      if (typeof attrRaw !== "string" || !/^[a-z][a-z0-9-]*$/.test(attrRaw)) {
+        issues.push(
+          field(
+            ["fix", "attr"],
+            'required for `remove-attribute`: the lowercase attribute name to delete, e.g. `fix: { op: "remove-attribute", attr: "type" }`',
+          ),
+        );
+      } else {
+        fixAttr = attrRaw;
+      }
+    } else if (attrRaw !== undefined) {
+      issues.push(field(["fix", "attr"], `only \`remove-attribute\` takes an \`attr\``));
+    }
   }
 
   const tagsRaw = stringList(data["tags"], ["tags"], issues);
@@ -407,7 +429,7 @@ export function validateFrontmatter(data: unknown): FrontmatterResult {
       scope: scope as Scope,
       selector,
       match,
-      fix: { op: fixOp as FixOp },
+      fix: { op: fixOp as FixOp, attr: fixAttr },
       replacement: replacement as string,
       tags,
       impacts,

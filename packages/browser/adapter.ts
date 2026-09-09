@@ -37,6 +37,8 @@ function makePorts(): (element: Element) => ElementPort {
       attr: (name) => element.getAttribute(name) ?? undefined,
       hasAttr: (name) => element.hasAttribute(name),
       attrNames: () => [...element.getAttributeNames()].map((name) => name.toLowerCase()),
+      // No source text, so no attribute range either — and therefore no fixes.
+      attrRange: () => null,
       text: () => element.textContent ?? "",
       parent: () => {
         // A template's content lives in a fragment, so climb back to the

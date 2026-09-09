@@ -3,10 +3,11 @@
  * drive the real thing without spawning a process.
  */
 
-import { glob, readFile, readdir, stat } from "node:fs/promises";
+import { glob, readFile, readdir, stat, writeFile } from "node:fs/promises";
 import { extname, join, sep } from "node:path";
 
 import { type Rule, parseSuppressions, run } from "../core/index.ts";
+import { applyFixes } from "../core/fix.ts";
 import { parseHtml } from "./adapter.ts";
 import type { FileResult } from "./reporters/index.ts";
 
@@ -75,26 +76,58 @@ export async function collectFiles(paths: string[]): Promise<string[]> {
   return [...files].sort((a, b) => a.split(sep).join("/").localeCompare(b.split(sep).join("/")));
 }
 
-export async function lintFile(
-  file: string,
-  rules: Rule[],
-  options: { skipTemplates?: boolean } = {},
-): Promise<FileResult> {
-  const source = await readFile(file, "utf8");
-  const parsed = parseHtml(source);
-  const findings = run(rules, parsed, {
+export type LintOptions = { skipTemplates?: boolean; fix?: boolean };
+
+/**
+ * Applying one fix can expose another — removing an element can leave its
+ * neighbour newly first in the document — and overlapping fixes are skipped
+ * rather than merged, so a second pass picks them up. Bounded, because a rule
+ * pair that undoes each other's work must terminate as a stalemate rather than
+ * a hang. ESLint uses ten for the same reason.
+ */
+const MAX_FIX_PASSES = 10;
+
+const analyse = (source: string, rules: Rule[], options: LintOptions) =>
+  run(rules, parseHtml(source), {
     // Suppression comments are read from the text, not the tree: the port has
     // no comment accessor, and only the source-backed adapters can offer this.
     suppressions: parseSuppressions(source),
     ...(options.skipTemplates !== undefined ? { skipTemplates: options.skipTemplates } : {}),
   });
-  return { file, findings };
+
+export async function lintFile(
+  file: string,
+  rules: Rule[],
+  options: LintOptions = {},
+): Promise<FileResult> {
+  const original = await readFile(file, "utf8");
+  let source = original;
+  let fixed = 0;
+
+  if (options.fix === true) {
+    for (let pass = 0; pass < MAX_FIX_PASSES; pass++) {
+      const fixes = analyse(source, rules, options)
+        .map((finding) => finding.fix)
+        .filter((fix) => fix !== null);
+      if (fixes.length === 0) break;
+
+      const result = applyFixes(source, fixes);
+      if (result.applied.length === 0 || result.output === source) break;
+      source = result.output;
+      fixed += result.applied.length;
+    }
+    // Only touch the file if something changed, so `--fix` on a clean tree
+    // does not rewrite every mtime and invalidate every build cache.
+    if (source !== original) await writeFile(file, source, "utf8");
+  }
+
+  return { file, findings: analyse(source, rules, options), fixed };
 }
 
 export async function lintFiles(
   files: string[],
   rules: Rule[],
-  options: { skipTemplates?: boolean } = {},
+  options: LintOptions = {},
 ): Promise<FileResult[]> {
   const results: FileResult[] = [];
   for (const file of files) results.push(await lintFile(file, rules, options));

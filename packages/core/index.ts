@@ -7,6 +7,7 @@
  */
 
 export { compile, run, type Rule, type RunOptions } from "./engine.ts";
+export { applyFixes, computeFix, type ApplyResult, type Fix } from "./fix.ts";
 export {
   NO_SUPPRESSIONS,
   parseSuppressions,

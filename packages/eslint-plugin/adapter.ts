@@ -27,7 +27,7 @@ type Node = {
   loc?: { start: { line: number; column: number } };
   name?: string;
   value?: string;
-  attributes?: { key: { value: string }; value?: { value: string } }[];
+  attributes?: { key: { value: string }; value?: { value: string }; range?: [number, number] }[];
   children?: Node[];
   body?: Node[];
 };
@@ -63,10 +63,13 @@ function makePorts(parents: WeakMap<Node, Node>): (node: Node) => ElementPort {
     if (cached) return cached;
 
     const attrs = new Map<string, string>();
+    const attrRanges = new Map<string, Range>();
     for (const attr of node.attributes ?? []) {
+      const name = attr.key.value.toLowerCase();
       // A valueless attribute (`<script defer>`) is the empty string, which is
       // what both `getAttribute` and parse5 report.
-      attrs.set(attr.key.value.toLowerCase(), attr.value?.value ?? "");
+      attrs.set(name, attr.value?.value ?? "");
+      if (attr.range) attrRanges.set(name, [attr.range[0], attr.range[1]]);
     }
 
     const port: ElementPort = {
@@ -74,6 +77,7 @@ function makePorts(parents: WeakMap<Node, Node>): (node: Node) => ElementPort {
       attr: (name) => attrs.get(name.toLowerCase()),
       hasAttr: (name) => attrs.has(name.toLowerCase()),
       attrNames: () => [...attrs.keys()],
+      attrRange: (name) => attrRanges.get(name.toLowerCase()) ?? null,
       text: () => textOf(node),
       parent: () => {
         const parent = parents.get(node);

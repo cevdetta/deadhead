@@ -9,7 +9,7 @@
 import { styleText } from "node:util";
 
 import type { Severity } from "../../core/vocabulary.ts";
-import { type Reporter, tally, total } from "./index.ts";
+import { type Reporter, tally, total, totalFixed } from "./index.ts";
 
 type Colour = Parameters<typeof styleText>[0];
 
@@ -54,7 +54,11 @@ export const stylish: Reporter = (results) => {
 
   const count = total(results);
   if (count === 0) {
-    return `${styleText("green", "✓")} no findings\n`;
+    // "left" rather than "found": after --fix, silence means the findings were
+    // repaired, not that they were never there.
+    return totalFixed(results) === 0
+      ? `${styleText("green", "✓")} no findings\n`
+      : `${styleText("green", "✓")} no findings left\n`;
   }
 
   const counts = tally(results);
