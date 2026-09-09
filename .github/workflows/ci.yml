@@ -37,8 +37,10 @@ jobs:
       - run: pnpm build
       - run: pnpm typecheck
       - run: pnpm test
-      # `pnpm check:self` (lint our own fixtures with our own CLI) joins here
-      # in M1, once packages/cli/bin/deadhead.ts exists.
+      # Lint our own clean fixtures with our own CLI. It targets valid.html
+      # only: the invalid.html files next to them are supposed to have
+      # findings, so pointing this at the whole tree could only ever fail.
+      - run: pnpm check:self
 
       # Folded into this job instead of a second runner: one checkout, one
       # install. A linter about shipping things you do not need should hold

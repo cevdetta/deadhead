@@ -16,7 +16,7 @@
     "test": "node --test",
     "test:conformance": "node --test test/conformance/",
     "check": "node packages/cli/bin/deadhead.ts",
-    "check:self": "node packages/cli/bin/deadhead.ts --fail-on=deprecated test/fixtures",
+    "check:self": "node packages/cli/bin/deadhead.ts --fail-on=deprecated \"test/fixtures/*/*/valid.html\"",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "validate:rules": "node scripts/validate-rules.ts",
     "lint:deps": "pnpm dlx @e18e/cli@0.7.0 analyze --log-level error --report-level warn",
