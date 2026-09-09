@@ -11,7 +11,7 @@ kind: "element"
 scope: "any"
 selector: "script[type]"
 match: "logic"
-fix: { op: "remove-attribute" }
+fix: { op: "remove-attribute", attr: "type" }
 replacement: "Drop the attribute: <script src=\"app.js\"></script>. Keep type only for module, importmap, speculationrules or a data block."
 tags: ["script", "legacy", "attr"]
 impacts: ["maintainability"]

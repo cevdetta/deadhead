@@ -60,9 +60,64 @@ deadhead --fail-on=harmful dist      # exit 1 only on harmful findings
 deadhead --skip-templates dist       # leave <template> contents alone
 ```
 
+```bash
+deadhead --fix dist                   # rewrite files, then report what is left
+```
+
 Exit codes are the CI contract: **0** nothing at or above the `--fail-on` threshold,
-**1** threshold met, **2** usage or I/O error. A broken invocation never looks like a
-clean run.
+**1** threshold met, **2** usage, config or I/O error. A broken invocation never looks
+like a clean run.
+
+### Fixes are text edits, never re-serialised markup
+
+`--fix` splices byte ranges out of the original file. It never parses your document and
+prints it back, because that rewrites quote style, attribute order, whitespace and
+character references across the whole file — turning a one-line fix into a thousand-line
+diff. The same property is what makes ESLint autofix free, and the conformance suite
+asserts the two produce byte-identical output.
+
+Two things are never fixed automatically: a rule that declares `fix: { op: "none" }`, and
+any rule whose `detectability` is `partial` — if the rule is not certain, it does not get
+to edit your file. Overlapping fixes are skipped rather than merged, and a second pass
+picks them up.
+
+### Configuration
+
+`deadhead.config.ts`, optional, read from the project directory. Every flag beats it.
+
+```ts
+export default {
+  include: ["dist/**/*.html"],
+  ignore: ["**/vendor/**"],
+  rules: {
+    "meta/http-equiv-x-ua-compatible": "off",
+    "script/type-javascript-mime": "harmful",   // or re-severity it
+  },
+  failOn: "deprecated",
+  baseline: ".deadhead-baseline.json",
+};
+```
+
+Once the packages are published, wrapping the object in `defineConfig` from
+`@deadhead/cli` gets you completion and type checking; a plain object works either way.
+
+A typo in a rule id is an error rather than a setting that silently does nothing — the
+failure it prevents is a rule you thought you had disabled still being on.
+
+### Baseline
+
+Adopt deadhead on an existing site without fixing the backlog first:
+
+```bash
+deadhead --baseline .deadhead-baseline.json --update-baseline dist   # accept today
+deadhead --baseline .deadhead-baseline.json dist                     # fail only on new
+```
+
+The baseline records a **count per file per rule**, not line numbers or source hashes.
+Those rot: reindent a file, or add an element above, and every entry below it would go
+stale and light up CI with findings nobody introduced. The honest cost is that an
+allowance of 3 will absorb a *different* third finding of the same rule in the same file.
+When the backlog shrinks, deadhead says so and suggests pruning.
 
 Silence a finding in the markup itself:
 

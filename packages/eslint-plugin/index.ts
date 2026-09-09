@@ -21,6 +21,7 @@
 import { run } from "../core/engine.ts";
 import { parseSuppressions } from "../core/suppressions.ts";
 import type { Rule as DeadheadRule } from "../core/engine.ts";
+import type { Finding } from "../core/types.ts";
 import { loadRules } from "../rules/load.ts";
 import { fromProgram } from "./adapter.ts";
 
@@ -29,18 +30,32 @@ type SourceCode = {
   getText(): string;
   getLocFromIndex(index: number): { line: number; column: number };
 };
+type Fixer = { replaceTextRange(range: [number, number], text: string): unknown };
 type Context = {
   sourceCode: SourceCode;
   report(descriptor: {
     loc: { start: { line: number; column: number }; end: { line: number; column: number } };
     messageId: string;
     data: Record<string, string>;
+    fix?: (fixer: Fixer) => unknown;
   }): void;
 };
 type EslintRule = {
   meta: Record<string, unknown>;
   create(context: Context): Record<string, (node: unknown) => void>;
 };
+
+/**
+ * A fix is offered only when the engine produced one. It is `null` for
+ * `fix: { op: "none" }` and for every `detectability: "partial"` rule, so
+ * ESLint is never handed an edit the CLI would refuse to make.
+ */
+const fixDescriptor = (
+  fix: Finding["fix"],
+): { fix?: (fixer: Fixer) => unknown } =>
+  fix === null
+    ? {}
+    : { fix: (fixer: Fixer) => fixer.replaceTextRange([fix.range[0], fix.range[1]], fix.text) };
 
 /**
  * `harmful` is a problem; the rest are suggestions. ESLint's `type` drives
@@ -53,6 +68,11 @@ function toEslintRule(rule: DeadheadRule): EslintRule {
   return {
     meta: {
       type: eslintType(rule),
+      // Autofix comes free: the project's fixes are already range-based text
+      // edits, which is exactly what an ESLint fixer is. Declared only when the
+      // rule actually has an op — claiming `fixable` and never fixing makes
+      // `--fix` report work it did not do.
+      ...(rule.meta.fix.op === "none" ? {} : { fixable: "code" as const }),
       docs: {
         description: rule.meta.description,
         url: `https://deadhead.dev/rules/${rule.meta.ruleId}`,
@@ -92,6 +112,7 @@ function toEslintRule(rule: DeadheadRule): EslintRule {
                 replacement: finding.replacement,
                 detail: finding.detail === undefined ? "" : ` (${finding.detail})`,
               },
+              ...fixDescriptor(finding.fix),
             });
           }
         },

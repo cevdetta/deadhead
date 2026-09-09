@@ -74,7 +74,7 @@ test("a minimal rule validates and optional fields widen to null/[]", () => {
   assert.deepEqual(result.meta.tags, []);
   assert.deepEqual(result.meta.impacts, []);
   assert.deepEqual(result.meta.related, []);
-  assert.deepEqual(result.meta.fix, { op: "remove-element" });
+  assert.deepEqual(result.meta.fix, { op: "remove-element", attr: null });
 });
 
 test("unknown frontmatter fields are rejected", () => {
@@ -145,6 +145,33 @@ test("kind: element needs a selector; kind: document needs logic", () => {
   const doc = validateFrontmatter({ ...withoutSelector, kind: "document", match: "logic" });
   assert.ok(doc.ok);
   assert.equal(doc.meta.selector, null);
+});
+
+test("remove-attribute must name the attribute it removes", () => {
+  // The op alone is not actionable: knowing a rule removes *an* attribute says
+  // nothing about which one, and the fixer would have to guess.
+  assert.match(
+    messages({ fix: { op: "remove-attribute" } }).join("\n"),
+    /required for `remove-attribute`/,
+  );
+  assert.match(
+    messages({ fix: { op: "remove-attribute", attr: "TYPE" } }).join("\n"),
+    /required for `remove-attribute`/,
+  );
+  const ok = validateFrontmatter({ ...base(), fix: { op: "remove-attribute", attr: "type" } });
+  assert.ok(ok.ok);
+  assert.deepEqual(ok.meta.fix, { op: "remove-attribute", attr: "type" });
+});
+
+test("only remove-attribute takes an attr", () => {
+  assert.match(
+    messages({ fix: { op: "remove-element", attr: "type" } }).join("\n"),
+    /only `remove-attribute` takes an `attr`/,
+  );
+  assert.match(
+    messages({ fix: { op: "none", attr: "type" } }).join("\n"),
+    /only `remove-attribute` takes an `attr`/,
+  );
 });
 
 test("match only accepts \"logic\"", () => {

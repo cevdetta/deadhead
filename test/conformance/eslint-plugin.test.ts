@@ -134,3 +134,60 @@ test("every ESLint rule advertises its documentation URL", () => {
     assert.ok((docs?.description ?? "").length > 0);
   }
 });
+
+// --- autofix ----------------------------------------------------------------
+
+test("ESLint's autofix produces byte-identical output to the CLI's --fix", async () => {
+  // The two must not merely both work — they must agree, or a project that
+  // runs the CLI in CI and the plugin in editors gets a diff on every save.
+  const { applyFixes } = await import("../../packages/core/fix.ts");
+  const { parseHtml } = await import("../../packages/cli/adapter.ts");
+  const { run } = await import("../../packages/core/index.ts");
+
+  for (const file of await collectFiles(["test/fixtures"])) {
+    const source = await readFile(file, "utf8");
+
+    // The CLI's loop: apply, re-analyse, repeat until nothing changes.
+    let viaCli = source;
+    for (let pass = 0; pass < 10; pass++) {
+      const fixes = run(rules, parseHtml(viaCli)).flatMap((f) => (f.fix === null ? [] : [f.fix]));
+      if (fixes.length === 0) break;
+      const applied = applyFixes(viaCli, fixes);
+      if (applied.applied.length === 0 || applied.output === viaCli) break;
+      viaCli = applied.output;
+    }
+
+    const viaEslint = linter.verifyAndFix(source, {
+      plugins: { deadhead: asPlugin },
+      languageOptions: { parser: htmlParser },
+      rules: allRules,
+    });
+
+    assert.equal(viaEslint.output, viaCli, file);
+  }
+});
+
+test("a rule with no fix is never declared fixable", () => {
+  for (const rule of rules) {
+    const eslintRule = plugin.rules[rule.meta.ruleId];
+    assert.ok(eslintRule);
+    const fixable = eslintRule.meta["fixable"];
+    if (rule.meta.fix.op === "none") {
+      assert.equal(fixable, undefined, `${rule.meta.ruleId} claims fixable but has no fix op`);
+    } else {
+      assert.equal(fixable, "code", `${rule.meta.ruleId} has a fix op but is not fixable`);
+    }
+  }
+});
+
+test("ESLint never offers a fix the CLI would refuse", async () => {
+  // `fix: { op: "none" }` and every `partial` rule must be inert under --fix.
+  const source = await readFile("test/fixtures/head/charset-position/invalid.html", "utf8");
+  const fixed = linter.verifyAndFix(source, {
+    plugins: { deadhead: asPlugin },
+    languageOptions: { parser: htmlParser },
+    rules: allRules,
+  });
+  assert.equal(fixed.fixed, false);
+  assert.equal(fixed.output, source);
+});

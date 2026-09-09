@@ -74,6 +74,12 @@ function makePorts(parents: WeakMap<P5Element, P5Element>): (node: P5Element) =>
       attr: (name) => attrs.get(name.toLowerCase()),
       hasAttr: (name) => attrs.has(name.toLowerCase()),
       attrNames: () => [...attrs.keys()],
+      attrRange: (name): Range | null => {
+        // parse5 keys attribute locations by the lowercased name, the same way
+        // it lowercases the attributes themselves.
+        const at = node.sourceCodeLocation?.attrs?.[name.toLowerCase()];
+        return at ? [at.startOffset, at.endOffset] : null;
+      },
       text: () => textOf(node),
       parent: () => {
         const parent = parents.get(node);

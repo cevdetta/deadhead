@@ -1,7 +1,12 @@
 import type { Finding } from "../../core/types.ts";
 import type { Severity } from "../../core/vocabulary.ts";
 
-export type FileResult = { file: string; findings: Finding[] };
+export type FileResult = {
+  file: string;
+  findings: Finding[];
+  /** How many fixes `--fix` applied to this file. */
+  fixed: number;
+};
 export type Reporter = (results: FileResult[]) => string;
 
 /** Counts per severity, in the fixed `harmful, deprecated, unnecessary` order. */
@@ -15,3 +20,6 @@ export function tally(results: FileResult[]): Record<Severity, number> {
 
 export const total = (results: FileResult[]): number =>
   results.reduce((sum, result) => sum + result.findings.length, 0);
+
+export const totalFixed = (results: FileResult[]): number =>
+  results.reduce((sum, result) => sum + result.fixed, 0);

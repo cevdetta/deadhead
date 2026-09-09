@@ -8,6 +8,7 @@
  * the rule set.
  */
 
+import { computeFix } from "./fix.ts";
 import { type Compound, leadingTag, matches, parseSelector } from "./selector.ts";
 import { NO_SUPPRESSIONS, type Suppressions } from "./suppressions.ts";
 import { walk } from "./walker.ts";
@@ -77,6 +78,7 @@ function contextFor(rule: Rule, source: string | null): RuleContext {
         loc: element.loc(),
         range: element.range(),
         node: { tag: element.tag, snippet: snippet(element, source) },
+        fix: computeFix(meta, element, source),
       };
       // exactOptionalPropertyTypes: assign `detail` only when there is one.
       if (extra?.detail !== undefined) finding.detail = extra.detail;
