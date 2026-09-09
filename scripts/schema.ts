@@ -14,95 +14,33 @@
  * it keeps `scripts/` free of runtime dependencies.
  */
 
-// --- vocabulary -------------------------------------------------------------
-// Every list below is closed. Adding a value is a deliberate one-line change
-// with a reviewer attached, which is the point: an open vocabulary drifts into
-// forty near-synonyms and the tag index stops being useful.
+import {
+  DETECTABILITY,
+  FIX_OP,
+  IMPACTS,
+  KIND,
+  SCOPE,
+  SEVERITY,
+  STANDARDS_BASIS,
+  STATUS,
+  TAGS,
+  type Detectability,
+  type FixOp,
+  type Impact,
+  type Kind,
+  type RuleMeta,
+  type Scope,
+  type Severity,
+  type StandardsBasis,
+  type Status,
+  type Tag,
+} from "../packages/core/vocabulary.ts";
+import { parseSelector } from "../packages/core/selector.ts";
 
-export const STATUS = ["avoid", "recommended", "situational"] as const;
-export const SEVERITY = ["harmful", "deprecated", "unnecessary"] as const;
-export const STANDARDS_BASIS = [
-  "spec",
-  "spec-obsolete",
-  "browser-convention",
-  "vendor",
-  "community",
-] as const;
-export const DETECTABILITY = ["yes", "partial", "no"] as const;
-export const KIND = ["element", "document"] as const;
-export const SCOPE = ["head", "body", "any"] as const;
-export const FIX_OP = ["remove-element", "remove-attribute", "none"] as const;
-export const IMPACTS = [
-  "performance",
-  "interop",
-  "a11y",
-  "seo",
-  "security",
-  "maintainability",
-] as const;
-
-/**
- * Tags are for browsing the rule index, not for driving behaviour. Kept
- * deliberately coarse: a tag that applies to exactly one rule is a title, not
- * a tag.
- */
-export const TAGS = [
-  "a11y",
-  "attr",
-  "body",
-  "charset",
-  "favicon",
-  "head",
-  "i18n",
-  "ie",
-  "legacy",
-  "link",
-  "meta",
-  "mobile",
-  "performance",
-  "script",
-  "security",
-  "seo",
-  "social",
-  "style",
-  "title",
-  "viewport",
-] as const;
-
-export type Status = (typeof STATUS)[number];
-export type Severity = (typeof SEVERITY)[number];
-export type StandardsBasis = (typeof STANDARDS_BASIS)[number];
-export type Detectability = (typeof DETECTABILITY)[number];
-export type Kind = (typeof KIND)[number];
-export type Scope = (typeof SCOPE)[number];
-export type FixOp = (typeof FIX_OP)[number];
-export type Impact = (typeof IMPACTS)[number];
-export type Tag = (typeof TAGS)[number];
-
-/**
- * Normalised rule metadata. Optional frontmatter fields are widened to `null`
- * rather than left absent so that `rules.json` has one stable shape and
- * consumers never branch on key presence.
- */
-export type RuleMeta = {
-  ruleId: string;
-  title: string;
-  description: string;
-  pubDate: string;
-  status: Status;
-  severity: Severity;
-  standardsBasis: StandardsBasis;
-  detectability: Detectability;
-  kind: Kind;
-  scope: Scope;
-  selector: string | null;
-  match: "logic" | null;
-  fix: { op: FixOp };
-  replacement: string;
-  tags: Tag[];
-  impacts: Impact[];
-  related: string[];
-};
+// The vocabulary and the selector grammar live in core because the engine
+// needs them too, and a validator that disagrees with the engine is worse
+// than no validator: it green-lights rules that silently match nothing.
+export type { RuleMeta, Status, Severity, Kind, Scope };
 
 /** Field order in `rules.json`. Fixed so the generated file diffs cleanly. */
 export const META_KEYS = [
@@ -214,225 +152,6 @@ export function splitFrontmatter(source: string): Split {
     offset,
     message: "frontmatter fence is never closed (expected a line containing only `---`)",
   };
-}
-
-// --- selector subset --------------------------------------------------------
-
-export type AttrOp = "exists" | "=" | "~=" | "^=" | "$=" | "*=";
-
-export type AttrSel = {
-  type: "attr";
-  name: string;
-  op: AttrOp;
-  value: string | null;
-  insensitive: boolean;
-};
-export type TagSel = { type: "tag"; name: string };
-export type NotSel = { type: "not"; inner: (TagSel | AttrSel)[] };
-export type Simple = TagSel | AttrSel | NotSel;
-/** One comma-separated alternative: a compound of simple selectors, no combinators. */
-export type Compound = Simple[];
-
-export type SelectorParse =
-  | { ok: true; ast: Compound[] }
-  | { ok: false; index: number; message: string };
-
-const IDENT = /[a-zA-Z_-][a-zA-Z0-9_-]*/y;
-const TAG = /[a-z][a-z0-9-]*/y;
-const VALUE = /[a-zA-Z0-9_-]+/y;
-
-/**
- * Parse the supported selector subset: tag names, `[attr]` with `=`, `~=`,
- * `^=`, `$=`, `*=`, the case-insensitive `i` flag, `:not(...)` wrapping those,
- * and comma-separated lists.
- *
- * Everything else is rejected, and the rejection is the feature. The browser
- * adapter hands this string straight to `querySelectorAll`, so the subset is
- * the intersection of "what CSS can do" and "what a fifty-line matcher in core
- * can do against the element port". A rule that needs a combinator is a
- * `kind: "document"` rule.
- */
-export function parseSelector(input: string): SelectorParse {
-  let i = 0;
-  const fail = (index: number, message: string): SelectorParse => ({
-    ok: false,
-    index,
-    message,
-  });
-
-  const ws = (): boolean => {
-    const from = i;
-    while (i < input.length && /\s/.test(input[i] as string)) i++;
-    return i > from;
-  };
-
-  const match = (re: RegExp): string | null => {
-    re.lastIndex = i;
-    const m = re.exec(input);
-    if (!m) return null;
-    i = re.lastIndex;
-    return m[0];
-  };
-
-  /** `[name]`, `[name op value]`, `[name op value i]`. Cursor is on `[`. */
-  const attr = (): AttrSel | SelectorParse => {
-    const open = i;
-    i++; // `[`
-    ws();
-    const name = match(IDENT);
-    if (name === null) {
-      return fail(i, "expected an attribute name after `[`");
-    }
-    ws();
-    if (input[i] === "]") {
-      i++;
-      return { type: "attr", name, op: "exists", value: null, insensitive: false };
-    }
-    if (input[i] === "|" && input[i + 1] === "=") {
-      return fail(i, "the `|=` attribute operator is not supported");
-    }
-    let op: AttrOp | null = null;
-    const two = input.slice(i, i + 2);
-    if (two === "~=" || two === "^=" || two === "$=" || two === "*=") {
-      op = two;
-      i += 2;
-    } else if (input[i] === "=") {
-      op = "=";
-      i += 1;
-    } else {
-      return fail(
-        i,
-        `expected \`]\` or an operator (=, ~=, ^=, $=, *=) in the attribute selector opened at ${open}`,
-      );
-    }
-    ws();
-    let value: string | null = null;
-    const quote = input[i];
-    if (quote === '"' || quote === "'") {
-      const end = input.indexOf(quote, i + 1);
-      if (end === -1) return fail(i, "unterminated quoted attribute value");
-      value = input.slice(i + 1, end);
-      i = end + 1;
-    } else {
-      value = match(VALUE);
-      if (value === null) {
-        return fail(i, "expected an attribute value (quote it if it contains punctuation)");
-      }
-    }
-    ws();
-    let insensitive = false;
-    const flag = input[i];
-    if (flag !== undefined && /[a-zA-Z]/.test(flag)) {
-      if (flag !== "i" && flag !== "I") {
-        return fail(i, `unsupported attribute flag \`${flag}\` (only the \`i\` flag is supported)`);
-      }
-      insensitive = true;
-      i++;
-      ws();
-    }
-    if (input[i] !== "]") {
-      return fail(i, "expected `]` to close the attribute selector");
-    }
-    i++;
-    return { type: "attr", name, op, value, insensitive };
-  };
-
-  /** A tag name and/or a run of attribute selectors, with no whitespace inside. */
-  const compound = (inNot: boolean): Compound | SelectorParse => {
-    const parts: Simple[] = [];
-    const start = i;
-
-    const tag = match(TAG);
-    if (tag !== null) parts.push({ type: "tag", name: tag });
-
-    for (;;) {
-      const ch = input[i];
-      if (ch === "[") {
-        const a = attr();
-        if (!("type" in a)) return a;
-        parts.push(a);
-        continue;
-      }
-      if (ch === ":") {
-        if (inNot) {
-          return fail(i, "`:not(...)` cannot be nested");
-        }
-        if (!input.startsWith(":not(", i)) {
-          const name = /[a-zA-Z-]*/y;
-          name.lastIndex = i + 1;
-          const pseudo = name.exec(input)?.[0] ?? "";
-          return fail(
-            i,
-            `pseudo-class \`:${pseudo}\` is not supported; only \`:not(...)\` is`,
-          );
-        }
-        i += ":not(".length;
-        ws();
-        const inner = compound(true);
-        if (!Array.isArray(inner)) return inner;
-        ws();
-        if (input[i] === ",") {
-          return fail(i, "`:not(...)` does not take a selector list");
-        }
-        if (input[i] !== ")") return fail(i, "expected `)` to close `:not(`");
-        i++;
-        parts.push({ type: "not", inner: inner as (TagSel | AttrSel)[] });
-        continue;
-      }
-      break;
-    }
-
-    if (parts.length === 0) {
-      const ch = input[i];
-      if (ch === "*") {
-        return fail(i, "the universal selector `*` is not supported");
-      }
-      if (ch === "." || ch === "#") {
-        return fail(
-          i,
-          `\`${ch}\` selectors are not supported; use [class~=name] or [id=name]`,
-        );
-      }
-      if (ch !== undefined && /[A-Z]/.test(ch)) {
-        return fail(i, "tag names must be lowercase");
-      }
-      return fail(start, ch === undefined ? "unexpected end of selector" : `unexpected \`${ch}\``);
-    }
-    return parts;
-  };
-
-  const ast: Compound[] = [];
-  ws();
-  if (i >= input.length) return fail(0, "selector is empty");
-
-  for (;;) {
-    const c = compound(false);
-    if (!Array.isArray(c)) return c;
-    ast.push(c);
-
-    const before = i;
-    const hadSpace = ws();
-    if (i >= input.length) break;
-    if (input[i] === ",") {
-      i++;
-      ws();
-      if (i >= input.length) return fail(i, "trailing `,` in selector list");
-      continue;
-    }
-    const ch = input[i] as string;
-    if (ch === ">" || ch === "+" || ch === "~") {
-      return fail(i, `combinators are not supported (found \`${ch}\`)`);
-    }
-    if (ch === "*" && !hadSpace) {
-      return fail(i, "the universal selector `*` is not supported");
-    }
-    if (hadSpace) {
-      return fail(before, "combinators are not supported (found a descendant space)");
-    }
-    return fail(i, `unexpected \`${ch}\``);
-  }
-
-  return { ok: true, ast };
 }
 
 // --- frontmatter ------------------------------------------------------------

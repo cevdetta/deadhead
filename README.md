@@ -10,9 +10,17 @@ finding it links to a written explanation of why, with sources.
 $ npx deadhead dist
 
 dist/index.html
-  warning  meta/http-equiv-x-ua-compatible  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-           use: delete it  (https://deadhead.dev/rules/meta/http-equiv-x-ua-compatible)
+  5:5  unnecessary  meta/http-equiv-x-ua-compatible
+       X-UA-Compatible only ever controlled Internet Explorer document modes, and no
+       shipping browser reads it.
+       -> Delete it. Internet Explorer and legacy Edge modes no longer exist.
+       https://deadhead.dev/rules/meta/http-equiv-x-ua-compatible
+
+x 1 finding (1 unnecessary)
 ```
+
+Severity is `harmful`, `deprecated` or `unnecessary` -- what the finding costs you,
+not how loudly the tool wants to say it.
 
 ## Why another linter
 
@@ -41,14 +49,40 @@ pnpm build
 pnpm check -- path/to/your/html
 ```
 
+`deadhead` takes files, directories, or globs -- it expands globs itself, so they
+behave the same in every shell:
+
+```bash
+deadhead dist                        # walk a directory for .html and .htm
+deadhead "src/**/*.html"             # quote it; the CLI does the expanding
+deadhead --format=sarif dist         # stylish (default), json, sarif
+deadhead --fail-on=harmful dist      # exit 1 only on harmful findings
+deadhead --skip-templates dist       # leave <template> contents alone
+```
+
+Exit codes are the CI contract: **0** nothing at or above the `--fail-on` threshold,
+**1** threshold met, **2** usage or I/O error. A broken invocation never looks like a
+clean run.
+
+Silence a finding in the markup itself:
+
+```html
+<!-- deadhead-disable-next-line meta/http-equiv-x-ua-compatible -->
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+```
+
+`<!-- deadhead-disable -->` (optionally with rule ids) turns findings off until
+`<!-- deadhead-enable -->`. Contents of `<pre>`, `<code>`, `<textarea>`, `<samp>` and
+`<kbd>` are never linted -- documenting bad markup is not writing it.
+
 Other commands:
 
 ```bash
 pnpm validate:rules   # frontmatter and rule docs fail fast, before the suite
 pnpm test             # full test suite (node:test)
 pnpm test:conformance # every fixture through every adapter
-pnpm typecheck        # strict typecheck (core/rules/scripts/test + browser)
-pnpm check:self       # run the linter over its own fixtures
+pnpm typecheck        # strict typecheck (core, rules, cli, scripts, tests)
+pnpm check:self       # run the linter over its own clean fixtures
 pnpm lint:deps        # dependency hygiene check
 ```
 
@@ -64,7 +98,10 @@ disagree.
 
 ## Status
 
-Early in development. Progress is tracked per milestone in the issue tracker.
+Early in development. The rule pipeline and the CLI work; the bookmarklet and the
+ESLint plugin do not exist yet, so `pnpm test:conformance` has nothing to compare and
+the rule set is deliberately small. Progress is tracked per milestone in the issue
+tracker.
 
 ## Contributing
 

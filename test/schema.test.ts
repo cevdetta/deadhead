@@ -3,7 +3,6 @@ import test from "node:test";
 
 import {
   type Issue,
-  parseSelector,
   splitFrontmatter,
   validateFrontmatter,
   validateProse,
@@ -38,82 +37,6 @@ test("splitFrontmatter rejects an unterminated fence", () => {
   const split = splitFrontmatter("---\nruleId: a/b\nstill frontmatter\n");
   assert.ok(!split.ok);
   assert.match(split.message, /never closed/);
-});
-
-// --- selector subset --------------------------------------------------------
-
-const ACCEPTED = [
-  "meta",
-  "meta[charset]",
-  'meta[http-equiv="X-UA-Compatible" i]',
-  "script[type]",
-  "link[rel~=icon]",
-  'script[src^="http://"]',
-  'link[href$=".css"]',
-  "a[href*=example]",
-  "meta:not([charset])",
-  "script:not([type])[src]",
-  "meta[name], meta[property]",
-  "  link[rel] ,  meta[name]  ",
-  "meta[ name = viewport  i ]",
-];
-
-for (const selector of ACCEPTED) {
-  test(`selector accepted: ${selector}`, () => {
-    const parsed = parseSelector(selector);
-    assert.ok(parsed.ok, `expected accept, got: ${parsed.ok ? "" : parsed.message}`);
-  });
-}
-
-const REJECTED: [string, RegExp][] = [
-  ["head > meta", /combinators are not supported/],
-  ["head meta", /descendant space/],
-  ["meta + link", /combinators are not supported/],
-  ["meta ~ link", /combinators are not supported/],
-  ["*", /universal selector/],
-  ["*[charset]", /universal selector/],
-  ["meta[charset]*", /universal selector/],
-  ["meta[charset] link", /descendant space/],
-  ["[lang|=en]", /`\|=`/],
-  ["meta:first-child", /pseudo-class `:first-child`/],
-  ["meta::before", /pseudo-class/],
-  [".legacy", /`\.` selectors are not supported/],
-  ["#main", /`#` selectors are not supported/],
-  ["META[charset]", /must be lowercase/],
-  ["[a=b s]", /only the `i` flag/],
-  ["meta:not(:not([charset]))", /cannot be nested/],
-  ["meta:not([a], [b])", /does not take a selector list/],
-  ["meta[", /expected an attribute name/],
-  ["meta[charset", /expected `\]`/],
-  ['meta[name="unterminated]', /unterminated quoted/],
-  ["", /selector is empty/],
-  ["meta,", /trailing `,`/],
-];
-
-for (const [selector, expected] of REJECTED) {
-  test(`selector rejected: ${JSON.stringify(selector)}`, () => {
-    const parsed = parseSelector(selector);
-    assert.ok(!parsed.ok, "expected reject");
-    assert.match(parsed.message, expected);
-    assert.ok(parsed.index >= 0);
-  });
-}
-
-test("a parsed selector keeps enough structure to bucket by leading tag", () => {
-  const parsed = parseSelector('meta[http-equiv="X-UA-Compatible" i]');
-  assert.ok(parsed.ok);
-  assert.deepEqual(parsed.ast, [
-    [
-      { type: "tag", name: "meta" },
-      {
-        type: "attr",
-        name: "http-equiv",
-        op: "=",
-        value: "X-UA-Compatible",
-        insensitive: true,
-      },
-    ],
-  ]);
 });
 
 // --- frontmatter ------------------------------------------------------------
