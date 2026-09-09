@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Meaningful script types</title>
+    <script src="/classic.js"></script>
+    <script type="module" src="/app.js"></script>
+    <script type="importmap">{ "imports": { "lit": "/vendor/lit.js" } }</script>
+    <script type="text/javascript; charset=utf-8" src="/never-runs.js"></script>
+  </head>
+  <body>
+    <script type="application/json" id="state">{ "user": null }</script>
+  </body>
+</html>
