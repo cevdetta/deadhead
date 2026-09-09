@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  // The only place in the repo that may see DOM types. The root config
+  // excludes this directory and declares `lib: ["esnext"]` with `types:
+  // ["node"]`, so a stray `document` reference anywhere else is a type error
+  // rather than something that quietly works on one of the three runtimes.
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "lib": ["esnext", "dom"],
+    // No Node types: this code runs in a page. `@deadhead/core` is imported
+    // from here and is checked under these settings too, which is what keeps
+    // core honest about having no Node dependencies.
+    "types": []
+  },
+  // `exclude` is inherited from the root config, which excludes this very
+  // directory. Override it, or there are no inputs at all.
+  "include": ["."],
+  "exclude": ["**/node_modules", "**/dist"]
+}

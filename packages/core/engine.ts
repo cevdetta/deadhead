@@ -220,9 +220,14 @@ function dedupe(findings: Finding[], suppressions: Suppressions): Finding[] {
     kept.push(finding);
   }
 
+  // No ruleId tiebreak: findings are collected in document order by the walk,
+  // and Array#sort is stable, so ties keep that order. It matters in the DOM
+  // adapter, where nothing has an offset and *every* finding ties -- sorting
+  // by ruleId there would list a page's findings alphabetically instead of
+  // top to bottom.
   return kept.sort((a, b) => {
     const [ao, al, ac] = positionOf(a);
     const [bo, bl, bc] = positionOf(b);
-    return ao - bo || al - bl || ac - bc || a.ruleId.localeCompare(b.ruleId);
+    return ao - bo || al - bl || ac - bc;
   });
 }

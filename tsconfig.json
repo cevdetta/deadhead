@@ -54,5 +54,7 @@
     "skipLibCheck": true
   },
   "include": ["packages", "scripts", "test"],
-  "exclude": ["packages/browser", "**/node_modules", "**/dist"]
+  // packages/browser and test/conformance need DOM types and carry their
+  // own configs; typechecking them here would fail on `document`.
+  "exclude": ["packages/browser", "test/conformance", "**/node_modules", "**/dist"]
 }

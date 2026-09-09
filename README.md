@@ -94,7 +94,35 @@ pnpm lint:deps        # dependency hygiene check
 - **ESLint plugin** for editor feedback while you type.
 
 All three run the same rule set and are tested against each other, so they cannot
-disagree.
+disagree. `pnpm test:conformance` runs every fixture through every adapter and fails
+if they diverge — including the built bookmarklet, executed as a bundle.
+
+### Browser artifacts
+
+```bash
+pnpm build && pnpm build:bookmarklet && pnpm build:css
+```
+
+`packages/browser/bookmarklet.js` is one self-contained IIFE with the rules inlined and
+no network access at all, so a strict Content-Security-Policy cannot block it — which
+matters, because a locked-down page is often the one worth inspecting. The same file is
+the devtools snippet: paste it into **Sources → Snippets** and run.
+
+`packages/browser/deadhead.css` outlines offenders in place, in the
+[ct.css](https://csswizardry.com/ct/) spirit, using `head, head * { display: block }` to
+give head elements a box to draw. Only selector-backed rules can appear in it: a
+`kind: "document"` rule asks something CSS cannot ask, and a rule refined by code is
+included but drawn with a dashed outline and labelled `(approximate)`, because the
+stylesheet cannot run the refinement.
+
+### What the DOM cannot see
+
+A rendered document has no source text, so `range()` and `loc()` are `null` in the
+browser, fixes are unavailable, and suppression comments are not read. A rule whose
+verdict depends on byte offsets — `head/charset-position` asks whether a declaration
+lands inside the first 1024 bytes — simply does not fire there. That asymmetry is
+declared in the conformance suite and asserted in both directions, so it cannot quietly
+become drift.
 
 ## Status
 
