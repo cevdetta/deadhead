@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  // The one place that legitimately needs both worlds: a Node test runner
+  // driving a DOM implementation. Everywhere else the split is enforced --
+  // the root config has Node types and no DOM, packages/browser has DOM types
+  // and no Node. Keeping this exception to a single directory is what stops
+  // `document` leaking into core or a rule.
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "lib": ["esnext", "dom"],
+    "types": ["node"]
+  },
+  "include": ["."],
+  "exclude": ["**/node_modules", "**/dist"]
+}

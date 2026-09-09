@@ -35,6 +35,11 @@ jobs:
       # not after the whole suite has run.
       - run: pnpm validate:rules
       - run: pnpm build
+      # The browser artifacts are generated from rules.json, so they break the
+      # same way a rule does. Build them here rather than finding out at
+      # release time.
+      - run: pnpm build:css
+      - run: pnpm build:bookmarklet
       - run: pnpm typecheck
       - run: pnpm test
       # Lint our own clean fixtures with our own CLI. It targets valid.html
