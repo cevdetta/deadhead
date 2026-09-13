@@ -14,7 +14,7 @@ fix: { op: "remove-element" }
 replacement: "Delete every msapplication-* tag, and any browserconfig.xml it points to. Put app name, colours and icons in the web app manifest."
 tags: ["head", "meta", "legacy", "ie"]
 impacts: ["maintainability"]
-related: ["meta/http-equiv-x-ua-compatible"]
+related: ["meta/http-equiv-x-ua-compatible", "meta/application-name"]
 ---
 
 Internet Explorer 9 let a user pin a site to the Windows taskbar, and Internet Explorer 11
@@ -70,7 +70,7 @@ Fully detectable. `<meta name>` holds a single value rather than a token set, so
 selector is a case-insensitive prefix match on `msapplication-` — the documented names mix
 case freely (`msapplication-TileColor`). It deliberately leaves `application-name` alone:
 IE used it for the pinned-site title, but it is a standard HTML metadata name with its own
-meaning.
+meaning, and `meta/application-name` covers it.
 
 The fix removes each element. That includes `msapplication-config` with `content="none"`,
 which only ever told IE11 not to request `/browserconfig.xml` when a site was pinned;
