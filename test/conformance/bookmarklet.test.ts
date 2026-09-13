@@ -81,7 +81,7 @@ test("nothing in the bundle can be blocked by a Content-Security-Policy", () => 
 });
 
 test("it renders a panel, and running it twice does not stack panels", () => {
-  const source = "<!doctype html><html><head><title>t</title><meta name='viewport' content='width=device-width'>" +
+  const source = "<!doctype html><html lang='en'><head><title>t</title><meta name='viewport' content='width=device-width'>" +
     '<meta http-equiv="X-UA-Compatible" content="IE=edge"></head><body></body></html>';
   const { window, document } = parseHTML(source);
   const context = { document, window };
