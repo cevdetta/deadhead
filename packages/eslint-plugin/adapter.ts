@@ -26,7 +26,8 @@ type Node = {
   range?: [number, number];
   loc?: { start: { line: number; column: number } };
   name?: string;
-  value?: string;
+  /** A string on `Text`; a `ScriptTagContent`/`StyleTagContent` node on `ScriptTag`/`StyleTag`. */
+  value?: string | Node;
   attributes?: { key: { value: string }; value?: { value: string }; range?: [number, number] }[];
   children?: Node[];
   body?: Node[];
@@ -42,11 +43,18 @@ const ELEMENT_TAG = (node: Node): string | null => {
 
 const childrenOf = (node: Node): Node[] => node.children ?? node.body ?? [];
 
-/** Concatenated text of every descendant, in document order. */
+/**
+ * Concatenated text of every descendant, in document order.
+ *
+ * `<script>` and `<style>` have no `Text` children: their contents hang off
+ * `value` as a single `ScriptTagContent`/`StyleTagContent` node, so without
+ * this they read as empty and a JSON-LD block could never parse.
+ */
 function textOf(node: Node): string {
+  if (typeof node.value === "object") return typeof node.value.value === "string" ? node.value.value : "";
   let out = "";
   for (const child of childrenOf(node)) {
-    if (child.type === "Text") out += child.value ?? "";
+    if (child.type === "Text") out += typeof child.value === "string" ? child.value : "";
     else out += textOf(child);
   }
   return out;
