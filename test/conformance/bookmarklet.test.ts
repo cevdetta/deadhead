@@ -81,7 +81,7 @@ test("nothing in the bundle can be blocked by a Content-Security-Policy", () => 
 });
 
 test("it renders a panel, and running it twice does not stack panels", () => {
-  const source = "<!doctype html><html><head><title>t</title>" +
+  const source = "<!doctype html><html><head><title>t</title><meta name='viewport' content='width=device-width'>" +
     '<meta http-equiv="X-UA-Compatible" content="IE=edge"></head><body></body></html>';
   const { window, document } = parseHTML(source);
   const context = { document, window };
@@ -93,7 +93,7 @@ test("it renders a panel, and running it twice does not stack panels", () => {
 
 test("a clean document says so rather than showing an empty list", () => {
   const source = '<!doctype html><html lang="en"><head><meta charset="utf-8">' +
-    "<title>t</title></head><body></body></html>";
+    "<title>t</title><meta name='viewport' content='width=device-width'></head><body></body></html>";
   const { findings, panel } = viaBundle(source);
   // Compare length, not the array: values crossing a vm realm boundary have a
   // different Array prototype and deepStrictEqual compares prototypes.
