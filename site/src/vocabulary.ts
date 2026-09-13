@@ -102,6 +102,7 @@ export const severityOrder: Record<Severity, number> = {
 
 export const namespaceBlurbs: Record<string, string> = {
   attr: "Attributes that outlived what they configured.",
+  document: "The document element and what the whole page declares about itself.",
   head: "The shape of the head itself — order, position, what must come first.",
   link: "<link> relations that no longer have a reader.",
   meta: "<meta> names and pragmas.",

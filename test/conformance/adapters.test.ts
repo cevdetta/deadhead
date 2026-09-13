@@ -187,7 +187,7 @@ test("every adapter steps into a <template>", () => {
   // parse5 and the DOM park template markup in a `content` fragment;
   // html-eslint keeps it inline. All three must still see the script.
   const html =
-    '<!doctype html><html><head><meta charset="utf-8"><title>t</title><meta name="viewport" content="width=device-width"></head>' +
+    '<!doctype html><html lang="en"><head><meta charset="utf-8"><title>t</title><meta name="viewport" content="width=device-width"></head>' +
     '<body><template><script type="text/javascript"></script></template></body></html>';
   for (const adapter of ADAPTERS) {
     assert.deepEqual(
@@ -203,7 +203,7 @@ test("<script> and <style> are elements in every adapter", () => {
   // adapter has to synthesise the tag. Miss it and every script/* rule
   // silently stops existing in the ESLint plugin.
   const html =
-    '<!doctype html><html><head><meta charset="utf-8"><title>t</title><meta name="viewport" content="width=device-width">' +
+    '<!doctype html><html lang="en"><head><meta charset="utf-8"><title>t</title><meta name="viewport" content="width=device-width">' +
     '<style>a{color:red}</style><script type="text/javascript"></script></head>' +
     "<body></body></html>";
   for (const adapter of ADAPTERS) {

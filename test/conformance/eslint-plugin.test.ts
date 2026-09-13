@@ -68,7 +68,7 @@ test("ESLint reports exactly what the CLI reports, at the same positions", async
 
 test("a finding carries the explanation and the replacement, not just a code", () => {
   const messages = lint(
-    '<html><head><meta charset="utf-8"><title>t</title><meta name="viewport" content="width=device-width">' +
+    '<html lang="en"><head><meta charset="utf-8"><title>t</title><meta name="viewport" content="width=device-width">' +
       '<meta http-equiv="X-UA-Compatible" content="IE=edge"></head><body></body></html>',
   );
   assert.equal(messages.length, 1);
@@ -95,7 +95,7 @@ test("clean fixtures produce nothing", async () => {
 
 test("suppression comments work through ESLint too", () => {
   const markup = (comment: string) =>
-    '<html><head><meta charset="utf-8"><title>t</title><meta name="viewport" content="width=device-width">' +
+    '<html lang="en"><head><meta charset="utf-8"><title>t</title><meta name="viewport" content="width=device-width">' +
     comment +
     '<meta http-equiv="X-UA-Compatible" content="IE=edge"></head><body></body></html>';
   assert.equal(lint(markup("")).length, 1);
