@@ -103,12 +103,13 @@ test("--help and --version exit 0 and write to stdout", async () => {
 test("json output is parseable and its summary matches its findings", () => {
   const run = deadhead("--format=json", "test/fixtures");
   const report = JSON.parse(run.stdout) as {
-    summary: { findings: number; harmful: number; unnecessary: number };
+    summary: { findings: number; harmful: number; deprecated: number; unnecessary: number };
     results: { file: string; findings: { ruleId: string }[] }[];
   };
   const counted = report.results.reduce((n, r) => n + r.findings.length, 0);
   assert.equal(report.summary.findings, counted);
-  assert.equal(report.summary.harmful + report.summary.unnecessary, counted);
+  const { harmful, deprecated, unnecessary } = report.summary;
+  assert.equal(harmful + deprecated + unnecessary, counted);
 });
 
 test("sarif output is parseable and declares every rule it references", () => {
