@@ -72,8 +72,8 @@ test("exit 0 when nothing is found", () => {
 test("exit 1 when the --fail-on threshold is met, 0 when it is not", () => {
   assert.equal(deadhead("test/fixtures").status, 1, "default threshold is any finding");
   assert.equal(deadhead("--fail-on=harmful", "test/fixtures/head").status, 1);
-  // The script fixtures are `unnecessary`, which is below a harmful threshold.
-  assert.equal(deadhead("--fail-on=harmful", "test/fixtures/script").status, 0);
+  // The type-javascript-mime fixtures are `unnecessary`, which is below a harmful threshold.
+  assert.equal(deadhead("--fail-on=harmful", "test/fixtures/script/type-javascript-mime").status, 0);
   assert.equal(deadhead("--fail-on=none", "test/fixtures").status, 0);
 });
 
