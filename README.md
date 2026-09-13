@@ -14,13 +14,18 @@ dist/index.html
        X-UA-Compatible only ever controlled Internet Explorer document modes, and no
        shipping browser reads it.
        -> Delete it. Internet Explorer and legacy Edge modes no longer exist.
-       https://deadhead.dev/rules/meta/http-equiv-x-ua-compatible
+       https://deadhead.cevdet.ch/rules/meta/http-equiv-x-ua-compatible
 
 x 1 finding (1 unnecessary)
 ```
 
 Severity is `harmful`, `deprecated` or `unnecessary` -- what the finding costs you,
 not how loudly the tool wants to say it.
+
+That last line is the whole point: every rule is published at
+**[deadhead.cevdet.ch](https://deadhead.cevdet.ch)**, generated from the same markdown
+the linter is built from. The finding and its explanation cannot drift, because they
+are the same file.
 
 ## Why another linter
 
@@ -143,8 +148,28 @@ pnpm test             # full test suite (node:test)
 pnpm test:conformance # every fixture through every adapter
 pnpm typecheck        # strict typecheck (core, rules, cli, scripts, tests)
 pnpm check:self       # run the linter over its own clean fixtures
+pnpm check:site       # build the docs site, then lint its own <head> with the CLI
 pnpm lint:deps        # dependency hygiene check
 ```
+
+### Documentation site
+
+```bash
+pnpm site:dev         # Astro dev server on the rule markdown
+pnpm site:build       # static build to site/dist
+pnpm site:preview     # preview static build of site/dist
+pnpm site:check       # typecheck the .astro files
+```
+
+[`site/`](site) is an Astro project that reads `content/rules/**/*.md` in place -- no
+copy, no second corpus -- and publishes each one at `/rules/<ruleId>`, the exact url
+every finding prints. Its enums are imported from
+[`packages/core/vocabulary.ts`](packages/core/vocabulary.ts), so a site that could
+render a severity the engine rejects will not typecheck.
+
+It is also a fixture. `pnpm check:site` runs the CLI over the rendered output, which
+means the head this project ships is held to the rules this project ships -- in a
+document assembled by a framework, which is where head markup usually goes wrong.
 
 ## Three ways to run it
 
@@ -212,10 +237,10 @@ become drift.
 
 ## Status
 
-Early in development. All three runtimes work and are checked against each other; the
-rule set is deliberately small while the foundations settle. Autofix, a config file and
-a baseline file are the next milestone. Progress is tracked per milestone in the issue
-tracker.
+Early in development, but the foundations are in place: all three runtimes work and are
+checked against each other, autofix, the config file and the baseline file have landed,
+and the rule documentation is published. The rule set is deliberately small -- it grows
+one researched rule at a time, and that is the bottleneck by design.
 
 ## Contributing
 

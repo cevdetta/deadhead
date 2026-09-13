@@ -47,7 +47,7 @@ test("each invalid.html trips its own rule", async () => {
     assert.ok(own.length > 0, `${file} produced no ${rule.meta.ruleId} finding`);
     for (const finding of own) {
       assert.equal(finding.severity, rule.meta.severity);
-      assert.equal(finding.url, `https://deadhead.dev/rules/${rule.meta.ruleId}`);
+      assert.equal(finding.url, `https://deadhead.cevdet.ch/rules/${rule.meta.ruleId}`);
       assert.ok(finding.loc !== null && finding.range !== null, "CLI findings carry positions");
     }
   }
@@ -130,7 +130,7 @@ test("sarif output is parseable and declares every rule it references", () => {
     assert.equal(result.locations.length, 1);
   }
   for (const rule of first.tool.driver.rules) {
-    assert.match(rule.helpUri, /^https:\/\/deadhead\.dev\/rules\//);
+    assert.match(rule.helpUri, /^https:\/\/deadhead\.cevdet\.ch\/rules\//);
   }
 });
 

@@ -1,0 +1,72 @@
+---
+import { getCollection, render } from "astro:content";
+import Layout, { REPO } from "../../layouts/Layout.astro";
+import RuleFacts from "../../components/RuleFacts.astro";
+import { severityLabels, statusLabels } from "../../vocabulary.ts";
+
+// The route is `[...ruleId]` rather than `[ruleId]` because a ruleId contains a
+// slash — `meta/keywords` is one id, not two segments. This URL is the contract
+// `packages/core/vocabulary.ts` prints in every finding.
+export async function getStaticPaths() {
+  const rules = await getCollection("rules");
+  return rules.map((rule) => ({
+    params: { ruleId: rule.data.ruleId },
+    props: { rule },
+  }));
+}
+
+const { rule } = Astro.props;
+const { Content } = await render(rule);
+const { data } = rule;
+
+const sourceUrl = `${REPO}/blob/main/content/rules/${data.ruleId}.md`;
+---
+
+<Layout
+  title={data.title}
+  description={data.description}
+  ogType="article"
+  publishedTime={data.pubDate}
+>
+  <article class="shell">
+    <header class="rule-head">
+      <a href="/rules">{data.ruleId}</a>
+      <h1>{data.title}</h1>
+      <p class="lede">{data.description}</p>
+      <ul class="badges">
+        <li>{statusLabels[data.status]}</li>
+        <li data-severity={data.severity}>{severityLabels[data.severity]}</li>
+      </ul>
+    </header>
+
+    <RuleFacts rule={rule} />
+
+    <!-- Complementary to the prose rather than part of it: the same answer the
+         `## Use instead` section gives, said in one line near the top. -->
+    <aside class="callout">
+      <h2>Instead</h2>
+      <p>{data.replacement}</p>
+    </aside>
+
+    <div class="flow">
+      <Content />
+    </div>
+
+    {
+      data.tags.length > 0 && (
+        <ul class="tags">
+          {data.tags.map((tag) => (
+            <li>{tag}</li>
+          ))}
+        </ul>
+      )
+    }
+
+    <p class="source-note">
+      This page is generated from <a href={sourceUrl}><code>content/rules/{data.ruleId}.md</code></a>,
+      the same file the linter is built from. Think the rule is wrong, or that browsers
+      moved on? <a href={`${REPO}/issues/new`}>Say so</a> — that is the most useful issue
+      you can file.
+    </p>
+  </article>
+</Layout>

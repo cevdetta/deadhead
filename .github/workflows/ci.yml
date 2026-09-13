@@ -47,6 +47,14 @@ jobs:
       # findings, so pointing this at the whole tree could only ever fail.
       - run: pnpm check:self
 
+      # The documentation site is built from the same content/rules markdown,
+      # so a rule that breaks the linter breaks the site too. Building it here
+      # also typechecks the .astro files, and check:site then runs the CLI over
+      # the rendered output: the head this project ships is held to the rules
+      # this project ships.
+      - run: pnpm site:check
+      - run: pnpm check:site
+
       # Folded into this job instead of a second runner: one checkout, one
       # install. A linter about shipping things you do not need should hold
       # itself to it. Pinned rather than @latest: `dlx` executes whatever was
@@ -54,7 +62,8 @@ jobs:
       # an RCE should not hand CI an unpinned one.
       #
       # Gated on errors, not warnings. Every current warning is a duplicate
-      # transitive version inside parse5/linkedom's own tree — dev-only, never
-      # shipped, and not ours to fix. They still print. Revisit when the
-      # packages are published and the analysis has real output to judge.
+      # transitive version inside a dev dependency's own tree — parse5,
+      # linkedom, and now Astro under site/ — none of it shipped, none of it
+      # ours to fix. They still print. Revisit when the packages are published
+      # and the analysis has real output to judge.
       - run: pnpm lint:deps

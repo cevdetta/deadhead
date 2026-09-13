@@ -5,6 +5,9 @@ node_modules/
 dist/
 *.tsbuildinfo
 
+# Astro's generated content types and cache (site/)
+.astro/
+
 # Generated from content/rules/**/*.md by scripts/build-rules.ts
 packages/rules/rules.json
 packages/browser/deadhead.css

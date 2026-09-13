@@ -22,6 +22,7 @@ import { run } from "../core/engine.ts";
 import { parseSuppressions } from "../core/suppressions.ts";
 import type { Rule as DeadheadRule } from "../core/engine.ts";
 import type { Finding } from "../core/types.ts";
+import { ruleUrl } from "../core/vocabulary.ts";
 import { loadRules } from "../rules/load.ts";
 import { fromProgram } from "./adapter.ts";
 
@@ -75,7 +76,7 @@ function toEslintRule(rule: DeadheadRule): EslintRule {
       ...(rule.meta.fix.op === "none" ? {} : { fixable: "code" as const }),
       docs: {
         description: rule.meta.description,
-        url: `https://deadhead.dev/rules/${rule.meta.ruleId}`,
+        url: ruleUrl(rule.meta.ruleId),
       },
       schema: [],
       messages: {

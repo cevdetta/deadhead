@@ -1,0 +1,21 @@
+{
+  "name": "@deadhead/site",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "deadhead.cevdet.ch — the rule documentation. Every finding the linter emits links here.",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.4",
+    "astro": "^7.3.2"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "typescript": "^6.0.3"
+  }
+}
