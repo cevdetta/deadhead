@@ -1,0 +1,58 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+import RuleList from "../../components/RuleList.astro";
+import { namespaceBlurbs, severityOrder } from "../../vocabulary.ts";
+
+const rules = await getCollection("rules");
+
+// Group by the namespace half of the ruleId. Namespaces say where the thing
+// lives, never whether it is bad, so this grouping is stable across a rule
+// changing severity — which is the whole reason ids are namespaced that way.
+const byNamespace = new Map<string, typeof rules>();
+for (const rule of rules) {
+  const namespace = rule.data.ruleId.split("/")[0]!;
+  const bucket = byNamespace.get(namespace) ?? [];
+  bucket.push(rule);
+  byNamespace.set(namespace, bucket);
+}
+
+const namespaces = [...byNamespace.entries()]
+  .sort(([a], [b]) => a.localeCompare(b))
+  .map(([namespace, list]) => ({
+    namespace,
+    blurb: namespaceBlurbs[namespace],
+    rules: list.sort(
+      (a, b) =>
+        severityOrder[a.data.severity] - severityOrder[b.data.severity] ||
+        a.data.ruleId.localeCompare(b.data.ruleId),
+    ),
+  }));
+
+const count = rules.length;
+---
+
+<Layout
+  title="Rules"
+  description={`All ${count} deadhead rules, grouped by where in the markup the thing lives.`}
+>
+  <article class="shell flow">
+    <header class="flow">
+      <h1>Rules</h1>
+      <p class="lede">
+        {count} rules, grouped by where the thing lives rather than by how bad
+        it is. Severity is a mutable field; the namespace in a ruleId is
+        permanent, because suppression comments and CI baselines are written
+        against it.
+      </p>
+    </header>
+
+    {namespaces.map(({ namespace, blurb, rules: list }) => (
+      <section class="namespace">
+        <h2 id={namespace}>{namespace}/</h2>
+        {blurb && <p>{blurb}</p>}
+        <RuleList rules={list} />
+      </section>
+    ))}
+  </article>
+</Layout>

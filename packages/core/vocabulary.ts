@@ -63,6 +63,9 @@ export const TAGS = [
   "viewport",
 ] as const;
 
+/** `namespace/name`, kebab-case. Shared by validate-rules and the docs site. */
+export const RULE_ID = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*\/[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;
+
 export type Status = (typeof STATUS)[number];
 export type Severity = (typeof SEVERITY)[number];
 export type StandardsBasis = (typeof STANDARDS_BASIS)[number];
@@ -115,5 +118,13 @@ export type RuleMeta = {
   related: string[];
 };
 
+/**
+ * Where the rules are published. Defined once, here, because it is a contract
+ * rather than a preference: the url is printed into CI logs, SARIF uploads and
+ * ESLint metadata, and every one of those outlives the run that produced it.
+ * The site in `site/` builds `/rules/<ruleId>` to match.
+ */
+export const SITE_URL = "https://deadhead.cevdet.ch";
+
 /** Where a finding's explanation lives. */
-export const ruleUrl = (ruleId: string): string => `https://deadhead.dev/rules/${ruleId}`;
+export const ruleUrl = (ruleId: string): string => `${SITE_URL}/rules/${ruleId}`;

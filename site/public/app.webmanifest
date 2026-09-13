@@ -1,0 +1,18 @@
+{
+  "name": "deadhead by Cevdet",
+  "short_name": "deadhead",
+  "description": "Documentation-driven linter for HTML <head>: finds deprecated, unnecessary and harmful markup and explains why. One rule set, three runtimes (CLI, browser, ESLint).",
+  "start_url": "https://deadhead.cevdet.ch",
+  "id": "/",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["utilities"],
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#000000",
+  "theme_color": "#82c3a0",
+  "icons": [
+    { "src": "/icon-192.png", "type": "image/png", "sizes": "192x192" },
+    { "src": "/icon-512.png", "type": "image/png", "sizes": "512x512" }
+  ]
+}

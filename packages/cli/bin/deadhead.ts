@@ -15,7 +15,7 @@ import { matchesGlob } from "node:path";
 import { parseArgs, styleText } from "node:util";
 
 import type { Rule } from "../../core/engine.ts";
-import { SEVERITY, SEVERITY_RANK, type Severity } from "../../core/vocabulary.ts";
+import { SEVERITY, SEVERITY_RANK, SITE_URL, type Severity } from "../../core/vocabulary.ts";
 import { RulesNotBuiltError, loadRules } from "../../rules/load.ts";
 import {
   BaselineError,
@@ -50,7 +50,7 @@ ${styleText("bold", "deadhead")} — lint HTML <head> for deprecated, unnecessar
   -h, --help              show this
   -v, --version           show the version
 
-  ${styleText("dim", "Every finding links to https://deadhead.dev/rules/<ruleId>.")}
+  ${styleText("dim", `Every finding links to ${SITE_URL}/rules/<ruleId>.`)}
 `.trimStart();
 
 const fail: (message: string) => never = (message) => {

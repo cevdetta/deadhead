@@ -120,7 +120,7 @@ test("a finding carries the rule's severity, message, replacement and URL", () =
   assert.equal(finding?.severity, "harmful");
   assert.equal(finding?.message, "It is bad.");
   assert.equal(finding?.replacement, "Use something else.");
-  assert.equal(finding?.url, "https://deadhead.dev/rules/meta/x");
+  assert.equal(finding?.url, "https://deadhead.cevdet.ch/rules/meta/x");
 });
 
 test("findings are sorted by source position", () => {

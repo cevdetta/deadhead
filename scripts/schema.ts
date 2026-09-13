@@ -19,6 +19,7 @@ import {
   FIX_OP,
   IMPACTS,
   KIND,
+  RULE_ID,
   SCOPE,
   SEVERITY,
   STANDARDS_BASIS,
@@ -156,7 +157,6 @@ export function splitFrontmatter(source: string): Split {
 
 // --- frontmatter ------------------------------------------------------------
 
-export const RULE_ID = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*\/[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;
 const ISO_DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
 
 const isPlainObject = (v: unknown): v is Record<string, unknown> =>

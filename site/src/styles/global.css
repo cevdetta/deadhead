@@ -1,0 +1,433 @@
+/*
+ * Hand-written, no framework. A linter that complains about dead weight in the
+ * head should not ship a documentation site with a utility framework in it.
+ *
+ * One content measure for the whole site, one spacing utility (.flow), and a
+ * component only where an element cannot carry the meaning on its own.
+ */
+
+:root {
+  --bg: #fdfdfb;
+  --bg-sunk: #f4f4f0;
+  --text: #191a17;
+  --muted: #64665e;
+  --rule: #e3e3dc;
+  --accent: #2f6f4f;
+  --accent-bg: #e8f1eb;
+
+  --harmful: #b0242b;
+  --deprecated: #8a5b14;
+  --unnecessary: #56576a;
+
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --measure: 82ch;
+  --gutter: clamp(1rem, 0.6rem + 2vw, 2rem);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #101210;
+    --bg-sunk: #191b18;
+    --text: #e7e6e0;
+    --muted: #9b9d93;
+    --rule: #2a2d29;
+    --accent: #82c3a0;
+    --accent-bg: #182220;
+
+    --harmful: #f28b86;
+    --deprecated: #dfab5f;
+    --unnecessary: #a3a4b4;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font: clamp(1rem, 0.97rem + 0.15vw, 1.0625rem) / 1.65 system-ui, sans-serif;
+  text-underline-offset: 0.15em;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: clamp(1.9rem, 1.6rem + 1.5vw, 2.6rem);
+}
+h2 {
+  font-size: clamp(1.3rem, 1.2rem + 0.5vw, 1.55rem);
+}
+h3 {
+  font-size: 1.1rem;
+}
+
+p,
+li {
+  text-wrap: pretty;
+}
+
+a {
+  color: inherit;
+  text-decoration-color: color-mix(in oklab, currentColor 35%, transparent);
+}
+
+a:hover {
+  text-decoration-color: currentColor;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+code,
+kbd,
+samp {
+  font-family: var(--mono);
+  font-size: 0.9em;
+}
+
+:not(pre) > code {
+  background: var(--bg-sunk);
+  border-radius: 3px;
+  padding: 0.1em 0.35em;
+}
+
+pre {
+  background: var(--bg-sunk);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 0.9rem 1rem;
+  overflow-x: auto;
+  font-size: 0.875rem;
+  line-height: 1.55;
+}
+
+pre code,
+pre samp {
+  font-size: inherit;
+}
+
+/* Astro emits both Shiki themes inline and expects the page to pick one. */
+@media (prefers-color-scheme: dark) {
+  pre,
+  pre span {
+    color: var(--shiki-dark) !important;
+    background-color: transparent !important;
+  }
+}
+
+blockquote {
+  border-inline-start: 3px solid var(--accent);
+  padding-inline-start: 1rem;
+  color: var(--muted);
+  font-style: italic;
+}
+
+ul,
+ol {
+  padding-inline-start: 1.4em;
+}
+
+/* --- layout --------------------------------------------------------------- */
+
+.shell {
+  inline-size: min(100% - 2 * var(--gutter), var(--measure));
+  margin-inline: auto;
+}
+
+/* The one spacing utility. Everything else inherits it. */
+.flow > * + * {
+  margin-block-start: 1.1em;
+}
+
+.flow > h2 {
+  margin-block-start: 2.2rem;
+}
+
+.flow > h3 {
+  margin-block-start: 1.6rem;
+}
+
+.flow > pre,
+.flow > blockquote,
+.flow > aside {
+  margin-block: 1.4em;
+}
+
+.lede {
+  font-size: 1.125rem;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+
+.masthead {
+  border-bottom: 1px solid var(--rule);
+  padding-block: 1rem;
+  margin-block-end: 2.5rem;
+}
+
+.masthead .shell {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.6rem 1.4rem;
+}
+
+.masthead b {
+  font-family: var(--mono);
+  margin-inline-end: auto;
+}
+
+.masthead img {
+  vertical-align: -0.2em;
+  margin-inline-end: 0.45em;
+}
+
+.masthead nav {
+  display: flex;
+  gap: 1.1rem;
+  font-size: 0.9375rem;
+}
+
+.masthead [aria-current="page"] {
+  color: var(--accent);
+  text-decoration-color: currentColor;
+}
+
+.colophon {
+  border-top: 1px solid var(--rule);
+  margin-block-start: 4rem;
+  padding-block: 1.5rem 3rem;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+/* --- badges and tags ------------------------------------------------------ */
+
+.badges,
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  list-style: none;
+  padding: 0;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.badges li,
+.tags li,
+.badge {
+  border: 1px solid currentColor;
+  border-radius: 3px;
+  padding: 0.05rem 0.45rem;
+  white-space: nowrap;
+}
+
+.badge {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.tags li {
+  color: var(--muted);
+  border-color: var(--rule);
+}
+
+[data-severity="harmful"] {
+  color: var(--harmful);
+}
+[data-severity="deprecated"] {
+  color: var(--deprecated);
+}
+[data-severity="unnecessary"] {
+  color: var(--unnecessary);
+}
+
+/* --- rule index ----------------------------------------------------------- */
+
+.namespace + .namespace {
+  margin-block-start: 2.5rem;
+}
+
+.namespace h2 {
+  font-family: var(--mono);
+  font-size: 1.05rem;
+}
+
+.namespace p {
+  color: var(--muted);
+  font-size: 0.9375rem;
+  margin-block-start: 0.15rem;
+}
+
+.rule-list {
+  list-style: none;
+  padding: 0;
+  margin-block-start: 1rem;
+  border-top: 1px solid var(--rule);
+}
+
+.rule-list li {
+  border-bottom: 1px solid var(--rule);
+}
+
+.rule-list a {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.2rem 1rem;
+  align-items: baseline;
+  padding: 0.85rem 0;
+  text-decoration: none;
+}
+
+.rule-list b {
+  font-family: var(--mono);
+  font-size: 0.9375rem;
+  font-weight: inherit;
+}
+
+.rule-list a:hover b {
+  color: var(--accent);
+}
+
+.rule-list p {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+/* --- rule page ------------------------------------------------------------ */
+
+.rule-head {
+  margin-block-end: 2rem;
+}
+
+.rule-head a {
+  font-family: var(--mono);
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
+.rule-head h1 {
+  margin-block: 0.4rem 0.7rem;
+}
+
+.rule-head .badges {
+  margin-block-start: 1rem;
+}
+
+article > .tags {
+  margin-block-start: 2.5rem;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: minmax(7.5rem, auto) 1fr;
+  gap: 0 1rem;
+  background: var(--bg-sunk);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 0.4rem 1rem;
+  margin-block: 2rem;
+  font-size: 0.9375rem;
+}
+
+.facts dt,
+.facts dd {
+  padding-block: 0.45rem;
+  border-block-start: 1px solid var(--rule);
+}
+
+.facts dt {
+  color: var(--muted);
+}
+
+.facts > :nth-child(-n + 2) {
+  border-block-start: 0;
+}
+
+.facts code {
+  background: none;
+  padding: 0;
+}
+
+.facts small {
+  display: block;
+  color: var(--muted);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+.callout {
+  border-inline-start: 3px solid var(--accent);
+  background: var(--accent-bg);
+  border-radius: 0 4px 4px 0;
+  padding: 0.75rem 1rem;
+}
+
+.callout h2 {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  margin-block-end: 0.2rem;
+}
+
+.source-note {
+  margin-block-start: 3rem;
+  padding-block-start: 1.25rem;
+  border-top: 1px solid var(--rule);
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+/* --- home ----------------------------------------------------------------- */
+
+.runtimes {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  list-style: none;
+  padding: 0;
+}
+
+.runtimes li {
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 1rem;
+}
+
+.runtimes h3 {
+  font-family: var(--mono);
+  font-size: 0.9375rem;
+}
+
+.runtimes p {
+  color: var(--muted);
+  font-size: 0.9375rem;
+  margin-block-start: 0.3rem;
+}

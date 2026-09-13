@@ -110,7 +110,7 @@ const finding = (ruleId: string): Finding => ({
   possible: false,
   message: "m",
   replacement: "r",
-  url: `https://deadhead.dev/rules/${ruleId}`,
+  url: `https://deadhead.cevdet.ch/rules/${ruleId}`,
   loc: null,
   range: null,
   node: { tag: "meta", snippet: "<meta>" },

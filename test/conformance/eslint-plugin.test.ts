@@ -130,7 +130,7 @@ test("the shipped configs reference rules that exist", () => {
 test("every ESLint rule advertises its documentation URL", () => {
   for (const [ruleId, rule] of Object.entries(plugin.rules)) {
     const docs = rule.meta["docs"] as { url?: string; description?: string } | undefined;
-    assert.equal(docs?.url, `https://deadhead.dev/rules/${ruleId}`);
+    assert.equal(docs?.url, `https://deadhead.cevdet.ch/rules/${ruleId}`);
     assert.ok((docs?.description ?? "").length > 0);
   }
 });

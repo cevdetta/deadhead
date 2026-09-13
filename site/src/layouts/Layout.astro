@@ -1,0 +1,106 @@
+---
+import styleURL from "../styles/global.css?url";
+
+export const SITE_NAME = "deadhead";
+export const REPO = "https://github.com/cevdetta/deadhead";
+
+interface Props {
+  title: string;
+  description: string;
+  /** Rule pages are articles; the index pages are not. */
+  ogType?: "website" | "article";
+  publishedTime?: Date | undefined;
+}
+
+const { title, description, ogType = "website", publishedTime } = Astro.props;
+
+const pageTitle = title === SITE_NAME ? title : `${title} · ${SITE_NAME}`;
+
+// With `build.format: "file"`, Astro.url.pathname at build time is the emitted
+// file (`/rules.html`, `/index.html`), not the URL it is served at. Left alone it
+// puts `.html` in every canonical — a URL Cloudflare 308s away from — and no nav
+// link ever matches the current page. Only the root index is special-cased, so
+// a ruleId that happens to end in `index` still maps to its own page.
+const path =
+  Astro.url.pathname === "/index.html"
+    ? "/"
+    : Astro.url.pathname.replace(/\.html$/, "");
+const canonical = new URL(path, Astro.site);
+
+const nav = [
+  { href: "/rules", label: "Rules" },
+  { href: "/install", label: "Install" },
+  { href: REPO, label: "GitHub" },
+];
+
+// This head is the project's own dogfood. `pnpm check:site` runs the CLI over
+// the built output, so anything added here has to survive every rule in
+// content/rules — charset in the first 1024 bytes, no X-UA-Compatible, no
+// keywords, no `shortcut` in a rel, no type attribute on a classic script.
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="color-scheme" content="dark light" />
+    <link rel="stylesheet" href={styleURL} />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/app.webmanifest" />
+
+    <link rel="canonical" href={canonical} />
+    <meta name="description" content={description} />
+    <meta property="og:site_name" content={SITE_NAME} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    {ogType === "article" && publishedTime && (
+      <meta
+        property="article:published_time"
+        content={publishedTime.toISOString()}
+      />
+    )}
+  </head>
+  <body>
+    <header class="masthead">
+      <div class="shell">
+        <b>
+          <a href="/"><img src="/logo.svg" alt="" width="20" height="20" />deadhead</a>
+        </b>
+        <nav aria-label="Primary">
+          {nav.map((item) => (
+            <a
+              href={item.href}
+              aria-current={path === item.href ? "page" : undefined}
+            >
+              {item.label}
+            </a>
+          ))}
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <slot />
+    </main>
+
+    <footer class="colophon">
+      <div class="shell flow">
+        <p>
+          Every rule on this site is one markdown file in{" "}
+          <a href={`${REPO}/tree/main/content/rules`}>
+            <code>content/rules/</code>
+          </a>
+          . A rule with no documentation is not a rule.
+        </p>
+        <p>
+          MIT licensed. <a href={REPO}>Source on GitHub</a>.
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,88 @@
+---
+import type { CollectionEntry } from "astro:content";
+import {
+  basisBlurbs,
+  basisLabels,
+  detectBlurbs,
+  detectLabels,
+  fixLabels,
+  impactLabels,
+  kindLabels,
+  scopeLabels,
+  severityBlurbs,
+  severityLabels,
+  toSentence,
+} from "../vocabulary.ts";
+
+interface Props {
+  rule: CollectionEntry<"rules">;
+}
+
+const { data } = Astro.props.rule;
+
+// `fix` is the one field whose label is not a straight lookup: the op alone
+// does not say which attribute or keyword it acts on, and that is exactly the
+// detail a reader needs before running --fix.
+const fixDetail =
+  data.fix.op === "remove-token" && data.fix.attr && data.fix.token
+    ? ` ${data.fix.token} from ${data.fix.attr}`
+    : data.fix.op === "remove-attribute" && data.fix.attr
+      ? ` ${data.fix.attr}`
+      : "";
+
+const matcher =
+  data.match === "logic" && data.selector
+    ? `${data.selector} + logic module`
+    : data.match === "logic"
+      ? "logic module"
+      : data.selector;
+---
+
+<dl class="facts">
+  <dt>Severity</dt>
+  <dd>{severityLabels[data.severity]}<small>{severityBlurbs[data.severity]}</small></dd>
+
+  <dt>Basis</dt>
+  <dd>{basisLabels[data.standardsBasis]}<small>{basisBlurbs[data.standardsBasis]}</small></dd>
+
+  <dt>Detectable</dt>
+  <dd>{detectLabels[data.detectability]}<small>{detectBlurbs[data.detectability]}</small></dd>
+
+  <dt>Matches</dt>
+  <dd>
+    {matcher ? <code>{matcher}</code> : "the whole document"}
+    <small>
+      {kindLabels[data.kind]} rule, {scopeLabels[data.scope]}.
+    </small>
+  </dd>
+
+  <dt>Fix</dt>
+  <dd>{fixLabels[data.fix.op]}{fixDetail}</dd>
+
+  {
+    data.impacts.length > 0 && (
+      <>
+        <dt>Impacts</dt>
+        <dd>{toSentence(data.impacts.map((i) => impactLabels[i]))}</dd>
+      </>
+    )
+  }
+
+  {
+    data.related.length > 0 && (
+      <>
+        <dt>Related</dt>
+        <dd>
+          {data.related.map((id, index) => (
+            <>
+              {index > 0 && ", "}
+              <a href={`/rules/${id}`}>
+                <code>{id}</code>
+              </a>
+            </>
+          ))}
+        </dd>
+      </>
+    )
+  }
+</dl>

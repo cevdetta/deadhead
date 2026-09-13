@@ -1,0 +1,87 @@
+---
+import Layout, { REPO } from "../layouts/Layout.astro";
+---
+
+<Layout
+  title="Install"
+  description="Install and run deadhead: the CLI, the bookmarklet, the ESLint plugin, suppression comments and CI configuration."
+>
+  <article class="shell flow">
+    <header class="flow">
+      <h1>Install</h1>
+      <p class="lede">
+        Node 24 or newer. No configuration is required to start — the defaults
+        are the point.
+      </p>
+    </header>
+
+    <h2>CLI</h2>
+    <pre><code>npx deadhead dist</code></pre>
+    <p>
+      It takes files, directories or globs, and expands globs itself so they
+      behave the same in every shell:
+    </p>
+    <pre><code>deadhead dist                     # walk a directory for .html and .htm
+deadhead "src/**/*.html"          # quote it; the CLI does the expanding
+deadhead --format=sarif dist      # stylish (default), json, sarif
+deadhead --fail-on=harmful dist   # exit 1 only on harmful findings
+deadhead --fix dist               # rewrite files, then report what is left</code></pre>
+    <p>
+      Exit codes are the CI contract: <strong>0</strong> nothing at or above the{" "}
+      <code>--fail-on</code> threshold, <strong>1</strong> threshold met,{" "}
+      <strong>2</strong> usage, config or I/O error. A broken invocation never
+      looks like a clean run.
+    </p>
+
+    <h2>Fixes are text edits, never re-serialised markup</h2>
+    <p>
+      <code>--fix</code> splices byte ranges out of the original file. It never
+      parses your document and prints it back, because that rewrites quote
+      style, attribute order, whitespace and character references across the
+      whole file — turning a one-line fix into a thousand-line diff.
+    </p>
+    <p>
+      Two things are never fixed automatically: a rule declaring{" "}
+      <code>fix: &lbrace; op: "none" &rbrace;</code>, and any rule whose
+      detectability is{" "}
+      <code>partial</code>. If the rule is not certain, it does not get to edit
+      your file.
+    </p>
+
+    <h2>Suppressing a finding</h2>
+    <pre><code>&lt;!-- deadhead-disable-next-line meta/http-equiv-x-ua-compatible --&gt;
+&lt;!-- deadhead-disable link/shortcut-icon --&gt;
+&lt;!-- deadhead-enable --&gt;</code></pre>
+    <p>
+      A bare <code>deadhead-disable</code> with no rule id suppresses everything
+      until the matching enable. Contents of <code>&lt;pre&gt;</code>,{" "}
+      <code>&lt;code&gt;</code>,{" "}
+      <code>&lt;textarea&gt;</code>,{" "}
+      <code>&lt;samp&gt;</code> and{" "}
+      <code>&lt;kbd&gt;</code> are skipped as content rather than markup.
+    </p>
+
+    <h2>Bookmarklet</h2>
+    <p>
+      A single IIFE with the rules inlined and no <code>fetch</code>, so a
+      strict CSP cannot block it. It reads rendered output, which is the only
+      ground truth when your head tags are assembled by a framework. Build it
+      from the repository with{" "}
+      <code>pnpm build:bookmarklet</code>.
+    </p>
+
+    <h2>ESLint</h2>
+    <p>
+      <code>eslint-plugin-deadhead</code> reports the same findings through{" "}
+      <code>@html-eslint/parser</code>, with autofix. It is a convenience rather
+      than the foundation: if your head tags live in JSX, Vue or Svelte, an HTML
+      parser will not see them, and the bookmarklet will.
+    </p>
+
+    <p class="source-note">
+      Full flag reference, configuration file and baseline documentation live in
+      the{" "}
+      <a href={REPO}>README</a>.
+    </p>
+  </article>
+</Layout>

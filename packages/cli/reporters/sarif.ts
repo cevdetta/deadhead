@@ -8,7 +8,7 @@
  * stylish reporter prints.
  */
 
-import type { Severity } from "../../core/vocabulary.ts";
+import { SITE_URL, type Severity } from "../../core/vocabulary.ts";
 import type { Reporter } from "./index.ts";
 
 /** SARIF has three useful levels; the severity ladder maps onto them directly. */
@@ -75,7 +75,7 @@ export const sarif: Reporter = (results) => {
           tool: {
             driver: {
               name: "deadhead",
-              informationUri: "https://deadhead.dev",
+              informationUri: SITE_URL,
               rules: [...rules.values()],
             },
           },

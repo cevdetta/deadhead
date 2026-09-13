@@ -1,0 +1,101 @@
+---
+import { getCollection } from "astro:content";
+import Layout, { REPO } from "../layouts/Layout.astro";
+import RuleList from "../components/RuleList.astro";
+import { severityOrder } from "../vocabulary.ts";
+
+const rules = (await getCollection("rules")).sort(
+  (a, b) =>
+    severityOrder[a.data.severity] - severityOrder[b.data.severity] ||
+    a.data.ruleId.localeCompare(b.data.ruleId),
+);
+
+const sample = `$ npx deadhead dist
+
+dist/index.html
+  5:5  unnecessary  meta/http-equiv-x-ua-compatible
+       X-UA-Compatible only ever controlled Internet Explorer document modes,
+       and no shipping browser reads it.
+       → Delete it. Internet Explorer and legacy Edge modes no longer exist.
+       https://deadhead.cevdet.ch/rules/meta/http-equiv-x-ua-compatible
+
+✖ 1 finding (1 unnecessary)`;
+---
+
+<Layout
+  title="deadhead"
+  description="A documentation-driven linter for HTML <head>. Every finding links to a researched explanation with sources."
+>
+  <article class="shell flow">
+    <header class="flow">
+      <h1>Deadheading is cutting the spent growth off a plant.</h1>
+      <p class="lede">
+        This does that to your <code>&lt;head&gt;</code>. It finds markup that
+        is harmful, deprecated or merely dead weight — and for every finding,
+        links to a written explanation of why, with sources.
+      </p>
+    </header>
+
+    <pre><samp>{sample}</samp></pre>
+
+    <h2>Why another linter</h2>
+    <p>
+      Most tools tell you <em>that</em> something is wrong. The interesting
+      question with head markup is <em>why</em>, and whether the advice you read
+      in 2014 still holds. Every rule here is a markdown document carrying at
+      least two independent sources, and the linter is generated from those
+      documents. A rule that cannot be explained does not ship.
+    </p>
+    <p>
+      Severity says what the finding costs you, not how loudly the tool wants to
+      say it:{" "}
+      <strong>harmful</strong> breaks something for users,{" "}
+      <strong>deprecated</strong> is formally obsolete but inert,{" "}
+      <strong>unnecessary</strong> works but is dead weight.
+    </p>
+
+    <h2>Three runtimes, one rule set</h2>
+    <ul class="runtimes">
+      <li>
+        <h3>CLI</h3>
+        <p>
+          Walks files, directories and globs. Stylish, JSON and SARIF output, so
+          CI annotates the diff. Exit codes are the contract.
+        </p>
+      </li>
+      <li>
+        <h3>Bookmarklet</h3>
+        <p>
+          One IIFE with the rules inlined and no <code>fetch</code>, so a strict
+          CSP cannot block it. It inspects rendered output, which is ground
+          truth.
+        </p>
+      </li>
+      <li>
+        <h3>ESLint plugin</h3>
+        <p>
+          The same findings inside <code>eslint</code>, with autofix, because a
+          fix is a text edit over a byte range either way.
+        </p>
+      </li>
+    </ul>
+    <p>
+      A conformance suite runs every fixture through all three and asserts
+      identical findings. That, rather than shared code, is what stops them
+      drifting.
+    </p>
+
+    <h2>The rules</h2>
+    <p>
+      {rules.length} so far, worst first.{" "}
+      <a href="/rules">Browse them by namespace</a>.
+    </p>
+    <RuleList rules={rules} />
+
+    <h2>Get it</h2>
+    <p>
+      <a href="/install">Installation and usage</a>, or read the{" "}
+      <a href={REPO}>source on GitHub</a>.
+    </p>
+  </article>
+</Layout>

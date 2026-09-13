@@ -7,7 +7,7 @@
  * a checked-in generated file is a second source of truth waiting to drift.
  *
  * Prose is deliberately *not* emitted. Every finding links to
- * https://deadhead.dev/rules/<ruleId> for the explanation, and the bookmarklet
+ * https://deadhead.cevdet.ch/rules/<ruleId> for the explanation, and the bookmarklet
  * inlines this file into a single IIFE, so anything in here is bytes in a
  * URL bar.
  */
