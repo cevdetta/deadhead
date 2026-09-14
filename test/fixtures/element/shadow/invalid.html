@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Card built on a v0 shadow insertion point</title>
+  </head>
+  <body>
+    <template id="card-template">
+      <div class="card"><slot name="heading">Untitled</slot></div>
+      <shadow><p>Legacy nested tree.</p></shadow>
+    </template>
+    <p>Every card on this page renders through the template above.</p>
+  </body>
+</html>

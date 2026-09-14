@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="A page of cards built on v1 slots.">
+    <title>Card built on a v1 slot</title>
+  </head>
+  <body>
+    <p class="shadow">Every card on this page renders through the template below.</p>
+    <template id="card-template">
+      <div class="card"><slot name="heading">Untitled</slot></div>
+    </template>
+  </body>
+</html>
