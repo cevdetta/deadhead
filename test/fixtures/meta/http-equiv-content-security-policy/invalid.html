@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Policy in markup</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; frame-ancestors 'none'">
+  </head>
+  <body>
+    <p>The frame-ancestors directive above is stripped before enforcement, so this page stays frameable.</p>
+  </body>
+</html>
