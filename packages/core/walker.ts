@@ -21,8 +21,12 @@ export type Region = "head" | "body" | null;
  * and `noscript` with scripting enabled), so a spec parser never builds
  * elements inside them. parse5 follows the spec; linkedom and
  * `@html-eslint/parser` do not, and without this they report findings inside
- * that parse5 cannot see. `plaintext` is left out: it has no end tag, so
- * skipping its descendants cannot make the adapters agree about what follows.
+ * that parse5 cannot see.
+ *
+ * `plaintext` has no end tag: a spec parser turns everything after it into
+ * text. linkedom and `@html-eslint/parser` leave it open instead, so what
+ * follows becomes its descendants, and skipping them makes all three agree.
+ * Only an explicit `</plaintext>`, which a browser ignores, still splits them.
  */
 const OPAQUE = new Set([
   "pre",
@@ -34,6 +38,7 @@ const OPAQUE = new Set([
   "noembed",
   "noframes",
   "noscript",
+  "plaintext",
   "title",
   "xmp",
 ]);
