@@ -12,11 +12,12 @@
 
 import { type DefaultTreeAdapterTypes, parse } from "parse5";
 import { type Compound, matches, parseSelector } from "../core/selector.ts";
-import type { DocumentPort, ElementPort, Parsed, Range } from "../core/types.ts";
+import type { DoctypePort, DocumentPort, ElementPort, Parsed, Range } from "../core/types.ts";
 
 type P5Element = DefaultTreeAdapterTypes.Element;
 type P5Node = DefaultTreeAdapterTypes.ChildNode;
 type P5Parent = DefaultTreeAdapterTypes.ParentNode;
+type P5Doctype = DefaultTreeAdapterTypes.DocumentType;
 
 const isElement = (node: P5Node | P5Parent): node is P5Element =>
   "tagName" in node && typeof node.tagName === "string";
@@ -109,6 +110,30 @@ function makePorts(parents: WeakMap<P5Element, P5Element>): (node: P5Element) =>
 }
 
 /**
+ * parse5 already applies the tree builder's rules: it keeps only a doctype
+ * that arrives before any text or element, lowercases its name, and reports
+ * missing identifiers as empty strings. The port only has to carry that over.
+ */
+function doctypeOf(document: DefaultTreeAdapterTypes.Document): DoctypePort | null {
+  const node = document.childNodes.find((child): child is P5Doctype => child.nodeName === "#documentType");
+  if (node === undefined) return null;
+  return {
+    tag: "!doctype",
+    name: node.name ?? "",
+    publicId: node.publicId ?? "",
+    systemId: node.systemId ?? "",
+    range: (): Range | null => {
+      const loc = node.sourceCodeLocation;
+      return loc ? [loc.startOffset, loc.endOffset] : null;
+    },
+    loc: () => {
+      const loc = node.sourceCodeLocation;
+      return loc ? { line: loc.startLine, col: loc.startCol } : null;
+    },
+  };
+}
+
+/**
  * Parse HTML into what the engine consumes.
  *
  * `querySelector`/`querySelectorAll` are implemented with core's own matcher
@@ -146,7 +171,10 @@ export function parseHtml(source: string): Parsed {
     return parsed.ast;
   };
 
+  const doctype = doctypeOf(document);
+
   const doc: DocumentPort = {
+    doctype: () => doctype,
     querySelectorAll(selector) {
       const ast = astFor(selector);
       const found: ElementPort[] = [];

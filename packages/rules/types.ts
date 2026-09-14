@@ -9,6 +9,7 @@
 
 export type {
   CheckFn,
+  DoctypePort,
   DocumentPort,
   ElementPort,
   Finding,

@@ -11,7 +11,7 @@
  * one of those degrades to "unavailable" rather than to something wrong.
  */
 
-import type { DocumentPort, ElementPort, Parsed } from "../core/types.ts";
+import type { DoctypePort, DocumentPort, ElementPort, Parsed } from "../core/types.ts";
 
 const isTemplate = (element: Element): element is HTMLTemplateElement =>
   element.tagName.toLowerCase() === "template" && "content" in element;
@@ -66,6 +66,25 @@ function makePorts(): (element: Element) => ElementPort {
 }
 
 /**
+ * `document.doctype` in a browser is already the doctype the tree builder
+ * honoured. The name is lowercased anyway because linkedom, the DOM the tests
+ * run against, keeps the author's case where a browser would not.
+ */
+function doctypeOf(document: Document): DoctypePort | null {
+  const node = document.doctype;
+  if (node === null) return null;
+  return {
+    tag: "!doctype",
+    name: node.name.replace(/[A-Z]+/g, (upper) => upper.toLowerCase()),
+    publicId: node.publicId,
+    systemId: node.systemId,
+    // No source text in a live document.
+    range: () => null,
+    loc: () => null,
+  };
+}
+
+/**
  * Wrap a live document.
  *
  * `querySelector`/`querySelectorAll` hand the selector straight to the
@@ -78,6 +97,7 @@ export function fromDocument(document: Document): Parsed {
   const root = document.documentElement;
 
   const doc: DocumentPort = {
+    doctype: () => doctypeOf(document),
     querySelector: (selector) => {
       const found = document.querySelector(selector);
       return found === null ? null : portFor(found);
