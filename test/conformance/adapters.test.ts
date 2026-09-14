@@ -272,6 +272,19 @@ test("no adapter lints inside elements the HTML parser treats as text", () => {
   }
 });
 
+test("no adapter lints what follows a <plaintext>, which never ends", () => {
+  // A spec parser reads everything after <plaintext> as text, end tags
+  // included. The other parsers keep it open and nest the rest inside it,
+  // markup that looks like elements and the closing body and html tags alike.
+  const html =
+    '<!doctype html><html lang="en"><head><meta charset="utf-8"><title>t</title><meta name="viewport" content="width=device-width"></head>' +
+    '<body><plaintext>raw <font color="red">x</font>\n<p>after</p><center>y</center></body></html>';
+  for (const adapter of ADAPTERS) {
+    const after = run(rules, adapter.parse(html)).filter((f) => f.node.tag === "font" || f.node.tag === "center");
+    assert.deepEqual(after, [], `${adapter.name} linted content after <plaintext>`);
+  }
+});
+
 test("every adapter steps into a <template>", () => {
   // parse5 and the DOM park template markup in a `content` fragment;
   // html-eslint keeps it inline. All three must still see the script.
