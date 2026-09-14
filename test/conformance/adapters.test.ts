@@ -183,6 +183,21 @@ test("snippets differ by construction, but name the same element", () => {
   assert.match(rebuilt.node.snippet, /http-equiv="X-UA-Compatible"/);
 });
 
+test("no adapter lints inside elements the HTML parser treats as text", () => {
+  // parse5 turns the contents of these into text, as a browser does; linkedom
+  // and html-eslint build elements. The walker skips their descendants so all
+  // three agree rather than two reporting a <font> the spec parser never sees.
+  for (const tag of ["iframe", "noembed", "noframes", "noscript", "title", "xmp"]) {
+    const html =
+      '<!doctype html><html lang="en"><head><meta charset="utf-8"><title>t</title><meta name="viewport" content="width=device-width"></head>' +
+      `<body><${tag}><font color="red">x</font></${tag}></body></html>`;
+    for (const adapter of ADAPTERS) {
+      const inside = run(rules, adapter.parse(html)).filter((f) => f.node.tag === "font");
+      assert.deepEqual(inside, [], `${adapter.name} linted inside <${tag}>`);
+    }
+  }
+});
+
 test("every adapter steps into a <template>", () => {
   // parse5 and the DOM park template markup in a `content` fragment;
   // html-eslint keeps it inline. All three must still see the script.

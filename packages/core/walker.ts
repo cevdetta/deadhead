@@ -16,8 +16,27 @@ export type Region = "head" | "body" | null;
  * bad `<meta>` tag is the whole point of a rule's documentation, and flagging
  * it would make the tool unusable on its own site. The container itself is
  * still visited; only its descendants are skipped.
+ *
+ * The second group is parsed as text by the HTML Standard (raw text or RCDATA,
+ * and `noscript` with scripting enabled), so a spec parser never builds
+ * elements inside them. parse5 follows the spec; linkedom and
+ * `@html-eslint/parser` do not, and without this they report findings inside
+ * that parse5 cannot see. `plaintext` is left out: it has no end tag, so
+ * skipping its descendants cannot make the adapters agree about what follows.
  */
-const OPAQUE = new Set(["pre", "code", "textarea", "samp", "kbd"]);
+const OPAQUE = new Set([
+  "pre",
+  "code",
+  "textarea",
+  "samp",
+  "kbd",
+  "iframe",
+  "noembed",
+  "noframes",
+  "noscript",
+  "title",
+  "xmp",
+]);
 
 export type WalkOptions = {
   /** Skip descending into `<body>` when no rule is scoped to reach it. */
