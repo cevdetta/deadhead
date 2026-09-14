@@ -26,6 +26,7 @@ export {
 export { walk, type Region, type WalkOptions } from "./walker.ts";
 export type {
   CheckFn,
+  DoctypePort,
   DocumentPort,
   ElementPort,
   Finding,

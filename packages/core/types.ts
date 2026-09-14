@@ -43,10 +43,36 @@ export type ElementPort = {
   loc(): Loc | null;
 };
 
+/**
+ * The document's DOCTYPE, as the HTML tokenizer reads it.
+ *
+ * Only a doctype the tree builder would honour counts: one preceded by
+ * nothing but comments and whitespace. A doctype after text or an element is a
+ * parse error that a browser ignores, so the port reports none. (linkedom
+ * hoists every doctype to the front, so the DOM adapter can only honour that
+ * in a real browser, which applies the rule itself.)
+ */
+export type DoctypePort = {
+  /** What a finding names it by. Never a real tag name. */
+  readonly tag: "!doctype";
+  /** ASCII-lowercased, as the tokenizer produces it. Empty when there is no name. */
+  readonly name: string;
+  /** Empty when absent, as `DocumentType.publicId` reports it. */
+  readonly publicId: string;
+  /** Empty when absent, as `DocumentType.systemId` reports it. */
+  readonly systemId: string;
+  /** `null` in the DOM adapter, where there is no source text. */
+  range(): Range | null;
+  /** 1-based. `null` in the DOM adapter. */
+  loc(): Loc | null;
+};
+
 /** What a `kind: "document"` rule sees. Selectors use the same subset. */
 export type DocumentPort = {
   querySelector(selector: string): ElementPort | null;
   querySelectorAll(selector: string): ElementPort[];
+  /** The doctype the parser honoured, or `null` when there is none. */
+  doctype(): DoctypePort | null;
 };
 
 export type Finding = {
@@ -73,8 +99,12 @@ export type Finding = {
 
 export type RuleContext = {
   readonly ruleId: string;
-  /** Build a finding for this element, filling in everything from frontmatter. */
-  report(element: ElementPort, extra?: { detail?: string }): Finding;
+  /**
+   * Build a finding for this element or doctype, filling in everything from
+   * frontmatter. A doctype finding never carries a fix: there is no op that
+   * edits one without changing how the page renders.
+   */
+  report(target: ElementPort | DoctypePort, extra?: { detail?: string }): Finding;
 };
 
 /** `kind: "element"` with `match: "logic"`: the selector pre-filters, this decides. */

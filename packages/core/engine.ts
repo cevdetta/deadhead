@@ -14,6 +14,7 @@ import { NO_SUPPRESSIONS, type Suppressions } from "./suppressions.ts";
 import { walk } from "./walker.ts";
 import type {
   CheckFn,
+  DoctypePort,
   ElementPort,
   Finding,
   MatchFn,
@@ -40,16 +41,31 @@ export type RunOptions = {
 
 const MAX_SNIPPET = 90;
 
+const isDoctype = (target: ElementPort | DoctypePort): target is DoctypePort => "publicId" in target;
+
+/** A doctype rebuilt from its parts, for an adapter with no source text to slice. */
+function doctypeText(doctype: DoctypePort): string {
+  const name = doctype.name === "" ? "" : ` ${doctype.name}`;
+  if (doctype.publicId !== "") {
+    const system = doctype.systemId === "" ? "" : ` "${doctype.systemId}"`;
+    return `<!DOCTYPE${name} PUBLIC "${doctype.publicId}"${system}>`;
+  }
+  if (doctype.systemId !== "") return `<!DOCTYPE${name} SYSTEM "${doctype.systemId}">`;
+  return `<!DOCTYPE${name}>`;
+}
+
 /**
- * The source text of the element, truncated. Falls back to rebuilding an open
- * tag from the port when there is no source — the DOM adapter — so a finding
- * always names something the reader can recognise.
+ * The source text of the element or doctype, truncated. Falls back to
+ * rebuilding it from the port when there is no source — the DOM adapter — so a
+ * finding always names something the reader can recognise.
  */
-function snippet(element: ElementPort, source: string | null): string {
+function snippet(element: ElementPort | DoctypePort, source: string | null): string {
   const range = element.range();
   let text: string;
   if (source !== null && range !== null) {
     text = source.slice(range[0], range[1]);
+  } else if (isDoctype(element)) {
+    text = doctypeText(element);
   } else {
     const attrs = element
       .attrNames()
@@ -65,7 +81,7 @@ function contextFor(rule: Rule, source: string | null): RuleContext {
   const { meta } = rule;
   return {
     ruleId: meta.ruleId,
-    report(element, extra) {
+    report(target, extra) {
       const finding: Finding = {
         ruleId: meta.ruleId,
         severity: meta.severity,
@@ -75,10 +91,11 @@ function contextFor(rule: Rule, source: string | null): RuleContext {
         message: meta.description,
         replacement: meta.replacement,
         url: ruleUrl(meta.ruleId),
-        loc: element.loc(),
-        range: element.range(),
-        node: { tag: element.tag, snippet: snippet(element, source) },
-        fix: computeFix(meta, element, source),
+        loc: target.loc(),
+        range: target.range(),
+        node: { tag: target.tag, snippet: snippet(target, source) },
+        // No fix op edits a doctype without changing the rendering mode.
+        fix: isDoctype(target) ? null : computeFix(meta, target, source),
       };
       // exactOptionalPropertyTypes: assign `detail` only when there is one.
       if (extra?.detail !== undefined) finding.detail = extra.detail;

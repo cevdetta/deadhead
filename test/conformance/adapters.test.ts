@@ -183,6 +183,80 @@ test("snippets differ by construction, but name the same element", () => {
   assert.match(rebuilt.node.snippet, /http-equiv="X-UA-Compatible"/);
 });
 
+/** A doctype as the port reports it, with or without its position. */
+const doctypeOf = (adapter: (typeof ADAPTERS)[number], html: string, withPosition: boolean) => {
+  const doctype = adapter.parse(html).doc.doctype();
+  if (doctype === null) return null;
+  const facts = { tag: doctype.tag, name: doctype.name, publicId: doctype.publicId, systemId: doctype.systemId };
+  return withPosition ? { ...facts, range: doctype.range(), loc: doctype.loc() } : facts;
+};
+
+const PAGE = '<html lang="en"><head><title>t</title></head><body></body></html>';
+
+test("every adapter reads the doctype the same way", () => {
+  const cases: Record<string, string> = {
+    standard: `<!doctype html>\n${PAGE}`,
+    uppercase: `<!DOCTYPE HTML>\n${PAGE}`,
+    xhtml: `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">\n${PAGE}`,
+    "public id only": `<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">\n${PAGE}`,
+    "system id only": `<!DOCTYPE html SYSTEM "about:legacy-compat">\n${PAGE}`,
+    "after a comment and whitespace": `<!-- build 42 -->\n\n  <!doctype html>\n${PAGE}`,
+    missing: PAGE,
+  };
+  for (const [name, html] of Object.entries(cases)) {
+    const expected = doctypeOf(ADAPTERS[0], html, false);
+    for (const adapter of ADAPTERS) {
+      assert.deepEqual(doctypeOf(adapter, html, false), expected, `${adapter.name}: ${name}`);
+    }
+    // Only the source-backed adapters can say where it is, and they must agree.
+    assert.deepEqual(doctypeOf(ADAPTERS[1], html, true), doctypeOf(ADAPTERS[0], html, true), `positions: ${name}`);
+    const dom = ADAPTERS[2].parse(html).doc.doctype();
+    if (dom !== null) assert.deepEqual([dom.range(), dom.loc()], [null, null], `dom has no positions: ${name}`);
+  }
+  assert.deepEqual(doctypeOf(ADAPTERS[0], cases["uppercase"] ?? "", false), {
+    tag: "!doctype",
+    name: "html",
+    publicId: "",
+    systemId: "",
+  });
+});
+
+test("source-backed adapters ignore a doctype the tree builder would ignore", () => {
+  // The spec only honours a doctype before any text or element. linkedom
+  // hoists every doctype to the front regardless, so the DOM adapter is left
+  // out here; a real browser applies the rule before the port ever sees it.
+  const cases: Record<string, string> = {
+    "after text": `x<!doctype html>\n${PAGE}`,
+    "inside html": '<html lang="en"><!doctype html><head><title>t</title></head><body></body></html>',
+    duplicated: `<!doctype html><!DOCTYPE html PUBLIC "a" "b">\n${PAGE}`,
+  };
+  for (const [name, html] of Object.entries(cases)) {
+    assert.deepEqual(doctypeOf(ADAPTERS[1], html, true), doctypeOf(ADAPTERS[0], html, true), name);
+  }
+  assert.equal(ADAPTERS[0].parse(cases["after text"] ?? "").doc.doctype(), null);
+  assert.equal(doctypeOf(ADAPTERS[0], cases["duplicated"] ?? "", false)?.publicId, "");
+});
+
+test("a document rule can report on the doctype in every adapter", () => {
+  const base = rules[0];
+  assert.ok(base !== undefined);
+  const probe: Rule = {
+    meta: { ...base.meta, ruleId: "document/probe", kind: "document", selector: null, match: null },
+    check: (doc, ctx) => {
+      const doctype = doc.doctype();
+      return doctype === null ? [] : [ctx.report(doctype, { detail: doctype.publicId })];
+    },
+  };
+  const html = `<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">\n${PAGE}`;
+  const findings = ADAPTERS.map((adapter) => run([probe], adapter.parse(html)));
+  for (const [i, adapter] of ADAPTERS.entries()) {
+    assert.deepEqual(findings[i]?.map(comparable), findings[0]?.map(comparable), adapter.name);
+    assert.equal(findings[i]?.[0]?.node.tag, "!doctype", adapter.name);
+    assert.equal(findings[i]?.[0]?.fix, null, adapter.name);
+    assert.equal(findings[i]?.[0]?.detail, "-//W3C//DTD HTML 4.01//EN", adapter.name);
+  }
+});
+
 test("no adapter lints inside elements the HTML parser treats as text", () => {
   // parse5 turns the contents of these into text, as a browser does; linkedom
   // and html-eslint build elements. The walker skips their descendants so all

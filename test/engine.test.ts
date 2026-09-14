@@ -96,6 +96,28 @@ test("a document rule runs once and can report anywhere", () => {
   assert.equal(findings[0]?.node.tag, "title");
 });
 
+test("a doctype finding points at the doctype and never carries a fix", () => {
+  const rule: Rule = {
+    meta: meta({ ruleId: "document/x", kind: "document", fix: { op: "remove-element", attr: null, token: null } }),
+    check: (d, ctx) => {
+      const doctype = d.doctype();
+      return doctype === null ? [] : [ctx.report(doctype)];
+    },
+  };
+  const [finding, ...rest] = lint(`<!-- a comment -->\n<!DOCTYPE html SYSTEM "about:legacy-compat">\n<html></html>`, [rule]);
+  assert.equal(rest.length, 0);
+  assert.ok(finding);
+  assert.equal(finding.node.tag, "!doctype");
+  assert.equal(finding.node.snippet, '<!DOCTYPE html SYSTEM "about:legacy-compat">');
+  assert.deepEqual(finding.loc, { line: 2, col: 1 });
+  assert.deepEqual(finding.range, [19, 63]);
+  assert.equal(finding.fix, null, "even a remove-element rule gets no fix on a doctype");
+});
+
+test("a document with no doctype reports none", () => {
+  assert.equal(parseHtml("<html><head></head><body></body></html>").doc.doctype(), null);
+});
+
 test("detectability: partial marks findings possible", () => {
   const rules: Rule[] = [
     { meta: meta({ ruleId: "meta/sure", selector: "meta[name]" }) },

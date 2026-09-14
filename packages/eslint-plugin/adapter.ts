@@ -1,7 +1,7 @@
 /**
  * `@html-eslint/parser` AST → element port.
  *
- * Three things about this AST differ from the other two adapters, and each one
+ * Four things about this AST differ from the other two adapters, and each one
  * would be a silent drift bug if missed. The conformance suite is what turns
  * them from "silently reports nothing" into a failing test.
  *
@@ -12,6 +12,9 @@
  *   `HTTP-EQUIV` arrives verbatim. The port promises lowercase.
  * - `loc.column` is 0-based, per ESLint convention. The port promises 1-based,
  *   matching parse5.
+ * - A `Doctype` node is raw tokens (`html`, `PUBLIC`, the identifiers), kept in
+ *   the author's case and wherever it appeared. The tree builder's rules for
+ *   which doctype counts have to be applied here.
  *
  * The AST types are described structurally here rather than imported from
  * `@html-eslint/types`, which is a transitive dependency of the parser and not
@@ -19,7 +22,7 @@
  */
 
 import { type Compound, matches, parseSelector } from "../core/selector.ts";
-import type { DocumentPort, ElementPort, Parsed, Range } from "../core/types.ts";
+import type { DoctypePort, DocumentPort, ElementPort, Parsed, Range } from "../core/types.ts";
 
 type Node = {
   type: string;
@@ -108,6 +111,50 @@ function makePorts(parents: WeakMap<Node, Node>): (node: Node) => ElementPort {
   return portFor;
 }
 
+/** HTML's ASCII whitespace: what the "initial" insertion mode skips. */
+const ASCII_WHITESPACE = /^[\t\n\f\r ]*$/;
+
+/**
+ * The doctype the tree builder would honour: the first `Doctype` at the top of
+ * the document with nothing but comments and whitespace before it. After any
+ * text or element, a browser has already left the "initial" insertion mode and
+ * ignores the doctype, so the port reports none, exactly as parse5 does.
+ */
+function doctypeOf(program: Node): DoctypePort | null {
+  const document = childrenOf(program).find((child) => child.type === "Document") ?? program;
+  let node: Node | undefined;
+  for (const child of childrenOf(document)) {
+    if (child.type === "Doctype") {
+      node = child;
+      break;
+    }
+    if (child.type === "Comment") continue;
+    if (child.type === "Text" && typeof child.value === "string" && ASCII_WHITESPACE.test(child.value)) continue;
+    return null;
+  }
+  if (node === undefined) return null;
+
+  // `<!DOCTYPE html PUBLIC "pub" "sys">` arrives as the tokens
+  // `html`, `PUBLIC`, `pub`, `sys`, with the quotes already stripped.
+  const tokens = ((node as { attributes?: { value?: { value?: string } }[] }).attributes ?? []).map(
+    (token) => token.value?.value ?? "",
+  );
+  const [name = "", keyword = "", first = "", second = ""] = tokens;
+  const kind = keyword.toLowerCase();
+  const range = node.range;
+  const loc = node.loc;
+
+  return {
+    tag: "!doctype",
+    name: name.replace(/[A-Z]+/g, (upper) => upper.toLowerCase()),
+    publicId: kind === "public" ? first : "",
+    systemId: kind === "public" ? second : kind === "system" ? first : "",
+    range: (): Range | null => (range ? [range[0], range[1]] : null),
+    // ESLint columns are 0-based; the port and parse5 are 1-based.
+    loc: () => (loc ? { line: loc.start.line, col: loc.start.column + 1 } : null),
+  };
+}
+
 /**
  * Wrap a parsed program.
  *
@@ -144,7 +191,10 @@ export function fromProgram(program: unknown, source: string): Parsed {
     return parsed.ast;
   };
 
+  const doctype = doctypeOf(program as Node);
+
   const doc: DocumentPort = {
+    doctype: () => doctype,
     querySelectorAll(selector) {
       const ast = astFor(selector);
       return elements.map(portFor).filter((port) => matches(port, ast));
