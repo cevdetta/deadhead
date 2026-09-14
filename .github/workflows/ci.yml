@@ -17,17 +17,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          # Nothing here pushes, so skip the credential helper entirely.
+          persist-credentials: false
 
-      # pnpm must be set up BEFORE setup-node, or `cache: pnpm` has no store
-      # path to cache. Version is read from "packageManager" in package.json.
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v7
+      # One step installs the pinned pnpm (read from "packageManager") as a
+      # native binary — no npm self-install, no v11-then-switch-to-v12 — plus
+      # the Node floor. This replaces pnpm/action-setup (npm-based: ~12s of
+      # self-installer + version switch, and it left a stale v11 store path
+      # behind) followed by setup-node (~5s, mostly a cache lookup that
+      # missed anyway). The install stays an explicit step below: the
+      # action's auto-install is unpinned (`pnpm install`), and only
+      # --frozen-lockfile fails on a missing or out-of-date lockfile.
+      # No store cache: a cold install is ~2.5s for 368 packages, cheaper
+      # than restoring + uploading a ~94MB cache on every run.
+      - uses: pnpm/setup@v2
         with:
           # Single version: 24 is the floor declared in engines. If it passes
           # on the floor it passes above; a second runner doubles minutes
           # for no signal on this codebase.
-          node-version: 24
-          cache: pnpm
+          runtime: node@24
+          install: false
 
       - run: pnpm install --frozen-lockfile
 
@@ -57,9 +67,11 @@ jobs:
 
       # Folded into this job instead of a second runner: one checkout, one
       # install. A linter about shipping things you do not need should hold
-      # itself to it. Pinned rather than @latest: `dlx` executes whatever was
-      # published minutes ago, and a project that rejected a dependency over
-      # an RCE should not hand CI an unpinned one.
+      # itself to it. Pinned exact in devDependencies rather than `dlx`
+      # @latest: `dlx` executes whatever was published minutes ago, and a
+      # project that rejected a dependency over an RCE should not hand CI an
+      # unpinned one. Running from the lockfile also skips the per-run `dlx`
+      # download of the tool itself.
       #
       # Gated on errors, not warnings. Every current warning is a duplicate
       # transitive version inside a dev dependency's own tree — parse5,

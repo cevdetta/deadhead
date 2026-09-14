@@ -16,7 +16,7 @@
     "test": "node --test",
     "test:conformance": "node --test test/conformance/",
     "check": "node packages/cli/bin/deadhead.ts",
-    "check:self": "node packages/cli/bin/deadhead.ts --fail-on=deprecated \"test/fixtures/*/*/valid.html\"",
+    "check:self": "node packages/cli/bin/deadhead.ts \"test/fixtures/*/*/valid.html\"",
     "check:site": "pnpm site:build && node packages/cli/bin/deadhead.ts site/dist",
     "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p packages/browser/tsconfig.json && tsc --noEmit -p test/conformance/tsconfig.json",
     "validate:rules": "node scripts/validate-rules.ts",
@@ -24,10 +24,11 @@
     "site:build": "pnpm --filter @deadhead/site build",
     "site:preview": "pnpm --filter @deadhead/site preview",
     "site:check": "pnpm --filter @deadhead/site check",
-    "lint:deps": "pnpm dlx @e18e/cli@0.7.0 analyze --log-level error --report-level warn",
+    "lint:deps": "e18e-cli analyze --log-level error --report-level warn",
     "prepublishOnly": "publint"
   },
   "devDependencies": {
+    "@e18e/cli": "0.7.0",
     "@html-eslint/parser": "^0.66.0",
     "@types/node": "^24.0.0",
     "eslint": "^10.10.0",
