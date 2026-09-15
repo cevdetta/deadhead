@@ -83,7 +83,7 @@ export async function collectFiles(paths: string[]): Promise<string[]> {
   return [...files].sort((a, b) => a.split(sep).join("/").localeCompare(b.split(sep).join("/")));
 }
 
-export type LintOptions = { skipTemplates?: boolean; fix?: boolean };
+export type LintOptions = { skipTemplates?: boolean; fix?: boolean; headOnly?: boolean };
 
 /**
  * Applying one fix can expose another — removing an element can leave its
@@ -107,7 +107,7 @@ export async function lintFile(
   rules: Rule[],
   options: LintOptions = {},
 ): Promise<FileResult> {
-  return lintFileCompiled(file, compile(rules), options);
+  return lintFileCompiled(file, compileForRun(rules, options), options);
 }
 
 async function lintFileCompiled(
@@ -163,8 +163,20 @@ export async function lintFiles(
 ): Promise<FileResult[]> {
   // Compile once for the whole run: selectors and buckets do not depend on
   // the file, and --fix re-analyses the same file up to MAX_FIX_PASSES times.
-  const compiled = compile(rules);
+  const compiled = compileForRun(rules, options);
   const results: FileResult[] = [];
   for (const file of files) results.push(await lintFileCompiled(file, compiled, options));
   return results;
 }
+
+/**
+ * Compile for a run, honouring the head-only opt-out. `compile()` skips the
+ * `<body>` walk when no active rule is scoped beyond `<head>`; `--no-head-only`
+ * forces the walk anyway. Findings are unchanged either way — document rules
+ * query the whole tree regardless — it only costs the walk.
+ */
+const compileForRun = (rules: Rule[], options: LintOptions): CompiledRules => {
+  const compiled = compile(rules);
+  if (options.headOnly === false) compiled.visitBody = true;
+  return compiled;
+};
