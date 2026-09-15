@@ -150,7 +150,9 @@ test("ESLint's autofix produces byte-identical output to the CLI's --fix", async
     // The CLI's loop: apply, re-analyse, repeat until nothing changes.
     let viaCli = source;
     for (let pass = 0; pass < 10; pass++) {
-      const fixes = run(rules, parseHtml(viaCli)).flatMap((f) => (f.fix === null ? [] : [f.fix]));
+      const fixes = run(rules, parseHtml(viaCli), { fix: true }).flatMap((f) =>
+        f.fix === null ? [] : [f.fix],
+      );
       if (fixes.length === 0) break;
       const applied = applyFixes(viaCli, fixes);
       if (applied.applied.length === 0 || applied.output === viaCli) break;

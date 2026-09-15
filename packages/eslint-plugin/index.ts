@@ -95,6 +95,9 @@ function toEslintRule(rule: DeadheadRule): EslintRule {
           const source = context.sourceCode.getText();
           const findings = run([rule], fromProgram(node, source), {
             suppressions: parseSuppressions(source),
+            // The fixer below needs finding.fix, and ESLint decides itself
+            // whether --fix applies it — the engine cannot know in advance.
+            fix: true,
           });
 
           for (const finding of findings) {

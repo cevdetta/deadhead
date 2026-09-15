@@ -45,6 +45,12 @@ export type CompiledRules = {
 export type RunOptions = {
   suppressions?: Suppressions;
   skipTemplates?: boolean;
+  /**
+   * Compute fixes. Only the `--fix` path (and the ESLint plugin, which fixes
+   * itself) reads `finding.fix`; everything else skips the `attrRange`
+   * lookups `computeFix` needs. Default off.
+   */
+  fix?: boolean;
 };
 
 const MAX_SNIPPET = 90;
@@ -85,7 +91,7 @@ function snippet(element: ElementPort | DoctypePort, source: string | null): str
   return text.length > MAX_SNIPPET ? `${text.slice(0, MAX_SNIPPET - 1)}…` : text;
 }
 
-function contextFor(rule: Rule, source: string | null): RuleContext {
+function contextFor(rule: Rule, source: string | null, fix: boolean): RuleContext {
   const { meta } = rule;
   return {
     ruleId: meta.ruleId,
@@ -102,8 +108,10 @@ function contextFor(rule: Rule, source: string | null): RuleContext {
         loc: target.loc(),
         range: target.range(),
         node: { tag: target.tag, snippet: snippet(target, source) },
-        // No fix op edits a doctype without changing the rendering mode.
-        fix: isDoctype(target) ? null : computeFix(meta, target, source),
+        // Fixes are computed only when asked: without them there are no
+        // `attrRange` lookups. No fix op edits a doctype without changing
+        // the rendering mode.
+        fix: fix && !isDoctype(target) ? computeFix(meta, target, source) : null,
       };
       // exactOptionalPropertyTypes: assign `detail` only when there is one.
       if (extra?.detail !== undefined) finding.detail = extra.detail;
@@ -170,20 +178,21 @@ export function runCompiled(compiled: CompiledRules, parsed: Parsed, options: Ru
   const { byTag, wildcard, documents, visitBody } = compiled;
   const suppressions = options.suppressions ?? NO_SUPPRESSIONS;
   const findings: Finding[] = [];
+  const fix = options.fix === true;
 
   // Document rules first: they query the whole tree rather than riding the walk.
   for (const rule of documents) {
     if (!rule.check) {
       throw new Error(`${rule.meta.ruleId}: kind "document" requires a check() logic module`);
     }
-    findings.push(...rule.check(parsed.doc, contextFor(rule, parsed.source)));
+    findings.push(...rule.check(parsed.doc, contextFor(rule, parsed.source, fix)));
   }
 
   const contexts = new Map<string, RuleContext>();
   const contextOf = (rule: Rule): RuleContext => {
     let ctx = contexts.get(rule.meta.ruleId);
     if (!ctx) {
-      ctx = contextFor(rule, parsed.source);
+      ctx = contextFor(rule, parsed.source, fix);
       contexts.set(rule.meta.ruleId, ctx);
     }
     return ctx;
