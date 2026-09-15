@@ -1,11 +1,11 @@
 /**
  * Dispatch rules over a parsed document.
  *
- * The shape that matters: rules are bucketed by the leading tag name of their
- * selector once, at load time, and each node is tested against its own bucket
- * plus a small wildcard bucket. Iterating every rule for every node is the
- * obvious implementation and it is quadratic in the thing that grows —
- * the rule set.
+ * The shape that matters: each comma alternative of a selector is bucketed by
+ * its leading tag name once, at load time, and each node is tested against
+ * its own bucket plus a small wildcard bucket. Iterating every rule for every
+ * node is the obvious implementation and it is quadratic in the thing that
+ * grows — the rule set.
  */
 
 import { computeFix } from "./fix.ts";
@@ -34,10 +34,18 @@ export type Rule = {
 
 type Compiled = Rule & { parsed: Compound[] | null };
 
+/**
+ * One rule as a dispatch bucket sees it: the rule plus the slice of its
+ * selector that can match this bucket's tag. `compounds` is `null` for a
+ * selector-less rule, whose logic decides alone, and the whole parse for a
+ * wildcard rule, whose alternatives fit no single bucket.
+ */
+type Dispatched = { rule: Compiled; compounds: Compound[] | null };
+
 /** Selector parses and dispatch buckets, built once and reused per file and per fix pass. */
 export type CompiledRules = {
-  byTag: Map<string, Compiled[]>;
-  wildcard: Compiled[];
+  byTag: Map<string, Dispatched[]>;
+  wildcard: Dispatched[];
   documents: Compiled[];
   visitBody: boolean;
 };
@@ -123,12 +131,17 @@ function contextFor(rule: Rule, source: string | null, fix: boolean): RuleContex
 /**
  * Parse each selector once and sort rules into dispatch buckets.
  *
+ * Bucketing is per comma alternative, not per rule: an alternative can only
+ * match elements with its leading tag, so testing it anywhere else is pure
+ * waste. A rule lands in wildcard only when one of its alternatives has no
+ * leading tag (or it has no selector at all) — then it must see every node.
+ *
  * A selector that fails to parse here is a build failure that escaped
  * `validate-rules`, not user input, so it throws rather than degrading.
  */
 export function compile(rules: Rule[]): CompiledRules {
-  const byTag = new Map<string, Compiled[]>();
-  const wildcard: Compiled[] = [];
+  const byTag = new Map<string, Dispatched[]>();
+  const wildcard: Dispatched[] = [];
   const documents: Compiled[] = [];
   let visitBody = false;
 
@@ -151,13 +164,33 @@ export function compile(rules: Rule[]): CompiledRules {
     }
     if (rule.meta.scope !== "head") visitBody = true;
 
-    const tag = parsed === null ? null : leadingTag(parsed);
-    if (tag === null) {
-      wildcard.push(compiled);
-    } else {
+    // Group this rule's alternatives by leading tag. `leadingTag` on one
+    // alternative is exactly that alternative's tag or null, so dispatch
+    // agrees with the matcher by construction: an element of tag T can only
+    // match alternatives bucketed under T (or tagless ones, via wildcard).
+    const groups = new Map<string, Compound[]>();
+    let tagless = parsed === null;
+    if (parsed !== null) {
+      for (const compound of parsed) {
+        const tag = leadingTag([compound]);
+        if (tag === null) {
+          tagless = true;
+          break;
+        }
+        const group = groups.get(tag);
+        if (group) group.push(compound);
+        else groups.set(tag, [compound]);
+      }
+    }
+    if (tagless) {
+      wildcard.push({ rule: compiled, compounds: parsed });
+      continue;
+    }
+    for (const [tag, compounds] of groups) {
+      const entry: Dispatched = { rule: compiled, compounds };
       const bucket = byTag.get(tag);
-      if (bucket) bucket.push(compiled);
-      else byTag.set(tag, [compiled]);
+      if (bucket) bucket.push(entry);
+      else byTag.set(tag, [entry]);
     }
   }
 
@@ -204,18 +237,18 @@ export function runCompiled(compiled: CompiledRules, parsed: Parsed, options: Ru
   walk(
     parsed.root,
     (element, region) => {
-      const consider = (rule: Compiled): void => {
-        const scope = rule.meta.scope;
+      const consider = (entry: Dispatched): void => {
+        const scope = entry.rule.meta.scope;
         if (scope === "head" && region !== "head") return;
         if (scope === "body" && region !== "body") return;
-        if (rule.parsed !== null && !matches(element, rule.parsed)) return;
+        if (entry.compounds !== null && !matches(element, entry.compounds)) return;
 
-        const ctx = contextOf(rule);
-        if (rule.meta.match === "logic") {
-          if (!rule.match) {
-            throw new Error(`${rule.meta.ruleId}: match "logic" requires a match() logic module`);
+        const ctx = contextOf(entry.rule);
+        if (entry.rule.meta.match === "logic") {
+          if (!entry.rule.match) {
+            throw new Error(`${entry.rule.meta.ruleId}: match "logic" requires a match() logic module`);
           }
-          if (!rule.match(element, ctx)) return;
+          if (!entry.rule.match(element, ctx)) return;
         }
         findings.push(ctx.report(element));
       };
@@ -223,8 +256,8 @@ export function runCompiled(compiled: CompiledRules, parsed: Parsed, options: Ru
       // Two loops rather than a concatenation: this runs once per node, and
       // building a throwaway array per node is the allocation that shows up.
       const bucket = byTag.get(element.tag);
-      if (bucket !== undefined) for (const rule of bucket) consider(rule);
-      for (const rule of wildcard) consider(rule);
+      if (bucket !== undefined) for (const entry of bucket) consider(entry);
+      for (const entry of wildcard) consider(entry);
     },
     walkOptions,
   );
