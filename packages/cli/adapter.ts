@@ -58,8 +58,16 @@ function textOf(node: P5Element): string {
  * template element. Walking the tree once and recording the real element
  * parent keeps `parent()` and `index()` honest across that boundary.
  */
-function makePorts(parents: WeakMap<P5Element, P5Element>): (node: P5Element) => ElementPort {
+function makePorts(
+  parents: WeakMap<P5Element, P5Element>,
+  elementChildren: WeakMap<P5Element, P5Element[]>,
+): (node: P5Element) => ElementPort {
   const cache = new WeakMap<P5Element, ElementPort>();
+  // Ports of each node's element children, materialised on first use. The
+  // engine walk calls children() once per visited element, so sharing one
+  // array per node removes the filter().map() allocation that used to show
+  // up once per node. Shared by reference: rules must not mutate it.
+  const childPorts = new WeakMap<P5Element, ElementPort[]>();
 
   const portFor = (node: P5Element): ElementPort => {
     const cached = cache.get(node);
@@ -86,11 +94,18 @@ function makePorts(parents: WeakMap<P5Element, P5Element>): (node: P5Element) =>
         const parent = parents.get(node);
         return parent === undefined ? null : portFor(parent);
       },
-      children: () => childrenOf(node).filter(isElement).map(portFor),
+      children: () => {
+        let ports = childPorts.get(node);
+        if (ports === undefined) {
+          ports = (elementChildren.get(node) ?? []).map(portFor);
+          childPorts.set(node, ports);
+        }
+        return ports;
+      },
       index: () => {
         const parent = parents.get(node);
         if (parent === undefined) return 0;
-        return childrenOf(parent).filter(isElement).indexOf(node);
+        return (elementChildren.get(parent) ?? []).indexOf(node);
       },
       range: (): Range | null => {
         const loc = node.sourceCodeLocation;
@@ -145,17 +160,29 @@ export function parseHtml(source: string): Parsed {
 
   const elements: P5Element[] = [];
   const parents = new WeakMap<P5Element, P5Element>();
+  // Element children per node, recorded in the same pass. The engine walk
+  // calls children() on every visited element, so deriving them here fuses
+  // the parse-time collect with the walk: no per-node filter().map() later.
+  // Template content children are recorded under the <template> element —
+  // collect recurses into the fragment with the template as parent — which
+  // is what keeps parent() and index() honest across that boundary.
+  const elementChildren = new WeakMap<P5Element, P5Element[]>();
   const collect = (node: P5Node | P5Parent, parent: P5Element | null): void => {
     const element = isElement(node) ? node : null;
     if (element !== null) {
       elements.push(element);
-      if (parent !== null) parents.set(element, parent);
+      if (parent !== null) {
+        parents.set(element, parent);
+        const siblings = elementChildren.get(parent);
+        if (siblings === undefined) elementChildren.set(parent, [element]);
+        else siblings.push(element);
+      }
     }
     for (const child of childrenOf(node)) collect(child, element ?? parent);
   };
   collect(document, null);
 
-  const portFor = makePorts(parents);
+  const portFor = makePorts(parents, elementChildren);
 
   const root = elements.find((node) => node.tagName.toLowerCase() === "html") ?? elements[0];
 
