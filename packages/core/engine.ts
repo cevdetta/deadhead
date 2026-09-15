@@ -34,6 +34,14 @@ export type Rule = {
 
 type Compiled = Rule & { parsed: Compound[] | null };
 
+/** Selector parses and dispatch buckets, built once and reused per file and per fix pass. */
+export type CompiledRules = {
+  byTag: Map<string, Compiled[]>;
+  wildcard: Compiled[];
+  documents: Compiled[];
+  visitBody: boolean;
+};
+
 export type RunOptions = {
   suppressions?: Suppressions;
   skipTemplates?: boolean;
@@ -110,12 +118,7 @@ function contextFor(rule: Rule, source: string | null): RuleContext {
  * A selector that fails to parse here is a build failure that escaped
  * `validate-rules`, not user input, so it throws rather than degrading.
  */
-export function compile(rules: Rule[]): {
-  byTag: Map<string, Compiled[]>;
-  wildcard: Compiled[];
-  documents: Compiled[];
-  visitBody: boolean;
-} {
+export function compile(rules: Rule[]): CompiledRules {
   const byTag = new Map<string, Compiled[]>();
   const wildcard: Compiled[] = [];
   const documents: Compiled[] = [];
@@ -163,8 +166,8 @@ const positionOf = (finding: Finding): [number, number, number] => [
   finding.loc?.col ?? 0,
 ];
 
-export function run(rules: Rule[], parsed: Parsed, options: RunOptions = {}): Finding[] {
-  const { byTag, wildcard, documents, visitBody } = compile(rules);
+export function runCompiled(compiled: CompiledRules, parsed: Parsed, options: RunOptions = {}): Finding[] {
+  const { byTag, wildcard, documents, visitBody } = compiled;
   const suppressions = options.suppressions ?? NO_SUPPRESSIONS;
   const findings: Finding[] = [];
 
@@ -218,6 +221,15 @@ export function run(rules: Rule[], parsed: Parsed, options: RunOptions = {}): Fi
   );
 
   return dedupe(findings, suppressions);
+}
+
+/**
+ * Convenience wrapper that compiles on every call. Prefer `compile()` once
+ * plus `runCompiled()` per file and per fix pass on hot paths (CLI `--fix`
+ * over many files); this stays for single-shot callers (tests, bookmarklet).
+ */
+export function run(rules: Rule[], parsed: Parsed, options: RunOptions = {}): Finding[] {
+  return runCompiled(compile(rules), parsed, options);
 }
 
 function dedupe(findings: Finding[], suppressions: Suppressions): Finding[] {

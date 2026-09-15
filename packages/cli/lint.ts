@@ -6,7 +6,7 @@
 import { glob, readFile, readdir, stat, writeFile } from "node:fs/promises";
 import { extname, join, sep } from "node:path";
 
-import { type Rule, parseSuppressions, run } from "../core/index.ts";
+import { type CompiledRules, type Rule, compile, parseSuppressions, runCompiled } from "../core/index.ts";
 import { applyFixes } from "../core/fix.ts";
 import { parseHtml } from "./adapter.ts";
 import type { FileResult } from "./reporters/index.ts";
@@ -87,8 +87,8 @@ export type LintOptions = { skipTemplates?: boolean; fix?: boolean };
  */
 const MAX_FIX_PASSES = 10;
 
-const analyse = (source: string, rules: Rule[], options: LintOptions) =>
-  run(rules, parseHtml(source), {
+const analyse = (source: string, compiled: CompiledRules, options: LintOptions) =>
+  runCompiled(compiled, parseHtml(source), {
     // Suppression comments are read from the text, not the tree: the port has
     // no comment accessor, and only the source-backed adapters can offer this.
     suppressions: parseSuppressions(source),
@@ -100,13 +100,21 @@ export async function lintFile(
   rules: Rule[],
   options: LintOptions = {},
 ): Promise<FileResult> {
+  return lintFileCompiled(file, compile(rules), options);
+}
+
+async function lintFileCompiled(
+  file: string,
+  compiled: CompiledRules,
+  options: LintOptions,
+): Promise<FileResult> {
   const original = await readFile(file, "utf8");
   let source = original;
   let fixed = 0;
 
   if (options.fix === true) {
     for (let pass = 0; pass < MAX_FIX_PASSES; pass++) {
-      const fixes = analyse(source, rules, options)
+      const fixes = analyse(source, compiled, options)
         .map((finding) => finding.fix)
         .filter((fix) => fix !== null);
       if (fixes.length === 0) break;
@@ -121,7 +129,7 @@ export async function lintFile(
     if (source !== original) await writeFile(file, source, "utf8");
   }
 
-  return { file, findings: analyse(source, rules, options), fixed };
+  return { file, findings: analyse(source, compiled, options), fixed };
 }
 
 export async function lintFiles(
@@ -129,7 +137,10 @@ export async function lintFiles(
   rules: Rule[],
   options: LintOptions = {},
 ): Promise<FileResult[]> {
+  // Compile once for the whole run: selectors and buckets do not depend on
+  // the file, and --fix re-analyses the same file up to MAX_FIX_PASSES times.
+  const compiled = compile(rules);
   const results: FileResult[] = [];
-  for (const file of files) results.push(await lintFile(file, rules, options));
+  for (const file of files) results.push(await lintFileCompiled(file, compiled, options));
   return results;
 }

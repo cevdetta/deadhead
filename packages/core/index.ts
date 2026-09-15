@@ -6,7 +6,7 @@
  * cannot ship a dependency tree.
  */
 
-export { compile, run, type Rule, type RunOptions } from "./engine.ts";
+export { compile, run, runCompiled, type CompiledRules, type Rule, type RunOptions } from "./engine.ts";
 export { applyFixes, computeFix, type ApplyResult, type Fix } from "./fix.ts";
 export {
   NO_SUPPRESSIONS,
