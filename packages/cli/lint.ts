@@ -100,6 +100,9 @@ const analyse = (source: string, compiled: CompiledRules, options: LintOptions) 
     // no comment accessor, and only the source-backed adapters can offer this.
     suppressions: parseSuppressions(source),
     ...(options.skipTemplates !== undefined ? { skipTemplates: options.skipTemplates } : {}),
+    // Fixes are computed on the --fix path only; anywhere else finding.fix
+    // is null and the attrRange lookups are skipped.
+    fix: options.fix === true,
   });
 
 export async function lintFile(

@@ -27,7 +27,9 @@ const meta = (overrides: Partial<RuleMeta> & { ruleId: string }): RuleMeta => ({
 });
 
 const fixesFor = (html: string, rules: Rule[]): Fix[] =>
-  run(rules, parseHtml(html)).flatMap((finding) => (finding.fix === null ? [] : [finding.fix]));
+  run(rules, parseHtml(html), { fix: true }).flatMap((finding) =>
+    finding.fix === null ? [] : [finding.fix],
+  );
 
 const removeMeta: Rule = {
   meta: meta({ ruleId: "meta/x", selector: "meta[name]", fix: { op: "remove-element", attr: null, token: null } }),
