@@ -6,7 +6,14 @@
 import { glob, readFile, readdir, stat, writeFile } from "node:fs/promises";
 import { extname, join, sep } from "node:path";
 
-import { type CompiledRules, type Rule, compile, parseSuppressions, runCompiled } from "../core/index.ts";
+import {
+  type CompiledRules,
+  type Finding,
+  type Rule,
+  compile,
+  parseSuppressions,
+  runCompiled,
+} from "../core/index.ts";
 import { applyFixes } from "../core/fix.ts";
 import { parseHtml } from "./adapter.ts";
 import type { FileResult } from "./reporters/index.ts";
@@ -111,16 +118,30 @@ async function lintFileCompiled(
   const original = await readFile(file, "utf8");
   let source = original;
   let fixed = 0;
+  // Findings from the latest fix pass, reused as the report when the loop
+  // stabilises on the current source. Analysing is deterministic, so a pass
+  // that already saw these exact bytes returns these exact findings — parsing
+  // the same text again would only repeat the work.
+  let stable: Finding[] | null = null;
 
   if (options.fix === true) {
     for (let pass = 0; pass < MAX_FIX_PASSES; pass++) {
-      const fixes = analyse(source, compiled, options)
+      const findings = analyse(source, compiled, options);
+      const fixes = findings
         .map((finding) => finding.fix)
         .filter((fix) => fix !== null);
-      if (fixes.length === 0) break;
+      // Nothing left to fix: this pass already parsed the final source.
+      if (fixes.length === 0) {
+        stable = findings;
+        break;
+      }
 
       const result = applyFixes(source, fixes);
-      if (result.applied.length === 0 || result.output === source) break;
+      // No progress: the source this pass saw is still current.
+      if (result.applied.length === 0 || result.output === source) {
+        stable = findings;
+        break;
+      }
       source = result.output;
       fixed += result.applied.length;
     }
@@ -129,7 +150,10 @@ async function lintFileCompiled(
     if (source !== original) await writeFile(file, source, "utf8");
   }
 
-  return { file, findings: analyse(source, compiled, options), fixed };
+  // `stable` is set exactly when the last fix pass ran on the current source.
+  // It stays null when the loop exhausted its passes while still changing the
+  // file (or never ran), and then one final analyse reports what is left.
+  return { file, findings: stable ?? analyse(source, compiled, options), fixed };
 }
 
 export async function lintFiles(
