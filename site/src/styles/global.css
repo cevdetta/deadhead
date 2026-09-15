@@ -265,6 +265,13 @@ ol {
   color: var(--unnecessary);
 }
 
+/* Severity badges get a whisper of fill so the hue reads at a glance. */
+/* `currentColor` keeps it theme-aware (light + dark need no extra code); */
+/* status + tags stay plain outline. Mirrors the OG card's rgba tint. */
+.badges li[data-severity] {
+  background: color-mix(in oklab, currentColor 10%, transparent);
+}
+
 /* --- rule index ----------------------------------------------------------- */
 
 .namespace + .namespace {
