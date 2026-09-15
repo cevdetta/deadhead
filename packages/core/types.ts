@@ -33,7 +33,7 @@ export type ElementPort = {
   text(): string;
   /** Element-only parent. */
   parent(): ElementPort | null;
-  /** Element-only children. */
+  /** Element-only children. Shared by reference: do not mutate the array. */
   children(): ElementPort[];
   /** Position among element siblings. */
   index(): number;
