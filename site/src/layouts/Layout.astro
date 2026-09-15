@@ -1,5 +1,6 @@
 ---
 import styleURL from "../styles/global.css?url";
+import { ogSlugForPath } from "../lib/og-path.ts";
 
 export const SITE_NAME = "deadhead";
 export const REPO = "https://github.com/cevdetta/deadhead";
@@ -26,6 +27,7 @@ const path =
     ? "/"
     : Astro.url.pathname.replace(/\.html$/, "");
 const canonical = new URL(path, Astro.site);
+const ogImage = new URL(`/og/${ogSlugForPath(path)}.png`, Astro.site);
 
 const nav = [
   { href: "/rules", label: "Rules" },
@@ -58,6 +60,7 @@ const nav = [
     <meta property="og:url" content={canonical} />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImage} />
     {ogType === "article" && publishedTime && (
       <meta
         property="article:published_time"
