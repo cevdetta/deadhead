@@ -70,42 +70,44 @@ function exportsOf(source: string): string[] {
 }
 
 /**
- * Strip docblock comments (`/** ... *\/`) from a module before it is inlined.
+ * Compact a module before it is inlined: strip docblock comments (`/** ... *\/`)
+ * and drop blank lines.
  *
  * Deliberately line-anchored rather than a character scan: a lexer would have
  * to tell `//` comments from `https://` strings and `\/\//` regexes (both
  * occur in the bundled sources), while every docblock here occupies whole
- * lines — the opener is the first non-blank on its line. Dropped lines are
- * left blank so bundle line numbers still match the sources. Constraint this
- * relies on: never put a line-leading `/**` inside a string literal.
+ * lines — the opener is the first non-blank on its line. Constraints this
+ * relies on: never put a line-leading `/**` inside a string literal, and
+ * never put a blank line inside a multi-line string (the only one today is
+ * the stylesheet in `bookmarklet.ts`, which has none).
  */
-function stripDocblocks(source: string): string {
+function compact(source: string): string {
   const out: string[] = [];
   let inBlock = false;
   for (const line of source.split("\n")) {
     if (!inBlock) {
       const open = line.search(/^[ \t]*\/\*\*/);
       if (open === -1) {
-        out.push(line);
+        if (line.trim() !== "") out.push(line);
         continue;
       }
       const opener = line.indexOf("/**", open);
       const close = line.indexOf("*/", opener + 3);
       if (close === -1) {
         inBlock = true;
-        out.push("");
         continue;
       }
-      out.push(line.slice(0, opener) + line.slice(close + 2));
+      const rest = line.slice(0, opener) + line.slice(close + 2);
+      if (rest.trim() !== "") out.push(rest);
       continue;
     }
     const close = line.indexOf("*/");
     if (close === -1) {
-      out.push("");
       continue;
     }
     inBlock = false;
-    out.push(line.slice(close + 2));
+    const rest = line.slice(close + 2);
+    if (rest.trim() !== "") out.push(rest);
   }
   return out.join("\n");
 }
@@ -163,7 +165,7 @@ async function collect(entry: string): Promise<Module[]> {
     if (seen === "visiting") throw new Error(`import cycle at ${rel(file)}`);
     state.set(file, "visiting");
 
-    const source = stripDocblocks(stripTypeScriptTypes(await readFile(file, "utf8"), { mode: "strip" }));
+    const source = compact(stripTypeScriptTypes(await readFile(file, "utf8"), { mode: "strip" }));
     const { body, deps } = rewrite(source, file);
     for (const dep of deps) await visit(dep);
 
