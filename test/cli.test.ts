@@ -232,6 +232,32 @@ test("a config file supplies defaults, and flags beat it", async () => {
   });
 });
 
+test("head-only mode is announced on stderr, and --no-head-only silences it", async () => {
+  await sandbox(async (dir) => {
+    const file = await copyFixture("meta/http-equiv-ie", dir, "page.html");
+    // Switch off every rule scoped beyond <head>: the body walk has nothing to do.
+    const off = rules
+      .filter((rule) => rule.meta.kind === "element" && rule.meta.scope !== "head")
+      .map((rule) => `      "${rule.meta.ruleId}": "off",`);
+    assert.ok(off.length > 0, "the fixture set has body-scoped rules to switch off");
+    await writeFile(
+      join(dir, "deadhead.config.ts"),
+      `export default {\n  rules: {\n${off.join("\n")}\n  },\n};`,
+    );
+
+    const run = spawnSync(process.execPath, [BIN, file], { cwd: dir, encoding: "utf8" });
+    assert.equal(run.status, 1, "head findings are still reported");
+    assert.match(run.stderr, /head-only mode/);
+
+    const full = spawnSync(process.execPath, [BIN, "--no-head-only", file], {
+      cwd: dir,
+      encoding: "utf8",
+    });
+    assert.equal(full.stderr, "", "the opt-out silences the note");
+    assert.equal(full.stdout, run.stdout, "the walk changes nothing but speed");
+  });
+});
+
 test("a baseline absorbs the backlog and still fails on anything new", async () => {
   await sandbox(async (dir) => {
     const file = await copyFixture("script/type-javascript-mime", dir, "page.html");

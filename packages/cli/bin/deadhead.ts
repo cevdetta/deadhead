@@ -14,7 +14,7 @@
 import { matchesGlob } from "node:path";
 import { parseArgs, styleText } from "node:util";
 
-import type { Rule } from "../../core/engine.ts";
+import { type Rule, compile } from "../../core/engine.ts";
 import { SEVERITY, SEVERITY_RANK, SITE_URL, type Severity } from "../../core/vocabulary.ts";
 import { RulesNotBuiltError, loadRules } from "../../rules/load.ts";
 import {
@@ -44,6 +44,9 @@ ${styleText("bold", "deadhead")} — lint HTML <head> for deprecated, unnecessar
                           harmful, deprecated, unnecessary (default), none
       --fix               rewrite files in place, then report what is left
       --skip-templates    do not lint the contents of <template>
+      --no-head-only      walk <body> even when no active rule is scoped
+                          beyond <head> (head-only mode skips the walk;
+                          findings are unchanged, it only costs the walk)
   -c, --config <path>     defaults to ./deadhead.config.ts when present
       --baseline <path>   ignore findings the baseline already accounts for
       --update-baseline   rewrite the baseline from this run, then exit 0
@@ -67,6 +70,7 @@ try {
       "fail-on": { type: "string" },
       fix: { type: "boolean", default: false },
       "skip-templates": { type: "boolean" },
+      "no-head-only": { type: "boolean", default: false },
       config: { type: "string", short: "c" },
       baseline: { type: "string" },
       "update-baseline": { type: "boolean", default: false },
@@ -137,7 +141,21 @@ try {
   );
 
   const skipTemplates = values["skip-templates"] ?? config.skipTemplates ?? false;
-  const results = await lintFiles(files, rules, { skipTemplates, fix: values.fix });
+  const results = await lintFiles(files, rules, {
+    skipTemplates,
+    fix: values.fix,
+    headOnly: !values["no-head-only"],
+  });
+
+  // Head-only mode is silent by design of the engine — the walk just never
+  // descends — so say so on stderr, where machine-readable stdout stays
+  // clean. It applies only when the active rule set allows it, which with
+  // the shipped rules means the user switched the body-scoped ones off.
+  if (values["no-head-only"] !== true && !compile(rules).visitBody) {
+    process.stderr.write(
+      `${styleText("dim", "head-only mode: no active rule is scoped beyond <head>, so the <body> walk is skipped (pass --no-head-only to walk it anyway)")}\n`,
+    );
+  }
 
   const baselinePath =
     values.baseline ??
