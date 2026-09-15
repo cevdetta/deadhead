@@ -11,7 +11,7 @@
  */
 
 import { type DefaultTreeAdapterTypes, parse } from "parse5";
-import { type Compound, matches, parseSelector } from "../core/selector.ts";
+import { type Compound, leadingTag, matches, parseSelector } from "../core/selector.ts";
 import type { DoctypePort, DocumentPort, ElementPort, Parsed, Range } from "../core/types.ts";
 
 type P5Element = DefaultTreeAdapterTypes.Element;
@@ -167,10 +167,19 @@ export function parseHtml(source: string): Parsed {
   // collect recurses into the fragment with the template as parent — which
   // is what keeps parent() and index() honest across that boundary.
   const elementChildren = new WeakMap<P5Element, P5Element[]>();
+  // Tag buckets for document queries, built in the same pass. Every document
+  // rule scans for its own selectors, so without dispatch the elements array
+  // is walked once per query; bucketing reuses the engine's dispatch idea and
+  // each query scans only its leading-tag bucket, in document order.
+  const byTag = new Map<string, P5Element[]>();
   const collect = (node: P5Node | P5Parent, parent: P5Element | null): void => {
     const element = isElement(node) ? node : null;
     if (element !== null) {
       elements.push(element);
+      const tag = element.tagName.toLowerCase();
+      const bucket = byTag.get(tag);
+      if (bucket === undefined) byTag.set(tag, [element]);
+      else bucket.push(element);
       if (parent !== null) {
         parents.set(element, parent);
         const siblings = elementChildren.get(parent);
@@ -200,20 +209,31 @@ export function parseHtml(source: string): Parsed {
 
   const doctype = doctypeOf(document);
 
+  /**
+   * The nodes a document query must test, in document order. A selector whose
+   * every alternative leads with the same tag can only match that tag's
+   * bucket; anything else scans everything, exactly as before.
+   */
+  const candidates = (selector: string): { ast: Compound[]; nodes: P5Element[] } => {
+    const ast = astFor(selector);
+    const tag = leadingTag(ast);
+    return { ast, nodes: tag === null ? elements : (byTag.get(tag) ?? []) };
+  };
+
   const doc: DocumentPort = {
     doctype: () => doctype,
     querySelectorAll(selector) {
-      const ast = astFor(selector);
+      const { ast, nodes } = candidates(selector);
       const found: ElementPort[] = [];
-      for (const node of elements) {
+      for (const node of nodes) {
         const port = portFor(node);
         if (matches(port, ast)) found.push(port);
       }
       return found;
     },
     querySelector(selector) {
-      const ast = astFor(selector);
-      for (const node of elements) {
+      const { ast, nodes } = candidates(selector);
+      for (const node of nodes) {
         const port = portFor(node);
         if (matches(port, ast)) return port;
       }
