@@ -44,6 +44,10 @@ export async function getStaticPaths(): Promise<
         title: `All ${rules.length} rules`,
       },
     },
+    {
+      urlPath: "/404",
+      input: { eyebrow: "no page at this address", title: "Not found" },
+    },
   ];
   return pages.map(({ urlPath, input }) => {
     const slug = ogSlugForPath(urlPath);

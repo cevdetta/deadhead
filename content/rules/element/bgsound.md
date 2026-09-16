@@ -1,7 +1,7 @@
 ---
 ruleId: "element/bgsound"
 title: "bgsound element"
-description: "bgsound was Internet Explorer's autoplaying background sound; it is obsolete, and the HTML Standard makes it an unknown element that plays nothing. Use audio with controls."
+description: "bgsound was Internet Explorer's background sound. Browsers now treat it as unknown and play nothing. Use audio with controls."
 pubDate: "2026-09-14"
 status: "avoid"
 severity: "deprecated"

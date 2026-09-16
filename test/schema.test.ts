@@ -123,6 +123,12 @@ test("pubDate must be a real ISO calendar date", () => {
   assert.match(messages({ pubDate: 20260102 }).join("\n"), /quoted ISO date/);
 });
 
+test("description must fit 160 chars for search results", () => {
+  assert.deepEqual(messages({ description: "x".repeat(160) }), []);
+  assert.match(messages({ description: "x".repeat(161) }).join("\n"), /must fit 160 chars/);
+  assert.ok(paths({ description: "x".repeat(161) }).includes("description"));
+});
+
 test("an unsupported selector fails the rule, with the offset of the offending token", () => {
   const result = validateFrontmatter({ ...base(), selector: "head > meta" });
   assert.ok(!result.ok);

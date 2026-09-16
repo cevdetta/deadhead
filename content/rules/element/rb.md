@@ -1,7 +1,7 @@
 ---
 ruleId: "element/rb"
 title: "rb element"
-description: "`rb` is entirely obsolete: it wraps ruby base text that can sit directly inside `ruby`, adding nothing. Browsers still render it, but the wrapper is dead weight the standard says must not be used."
+description: "`rb` wraps ruby base text that can sit in `ruby`. The wrapper adds nothing. Omit it."
 pubDate: "2026-09-14"
 status: "avoid"
 severity: "deprecated"

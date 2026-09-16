@@ -1,7 +1,7 @@
 ---
 ruleId: "element/rtc"
 title: "rtc element"
-description: "`rtc` is entirely obsolete: the container for second-side ruby annotations that only Gecko lays out. Chromium and WebKit parse it but misplace its annotations; nested `ruby` does the same job in every engine."
+description: "`rtc` held second-side ruby annotations for Gecko only. Chromium and WebKit misplace them. Nest `ruby` for all engines."
 pubDate: "2026-09-14"
 status: "avoid"
 severity: "deprecated"

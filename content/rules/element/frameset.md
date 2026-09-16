@@ -1,7 +1,7 @@
 ---
 ruleId: "element/frameset"
 title: "frameset, frame and noframes"
-description: "frameset, frame and noframes are obsolete; a frameset page is several separate documents in one window, so use one document with iframe and CSS, or server-side includes."
+description: "frameset, frame and noframes are obsolete. A frameset is separate documents in one window. Use one document with iframe."
 pubDate: "2026-09-14"
 status: "avoid"
 severity: "deprecated"

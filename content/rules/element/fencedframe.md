@@ -1,7 +1,7 @@
 ---
 ruleId: "element/fencedframe"
 title: "fencedframe element"
-description: "`fencedframe` is Chrome's Privacy Sandbox embed element for cross-site content that must not communicate with its embedder. Google is phasing it out with the rest of the Sandbox ad stack: the removal intent is approved, with the element stubbed in M154 and fully removed in M155. An ordinary `iframe` covers every remaining use case."
+description: "`fencedframe` is Chrome's removed Sandbox embed for cross-site content. Google stubs it in M154 and removes it in M155. Use `iframe`."
 pubDate: "2026-09-14"
 status: "avoid"
 severity: "deprecated"

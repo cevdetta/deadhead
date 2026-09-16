@@ -1,7 +1,7 @@
 ---
 ruleId: "element/plugin-embed"
 title: "object and embed for Flash, Java or Silverlight"
-description: "This object or embed loads a Flash, Java or Silverlight plug-in; no current browser runs plug-ins and all three platforms are end-of-life, so the content never appears."
+description: "This object or embed loads a Flash, Java or Silverlight plug-in. Browsers run no plug-ins, so the content stays blank."
 pubDate: "2026-09-14"
 status: "avoid"
 severity: "deprecated"

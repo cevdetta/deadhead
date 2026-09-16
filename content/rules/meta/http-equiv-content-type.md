@@ -1,7 +1,7 @@
 ---
 ruleId: "meta/http-equiv-content-type"
 title: "meta http-equiv=\"content-type\""
-description: "http-equiv=content-type is a verbose alias for the charset declaration that the spec forbids combining with `<meta charset>`; declare the encoding once, with `<meta charset>` or the Content-Type header."
+description: "http-equiv=content-type duplicates the charset declaration and cannot combine with meta charset. Declare the encoding once."
 pubDate: "2026-09-14"
 status: "avoid"
 severity: "unnecessary"

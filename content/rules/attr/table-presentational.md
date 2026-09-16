@@ -1,7 +1,7 @@
 ---
 ruleId: "attr/table-presentational"
 title: "Presentational attributes on table"
-description: "align, bgcolor, border, cellpadding, cellspacing, frame, rules, summary and width on table are obsolete; browsers still apply the styling ones as low-priority hints, so move them to CSS and describe tables with caption."
+description: "Presentational attributes on table are obsolete. Browsers apply them as low-priority hints. Move styling to CSS and add caption."
 pubDate: "2026-09-14"
 status: "avoid"
 severity: "deprecated"

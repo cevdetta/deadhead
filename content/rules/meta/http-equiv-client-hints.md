@@ -1,7 +1,7 @@
 ---
 ruleId: "meta/http-equiv-client-hints"
 title: "meta http-equiv client-hint keywords"
-description: "http-equiv accept-ch/delegate-ch work only in Chromium, only for page-initiated requests, and never persist; the Accept-CH/Delegate-CH headers apply earlier and stick."
+description: "http-equiv accept-ch and delegate-ch work only in Chromium for page requests and never persist. Send headers instead."
 pubDate: "2026-09-14"
 status: "avoid"
 severity: "unnecessary"

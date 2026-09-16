@@ -1,7 +1,7 @@
 ---
 ruleId: "meta/http-equiv-name-misuse"
 title: "meta http-equiv with a metadata name"
-description: "http-equiv values like keywords, author or theme-color are not pragma directives and do nothing; the spec defines them as name values (or as meta charset / html lang territory)."
+description: "http-equiv values like keywords or author are not pragma directives and do nothing. Use name values or charset and lang."
 pubDate: "2026-09-14"
 status: "avoid"
 severity: "unnecessary"
