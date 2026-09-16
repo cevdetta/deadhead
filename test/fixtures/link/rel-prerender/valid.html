@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Speculation rules prerender</title>
+    <script type="speculationrules">
+    {
+      "prerender": [{
+        "where": { "href_matches": "/next" },
+        "eagerness": "moderate"
+      }]
+    }
+    </script>
+  </head>
+  <body>
+    <p>One prerender declaration, in the format browsers read.</p>
+  </body>
+</html>
