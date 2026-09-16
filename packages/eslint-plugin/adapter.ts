@@ -21,6 +21,7 @@
  * one this package declares.
  */
 
+import { makeDoctypePort, withPortCache } from "../core/port.ts";
 import { type Compound, matches, parseSelector } from "../core/selector.ts";
 import type { DoctypePort, DocumentPort, ElementPort, Parsed, Range } from "../core/types.ts";
 
@@ -64,15 +65,10 @@ function textOf(node: Node): string {
 }
 
 function makePorts(parents: WeakMap<Node, Node>): (node: Node) => ElementPort {
-  const cache = new WeakMap<Node, ElementPort>();
-
   const elementChildren = (node: Node): Node[] =>
     childrenOf(node).filter((child) => ELEMENT_TAG(child) !== null);
 
-  const portFor = (node: Node): ElementPort => {
-    const cached = cache.get(node);
-    if (cached) return cached;
-
+  return withPortCache<Node>((node, portFor) => {
     const attrs = new Map<string, string>();
     const attrRanges = new Map<string, Range>();
     for (const attr of node.attributes ?? []) {
@@ -104,15 +100,46 @@ function makePorts(parents: WeakMap<Node, Node>): (node: Node) => ElementPort {
       loc: () => (node.loc ? { line: node.loc.start.line, col: node.loc.start.column + 1 } : null),
     };
 
-    cache.set(node, port);
     return port;
-  };
-
-  return portFor;
+  });
 }
 
 /** HTML's ASCII whitespace: what the "initial" insertion mode skips. */
 const ASCII_WHITESPACE = /^[\t\n\f\r ]*$/;
+
+function assertProgramNode(value: unknown): asserts value is Node {
+  if (typeof value !== "object" || value === null) {
+    throw new Error(
+      "deadhead: unexpected @html-eslint/parser AST (expected a Program node object) — did the parser shape change?",
+    );
+  }
+  if (!("type" in value) && !("children" in value) && !("body" in value)) {
+    throw new Error(
+      "deadhead: unexpected @html-eslint/parser AST (expected a Program node with children/body) — did the parser shape change?",
+    );
+  }
+}
+
+function doctypeTokens(node: Node): string[] {
+  if (!("attributes" in node)) return [];
+  const attrs: unknown = node.attributes;
+  if (attrs === undefined) return [];
+  if (!Array.isArray(attrs)) {
+    throw new Error(
+      "deadhead: unexpected Doctype token shape (expected an attributes array) — did @html-eslint/parser change?",
+    );
+  }
+  return attrs.map((token: unknown) => {
+    if (typeof token !== "object" || token === null || !("value" in token)) return "";
+    const inner: unknown = token.value;
+    if (typeof inner === "string") return inner;
+    if (typeof inner === "object" && inner !== null && "value" in inner) {
+      const text: unknown = inner.value;
+      return typeof text === "string" ? text : "";
+    }
+    return "";
+  });
+}
 
 /**
  * The doctype the tree builder would honour: the first `Doctype` at the top of
@@ -136,23 +163,20 @@ function doctypeOf(program: Node): DoctypePort | null {
 
   // `<!DOCTYPE html PUBLIC "pub" "sys">` arrives as the tokens
   // `html`, `PUBLIC`, `pub`, `sys`, with the quotes already stripped.
-  const tokens = ((node as { attributes?: { value?: { value?: string } }[] }).attributes ?? []).map(
-    (token) => token.value?.value ?? "",
-  );
+  const tokens = doctypeTokens(node);
   const [name = "", keyword = "", first = "", second = ""] = tokens;
   const kind = keyword.toLowerCase();
   const range = node.range;
   const loc = node.loc;
 
-  return {
-    tag: "!doctype",
-    name: name.replace(/[A-Z]+/g, (upper) => upper.toLowerCase()),
+  return makeDoctypePort({
+    name,
     publicId: kind === "public" ? first : "",
     systemId: kind === "public" ? second : kind === "system" ? first : "",
     range: (): Range | null => (range ? [range[0], range[1]] : null),
     // ESLint columns are 0-based; the port and parse5 are 1-based.
     loc: () => (loc ? { line: loc.start.line, col: loc.start.column + 1 } : null),
-  };
+  });
 }
 
 /**
@@ -163,6 +187,7 @@ function doctypeOf(program: Node): DoctypePort | null {
  * ESLint run always has the text in hand.
  */
 export function fromProgram(program: unknown, source: string): Parsed {
+  assertProgramNode(program);
   const elements: Node[] = [];
   const parents = new WeakMap<Node, Node>();
 
@@ -174,7 +199,7 @@ export function fromProgram(program: unknown, source: string): Parsed {
     }
     for (const child of childrenOf(node)) collect(child, isElement ? node : parent);
   };
-  collect(program as Node, null);
+  collect(program, null);
 
   const portFor = makePorts(parents);
   const root = elements.find((node) => ELEMENT_TAG(node) === "html") ?? elements[0];
@@ -191,7 +216,7 @@ export function fromProgram(program: unknown, source: string): Parsed {
     return parsed.ast;
   };
 
-  const doctype = doctypeOf(program as Node);
+  const doctype = doctypeOf(program);
 
   const doc: DocumentPort = {
     doctype: () => doctype,

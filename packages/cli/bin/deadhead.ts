@@ -15,7 +15,7 @@ import { matchesGlob } from "node:path";
 import { parseArgs, styleText } from "node:util";
 
 import { type Rule, compile } from "../../core/engine.ts";
-import { SEVERITY, SEVERITY_RANK, SITE_URL, type Severity } from "../../core/vocabulary.ts";
+import { SEVERITY, SEVERITY_RANK, SITE_URL } from "../../core/vocabulary.ts";
 import { RulesNotBuiltError, loadRules } from "../../rules/load.ts";
 import {
   BaselineError,
@@ -33,6 +33,10 @@ import { stylish } from "../reporters/stylish.ts";
 
 const REPORTERS: Record<string, Reporter> = { stylish, json, sarif };
 const FAIL_ON = [...SEVERITY, "none"] as const;
+type Threshold = (typeof FAIL_ON)[number];
+
+const isThreshold = (value: unknown): value is Threshold =>
+  value === "none" || (typeof value === "string" && SEVERITY.some((known) => known === value));
 
 const USAGE = `
 ${styleText("bold", "deadhead")} — lint HTML <head> for deprecated, unnecessary and harmful markup
@@ -113,7 +117,7 @@ try {
   const config = loaded?.config ?? {};
 
   const threshold = values["fail-on"] ?? config.failOn ?? "unnecessary";
-  if (!(FAIL_ON as readonly string[]).includes(threshold)) {
+  if (!isThreshold(threshold)) {
     fail(`unknown --fail-on ${JSON.stringify(threshold)} (expected ${FAIL_ON.join(", ")})`);
   }
 
@@ -203,7 +207,7 @@ try {
   // A threshold fails on itself and on everything worse: --fail-on=deprecated
   // also fails on harmful.
   const counts = tally(reported);
-  const floor = SEVERITY_RANK[threshold as Severity];
+  const floor = SEVERITY_RANK[threshold];
   const breached = SEVERITY.some(
     (severity) => counts[severity] > 0 && SEVERITY_RANK[severity] >= floor,
   );

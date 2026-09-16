@@ -11,6 +11,7 @@
  * one of those degrades to "unavailable" rather than to something wrong.
  */
 
+import { makeDoctypePort, withPortCache } from "../core/port.ts";
 import type { DoctypePort, DocumentPort, ElementPort, Parsed } from "../core/types.ts";
 
 const isTemplate = (element: Element): element is HTMLTemplateElement =>
@@ -25,12 +26,7 @@ const childElements = (element: Element): Element[] =>
   isTemplate(element) ? [...element.content.children] : [...element.children];
 
 function makePorts(): (element: Element) => ElementPort {
-  const cache = new WeakMap<Element, ElementPort>();
-
-  const portFor = (element: Element): ElementPort => {
-    const cached = cache.get(element);
-    if (cached) return cached;
-
+  return withPortCache<Element>((element, portFor) => {
     const port: ElementPort = {
       // `tagName` is uppercase for HTML elements in a real document.
       tag: element.tagName.toLowerCase(),
@@ -58,11 +54,8 @@ function makePorts(): (element: Element) => ElementPort {
       loc: () => null,
     };
 
-    cache.set(element, port);
     return port;
-  };
-
-  return portFor;
+  });
 }
 
 /**
@@ -73,15 +66,14 @@ function makePorts(): (element: Element) => ElementPort {
 function doctypeOf(document: Document): DoctypePort | null {
   const node = document.doctype;
   if (node === null) return null;
-  return {
-    tag: "!doctype",
-    name: node.name.replace(/[A-Z]+/g, (upper) => upper.toLowerCase()),
+  return makeDoctypePort({
+    name: node.name,
     publicId: node.publicId,
     systemId: node.systemId,
     // No source text in a live document.
     range: () => null,
     loc: () => null,
-  };
+  });
 }
 
 /**

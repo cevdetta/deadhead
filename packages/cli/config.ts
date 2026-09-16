@@ -45,16 +45,23 @@ const KEYS = new Set(["include", "ignore", "rules", "failOn", "skipTemplates", "
 const isStringArray = (value: unknown): value is string[] =>
   Array.isArray(value) && value.every((item) => typeof item === "string");
 
+function assertIsRecord(value: unknown, message: string): asserts value is Record<string, unknown> {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    throw new ConfigError(message);
+  }
+}
+
+const isSeverity = (value: unknown): value is Severity =>
+  typeof value === "string" && SEVERITY.some((known) => known === value);
+
 /**
  * Validate by hand, like the frontmatter schema, and for the same reason: the
  * error a contributor sees is the point. "unknown rule `meta/viewport` in
  * deadhead.config.ts" beats "invalid enum value at rules.meta/viewport".
  */
 function validate(raw: unknown, knownRules: Set<string>, path: string): DeadheadConfig {
-  if (typeof raw !== "object" || raw === null || Array.isArray(raw)) {
-    throw new ConfigError(`${path}: default export must be an object`);
-  }
-  const input = raw as Record<string, unknown>;
+  assertIsRecord(raw, `${path}: default export must be an object`);
+  const input = raw;
   const config: DeadheadConfig = {};
 
   for (const key of Object.keys(input)) {
@@ -72,31 +79,29 @@ function validate(raw: unknown, knownRules: Set<string>, path: string): Deadhead
 
   if (input["rules"] !== undefined) {
     const rules = input["rules"];
-    if (typeof rules !== "object" || rules === null || Array.isArray(rules)) {
-      throw new ConfigError(`${path}: \`rules\` must be an object`);
-    }
+    assertIsRecord(rules, `${path}: \`rules\` must be an object`);
     const out: Record<string, RuleSetting> = {};
-    for (const [ruleId, setting] of Object.entries(rules as Record<string, unknown>)) {
+    for (const [ruleId, setting] of Object.entries(rules)) {
       // A typo here would otherwise disable nothing and say nothing.
       if (!knownRules.has(ruleId)) {
         throw new ConfigError(`${path}: unknown rule \`${ruleId}\``);
       }
-      if (setting !== "off" && !(SEVERITY as readonly string[]).includes(setting as string)) {
+      if (setting !== "off" && !isSeverity(setting)) {
         throw new ConfigError(
           `${path}: rules["${ruleId}"] must be "off" or one of ${SEVERITY.join(", ")}`,
         );
       }
-      out[ruleId] = setting as RuleSetting;
+      out[ruleId] = setting;
     }
     config.rules = out;
   }
 
   if (input["failOn"] !== undefined) {
     const failOn = input["failOn"];
-    if (failOn !== "none" && !(SEVERITY as readonly string[]).includes(failOn as string)) {
+    if (failOn !== "none" && !isSeverity(failOn)) {
       throw new ConfigError(`${path}: \`failOn\` must be "none" or one of ${SEVERITY.join(", ")}`);
     }
-    config.failOn = failOn as Severity | "none";
+    config.failOn = failOn;
   }
 
   if (input["skipTemplates"] !== undefined) {
