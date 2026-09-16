@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Prerender hint</title>
+    <link rel="prerender" href="/next">
+    <script type="speculationrules">
+    {
+      "prerender": [{
+        "where": { "href_matches": "/next" },
+        "eagerness": "moderate"
+      }]
+    }
+    </script>
+  </head>
+  <body>
+    <p>The link above asks for a prerender the browser no longer runs.</p>
+  </body>
+</html>
