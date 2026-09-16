@@ -25,6 +25,26 @@ type RulesFile = { schemaVersion: number; rules: RuleMeta[] };
 
 export class RulesNotBuiltError extends Error {}
 
+function assertRulesFile(value: unknown): asserts value is RulesFile {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    throw new Error(
+      `${fileURLToPath(RULES_JSON)} is not a rules file (expected { schemaVersion, rules[] }) — run \`pnpm build\`.`,
+    );
+  }
+  if (!("rules" in value) || !Array.isArray(value.rules)) {
+    throw new Error(
+      `${fileURLToPath(RULES_JSON)} is not a rules file (expected { schemaVersion, rules[] }) — run \`pnpm build\`.`,
+    );
+  }
+  for (const meta of value.rules) {
+    if (typeof meta !== "object" || meta === null || !("ruleId" in meta)) {
+      throw new Error(
+        `${fileURLToPath(RULES_JSON)} has a rule without a ruleId — run \`pnpm build\`.`,
+      );
+    }
+  }
+}
+
 export async function loadRules(): Promise<Rule[]> {
   let raw: string;
   try {
@@ -38,7 +58,8 @@ export async function loadRules(): Promise<Rule[]> {
     throw err;
   }
 
-  const parsed = JSON.parse(raw) as RulesFile;
+  const parsed: unknown = JSON.parse(raw);
+  assertRulesFile(parsed);
   const rules: Rule[] = [];
 
   for (const meta of parsed.rules) {

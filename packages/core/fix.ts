@@ -55,7 +55,11 @@ function quotedValueRange(source: string, [start, end]: Range): Range | null {
   if (equals === -1) return null;
 
   let at = equals + 1;
-  while (at < text.length && SPACE.test(text[at] as string)) at++;
+  while (at < text.length) {
+    const ch = text[at];
+    if (ch === undefined || !SPACE.test(ch)) break;
+    at++;
+  }
   const quote = text[at];
   if (quote !== '"' && quote !== "'") return null;
 

@@ -11,6 +11,7 @@
  */
 
 import { type DefaultTreeAdapterTypes, parse } from "parse5";
+import { makeDoctypePort, withPortCache } from "../core/port.ts";
 import { type Compound, leadingTag, matches, parseSelector } from "../core/selector.ts";
 import type { DoctypePort, DocumentPort, ElementPort, Parsed, Range } from "../core/types.ts";
 
@@ -62,17 +63,13 @@ function makePorts(
   parents: WeakMap<P5Element, P5Element>,
   elementChildren: WeakMap<P5Element, P5Element[]>,
 ): (node: P5Element) => ElementPort {
-  const cache = new WeakMap<P5Element, ElementPort>();
   // Ports of each node's element children, materialised on first use. The
   // engine walk calls children() once per visited element, so sharing one
   // array per node removes the filter().map() allocation that used to show
   // up once per node. Shared by reference: rules must not mutate it.
   const childPorts = new WeakMap<P5Element, ElementPort[]>();
 
-  const portFor = (node: P5Element): ElementPort => {
-    const cached = cache.get(node);
-    if (cached) return cached;
-
+  return withPortCache<P5Element>((node, portFor) => {
     // parse5 lowercases HTML tag names and attribute names during parsing, so
     // the port's "lowercase" guarantee costs nothing here.
     const attrs = new Map<string, string>();
@@ -117,11 +114,8 @@ function makePorts(
       },
     };
 
-    cache.set(node, port);
     return port;
-  };
-
-  return portFor;
+  });
 }
 
 /**
@@ -132,8 +126,7 @@ function makePorts(
 function doctypeOf(document: DefaultTreeAdapterTypes.Document): DoctypePort | null {
   const node = document.childNodes.find((child): child is P5Doctype => child.nodeName === "#documentType");
   if (node === undefined) return null;
-  return {
-    tag: "!doctype",
+  return makeDoctypePort({
     name: node.name ?? "",
     publicId: node.publicId ?? "",
     systemId: node.systemId ?? "",
@@ -145,7 +138,7 @@ function doctypeOf(document: DefaultTreeAdapterTypes.Document): DoctypePort | nu
       const loc = node.sourceCodeLocation;
       return loc ? { line: loc.startLine, col: loc.startCol } : null;
     },
-  };
+  });
 }
 
 /**

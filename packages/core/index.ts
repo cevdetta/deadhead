@@ -23,6 +23,7 @@ export {
   type Simple,
   type TagSel,
 } from "./selector.ts";
+export { makeDoctypePort, withPortCache } from "./port.ts";
 export { walk, type Region, type WalkOptions } from "./walker.ts";
 export type {
   CheckFn,

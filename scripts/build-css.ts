@@ -31,14 +31,14 @@ const COLOUR: Record<Severity, string> = {
 };
 
 /** CSS string escaping for the `content` property. */
-const cssString = (value: string): string =>
+export const cssString = (value: string): string =>
   `"${value.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
 
 /**
  * `scope` becomes the CSS ancestor, mirroring what the walker does: a rule
  * scoped to `head` must not light up a `<meta>` someone put in the body.
  */
-const scoped = (meta: RuleMeta): string => {
+export const scoped = (meta: Pick<RuleMeta, "scope" | "selector">): string => {
   const prefix = meta.scope === "any" ? "" : `${meta.scope} `;
   // A rule's selector may be a comma list; the prefix distributes over it.
   return (meta.selector ?? "")

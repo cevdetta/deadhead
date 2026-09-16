@@ -46,11 +46,32 @@ export async function readBaseline(path: string): Promise<Baseline> {
     throw new BaselineError(`${path}: not valid JSON`);
   }
 
-  const baseline = parsed as Partial<Baseline>;
-  if (baseline.version !== 1 || typeof baseline.entries !== "object" || baseline.entries === null) {
-    throw new BaselineError(`${path}: not a deadhead baseline (expected { version: 1, entries })`);
+  function assertBaseline(value: unknown): asserts value is Baseline {
+    if (typeof value !== "object" || value === null || Array.isArray(value)) {
+      throw new BaselineError(`${path}: not a deadhead baseline (expected { version: 1, entries })`);
+    }
+    if (!("version" in value) || !("entries" in value)) {
+      throw new BaselineError(`${path}: not a deadhead baseline (expected { version: 1, entries })`);
+    }
+    if (value.version !== 1 || typeof value.entries !== "object" || value.entries === null) {
+      throw new BaselineError(`${path}: not a deadhead baseline (expected { version: 1, entries })`);
+    }
+    for (const [file, perRule] of Object.entries(value.entries)) {
+      if (typeof perRule !== "object" || perRule === null || Array.isArray(perRule)) {
+        throw new BaselineError(`${path}: entry for ${JSON.stringify(file)} must map ruleIds to counts`);
+      }
+      for (const [ruleId, count] of Object.entries(perRule)) {
+        if (typeof count !== "number" || !Number.isInteger(count) || count < 0) {
+          throw new BaselineError(
+            `${path}: entry ${JSON.stringify(file)} → ${JSON.stringify(ruleId)} must be a non-negative integer`,
+          );
+        }
+      }
+    }
   }
-  return { version: 1, entries: baseline.entries };
+
+  assertBaseline(parsed);
+  return { version: 1, entries: parsed.entries };
 }
 
 /** Counts for one lint run, in the baseline's own shape. */

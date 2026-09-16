@@ -59,7 +59,11 @@ export function parseSelector(input: string): SelectorParse {
 
   const ws = (): boolean => {
     const from = i;
-    while (i < input.length && /\s/.test(input[i] as string)) i++;
+    while (i < input.length) {
+      const ch = input[i];
+      if (ch === undefined || !/\s/.test(ch)) break;
+      i++;
+    }
     return i > from;
   };
 
@@ -216,7 +220,8 @@ export function parseSelector(input: string): SelectorParse {
       if (i >= input.length) return fail(i, "trailing `,` in selector list");
       continue;
     }
-    const ch = input[i] as string;
+    const ch = input[i];
+    if (ch === undefined) break;
     if (ch === ">" || ch === "+" || ch === "~") {
       return fail(i, `combinators are not supported (found \`${ch}\`)`);
     }
