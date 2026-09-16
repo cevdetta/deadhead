@@ -17,7 +17,8 @@ impacts: ["maintainability"]
 related: ["element/isindex"]
 ---
 
-`<nextid>` is a leftover from the web's first years: an empty `head` element
+`<nextid>` identifies nothing. `<nextid>` is a leftover from the web's first years: an
+empty `head` element
 whose `n` attribute handed the next document identifier to editors that
 numbered anchors automatically. The HTML Standard lists it under
 non-conforming features with the direction "Use GUIDs instead", and W3C's
@@ -33,7 +34,7 @@ disagrees between engines, so markup containing it does not even mean the
 same tree everywhere.
 
 Unique `id` attributes are the replacement on every engine. They identify
-elements for fragment links, labels, and scripting — everything the automatic
+elements for fragment links, labels, and scripting: everything the automatic
 numbering was for, without a dead tag.
 
 ## Use instead
@@ -48,11 +49,11 @@ A unique identifier on the element that needs one:
 
 ## Detectability
 
-Fully detectable. The selector is the bare element name `nextid`; no logic
+Fully detectable. The rule matches the bare element name `nextid`; no logic
 module is needed. The scope is `any` deliberately: because parsers disagree
 about whether the element lives in `head` or `body`, a head-scoped rule would
-diverge between adapters, while `any` reports it once wherever it lands. A
-pre-filing probe confirmed all three adapters agree on a closed
+diverge between adapters, while `any` reports it once wherever it lands. All
+three adapters agree on a closed
 `<nextid></nextid>` as the last element of `head`, down to identical source
 positions in the source-backed adapters.
 
@@ -61,5 +62,5 @@ removal is not reliably a pure deletion, and the fix op is `none`.
 
 ## Resources
 
-- [HTML Standard — Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#non-conforming-features) — `nextid` is entirely obsolete; GUIDs instead.
-- [W3C HTML5: Edition for Web Authors — Obsolete features](https://www.w3.org/TR/2011/WD-html5-author-20110809/obsolete.html) — independent W3C list with the same verdict and replacement.
+- [HTML Standard: Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#non-conforming-features): `nextid` is entirely obsolete; GUIDs instead.
+- [W3C HTML5: Edition for Web Authors: Obsolete features](https://www.w3.org/TR/2011/WD-html5-author-20110809/obsolete.html): independent W3C list with the same verdict and replacement.

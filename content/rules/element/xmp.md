@@ -17,7 +17,8 @@ impacts: ["maintainability"]
 related: ["element/listing", "element/plaintext"]
 ---
 
-`<xmp>` was a shortcut for showing HTML source on a page: everything between `<xmp>` and `</xmp>`
+`<xmp>` cannot show its own end tag. `<xmp>` was a shortcut for showing HTML source on
+a page: everything between `<xmp>` and `</xmp>`
 appears as typed, in a monospace font, with no need to escape angle brackets. MDN traces it to
 HTML 2, and it still turns up in old pages.
 
@@ -52,15 +53,16 @@ Wrap the sample in `pre` and `code`, and escape `<` and `&`:
 
 ## Detectability
 
-Fully detectable by tag name. deadhead never lints the content of an `xmp`, because a browser reads
-it as text, so only the element itself is reported. There is no autofix: removing it would delete
+Fully detectable by tag name. The rule matches the tag outright, and the engine never
+lints the content of an `xmp`, because a browser reads
+it as text. Only the element itself is reported. There is no autofix: removing it would delete
 the content, and moving to `pre` and `code` means renaming the element and escaping its content,
 which a fix can't do.
 
 ## Resources
 
-- [HTML Standard — Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#non-conforming-features) — `xmp` is obsolete; use `pre` and `code` with `<` and `&` escaped instead.
-- [HTML Standard — Parsing: the "in body" insertion mode](https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inbody) — `xmp` uses the generic raw text element parsing algorithm, whose RAWTEXT state decodes no character references.
-- [HTML Standard — Rendering: flow content](https://html.spec.whatwg.org/multipage/rendering.html#flow-content-3) — `xmp` is displayed like `pre`: block, monospace, `white-space: pre`.
-- [W3C — HTML Accessibility API Mappings](https://www.w3.org/TR/html-aam-1.0/#el-code) — `code` maps to the ARIA `code` role.
-- [MDN — `<xmp>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/xmp) — deprecated since HTML 3.2, "not implemented in a consistent way"; use `pre` or `code`.
+- [HTML Standard: Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#non-conforming-features): `xmp` is obsolete; use `pre` and `code` with `<` and `&` escaped instead.
+- [HTML Standard: Parsing: the "in body" insertion mode](https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inbody): `xmp` uses the generic raw text element parsing algorithm, whose RAWTEXT state decodes no character references.
+- [HTML Standard: Rendering: flow content](https://html.spec.whatwg.org/multipage/rendering.html#flow-content-3): `xmp` is displayed like `pre`: block, monospace, `white-space: pre`.
+- [W3C: HTML Accessibility API Mappings](https://www.w3.org/TR/html-aam-1.0/#el-code): `code` maps to the ARIA `code` role.
+- [MDN: `<xmp>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/xmp): deprecated since HTML 3.2, "not implemented in a consistent way"; use `pre` or `code`.

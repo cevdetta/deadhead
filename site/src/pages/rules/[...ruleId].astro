@@ -5,7 +5,7 @@ import RuleFacts from "../../components/RuleFacts.astro";
 import { severityLabels, statusLabels } from "../../vocabulary.ts";
 
 // The route is `[...ruleId]` rather than `[ruleId]` because a ruleId contains a
-// slash — `meta/keywords` is one id, not two segments. This URL is the contract
+// slash: `meta/keywords` is one id, not two segments. This URL is the contract
 // `packages/core/vocabulary.ts` prints in every finding.
 export async function getStaticPaths() {
   const rules = await getCollection("rules");
@@ -65,7 +65,7 @@ const sourceUrl = `${REPO}/blob/main/content/rules/${data.ruleId}.md`;
     <p class="source-note">
       This page is generated from <a href={sourceUrl}><code>content/rules/{data.ruleId}.md</code></a>,
       the same file the linter is built from. Think the rule is wrong, or that browsers
-      moved on? <a href={`${REPO}/issues/new`}>Say so</a> — that is the most useful issue
+      moved on? <a href={`${REPO}/issues/new`}>Say so</a>. That is the most useful issue
       you can file.
     </p>
   </article>

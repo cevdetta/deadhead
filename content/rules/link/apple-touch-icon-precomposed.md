@@ -17,10 +17,11 @@ impacts: ["maintainability"]
 related: ["link/mask-icon", "meta/apple-mobile-web-app-capable"]
 ---
 
-Before iOS 7, Safari dressed every home-screen icon in rounded corners and a glossy
+The `apple-touch-icon-precomposed` suffix is obsolete since iOS 7. Before iOS 7, Safari
+dressed every home-screen icon in rounded corners and a glossy
 highlight. Sites that had already drawn their own finish opted out with a second
 spelling, `<link rel="apple-touch-icon-precomposed">`, and Apple's guidance was to
-declare both. Favicon generators still write the pair, often pointing at the same PNG.
+declare both. Favicon generators still write the pair, pointing both entries at the same PNG.
 
 ## Why avoid
 
@@ -52,7 +53,7 @@ for iOS's home screen.
 Fully detectable, but not with a selector: it's a document rule because it only fires
 when a plain `apple-touch-icon` link also exists. A link whose `rel` carries both tokens
 doesn't count as that plain link, since removing it would remove the page's only touch
-icon. A lone precomposed link isn't reported either. It is the page's only home-screen
+icon. The rule does not report a lone precomposed link either. It is the page's only home-screen
 icon, and no fix can rename a token.
 
 The fix removes every precomposed link. Where the precomposed link points at the same
@@ -65,7 +66,7 @@ the fix to a page that declares more than one icon.
 
 ## Resources
 
-- [Apple Developer — Configuring Web Applications (Safari Web Content Guide, archived)](https://developer.apple.com/library/archive/documentation/AppleApplications/Reference/SafariWebContent/ConfiguringWebApplications/ConfiguringWebApplications.html) — "Safari on iOS 7 doesn't add effects to icons"; the precomposed suffix only mattered to older versions.
-- [Chrome for Developers — Lighthouse: Does not provide a valid apple-touch-icon](https://developer.chrome.com/docs/lighthouse/pwa/apple-touch-icon) — "A rel="apple-touch-icon-precomposed" link passes the audit, but it has been obsolete since iOS 7."
-- [WebKit — `Source/WebCore/html/LinkIconCollector.cpp`](https://github.com/WebKit/WebKit/blob/main/Source/WebCore/html/LinkIconCollector.cpp) — touch icons ordered largest first; "A Precomposed icon should come first if both icons have the same size."
-- [WebKit — `Source/WebCore/html/LinkRelAttribute.cpp`](https://github.com/WebKit/WebKit/blob/main/Source/WebCore/html/LinkRelAttribute.cpp) — the engine still parses `apple-touch-icon-precomposed` as its own icon type.
+- [Apple Developer: Configuring Web Applications (Safari Web Content Guide, archived)](https://developer.apple.com/library/archive/documentation/AppleApplications/Reference/SafariWebContent/ConfiguringWebApplications/ConfiguringWebApplications.html): "Safari on iOS 7 doesn't add effects to icons"; the precomposed suffix only mattered to older versions.
+- [Chrome for Developers: Lighthouse: Does not provide a valid apple-touch-icon](https://developer.chrome.com/docs/lighthouse/pwa/apple-touch-icon): "A rel="apple-touch-icon-precomposed" link passes the audit, but it has been obsolete since iOS 7."
+- [WebKit: `Source/WebCore/html/LinkIconCollector.cpp`](https://github.com/WebKit/WebKit/blob/main/Source/WebCore/html/LinkIconCollector.cpp): touch icons ordered largest first; "A Precomposed icon should come first if both icons have the same size."
+- [WebKit: `Source/WebCore/html/LinkRelAttribute.cpp`](https://github.com/WebKit/WebKit/blob/main/Source/WebCore/html/LinkRelAttribute.cpp): the engine still parses `apple-touch-icon-precomposed` as its own icon type.

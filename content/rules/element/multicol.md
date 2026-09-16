@@ -17,10 +17,10 @@ impacts: ["maintainability"]
 related: ["element/center", "element/spacer"]
 ---
 
-`<multicol>` was an early experiment in laying out text in newspaper-style
-columns — a `cols` attribute said how many. The HTML Standard lists it under
-non-conforming features, grouped with `basefont`, `big`, `blink`, `center`,
-`font`, `marquee`, `nobr`, `spacer` and `tt`, with the direction "Use
+No browser lays out `<multicol>`. `<multicol>` was an early experiment in laying out
+text in newspaper-style
+columns: a `cols` attribute said how many. The HTML Standard lists it under
+non-conforming features with the direction "Use
 appropriate elements or CSS instead".
 
 ## Why avoid
@@ -35,7 +35,7 @@ tag.
 CSS owns this job now. CSS Multi-column Layout flows any element's content
 into balanced columns: `column-count` fixes the number of columns,
 `column-width` sets their optimal width, and `columns` is the shorthand for
-both — with `column-gap` and `column-rule` controlling the gutters. That is
+both, with `column-gap` and `column-rule` controlling the gutters. That is
 everything `multicol` promised, on every engine, without a proprietary tag.
 
 ## Use instead
@@ -55,8 +55,8 @@ A normal container with the number of columns declared in style:
 
 ## Detectability
 
-Fully detectable. The selector is the bare element name `multicol`; no logic
-module is needed, and the roadmap probe found all three adapters agree on
+Fully detectable. The rule matches the bare element name `multicol`; no logic
+module is needed, and all three adapters agree on
 closed elements.
 
 There is no autofix. Removing the element deletes its content, and rewriting
@@ -64,6 +64,6 @@ it as a styled container is not a subtraction, so the fix op is `none`.
 
 ## Resources
 
-- [HTML Standard — Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#non-conforming-features) — `multicol` is entirely obsolete; appropriate elements or CSS instead.
-- [W3C CSS Multi-column Layout Module Level 1](https://www.w3.org/TR/css-multicol-1/) — `column-count` fixes the number of columns, `columns` is the shorthand; the standard replacement.
-- [MDN — `<multicol>` (archive mirror)](https://devdoc.net/web/developer.mozilla.org/en-US/docs/Web/HTML/Element/multicol.html) — experimental, never significant traction, not implemented in major browsers; use a regular element with CSS Columns (MDN has since removed the page).
+- [HTML Standard: Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#non-conforming-features): `multicol` is entirely obsolete; appropriate elements or CSS instead.
+- [W3C CSS Multi-column Layout Module Level 1](https://www.w3.org/TR/css-multicol-1/): `column-count` fixes the number of columns, `columns` is the shorthand; the standard replacement.
+- [MDN: `<multicol>` (archive mirror)](https://devdoc.net/web/developer.mozilla.org/en-US/docs/Web/HTML/Element/multicol.html): experimental, never significant traction, not implemented in major browsers; use a regular element with CSS Columns (MDN has since removed the page).

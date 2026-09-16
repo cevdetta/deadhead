@@ -8,7 +8,7 @@ const rules = await getCollection("rules");
 
 // Group by the namespace half of the ruleId. Namespaces say where the thing
 // lives, never whether it is bad, so this grouping is stable across a rule
-// changing severity — which is the whole reason ids are namespaced that way.
+// changing severity: which is the whole reason ids are namespaced that way.
 const byNamespace = new Map<string, typeof rules>();
 for (const rule of rules) {
   const namespace = rule.data.ruleId.split("/")[0]!;
@@ -40,8 +40,8 @@ const count = rules.length;
     <header class="flow">
       <h1>Rules</h1>
       <p class="lede">
-        {count} rules, grouped by where the thing lives rather than by how bad
-        it is. Severity is a mutable field; the namespace in a ruleId is
+        {count} rules, grouped by where the thing lives.
+        Severity is a mutable field; the namespace in a ruleId is
         permanent, because suppression comments and CI baselines are written
         against it.
       </p>

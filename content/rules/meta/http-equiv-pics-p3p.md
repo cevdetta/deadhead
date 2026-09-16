@@ -26,9 +26,9 @@ for implementation") and superseded PICS with POWDER back in 2009.
 ## Why avoid
 
 Both vocabularies are dead and their only reader is retired. No current
-user agent interprets P3P — W3C's obituary cites limited deployment and
-copy-pasted policies that reflected nobody's actual practices — and
-Microsoft removed P3P support in Windows 10 with instructions not to
+user agent interprets P3P. W3C's obituary cites limited deployment and
+copy-pasted policies that reflected nobody's actual practices. Microsoft
+removed P3P support in Windows 10 with instructions not to
 deploy it. POWDER deliberately dropped PICS's one HTML-embedded
 capability: descriptions now live in discrete documents linked from the
 page, keeping description maintenance separate from the described
@@ -41,12 +41,12 @@ Delete the tag.
 
 ## Detectability
 
-Fully detectable. Either attribute value identifies the tag outright, so a
-two-branch selector is the whole rule and the fix is always to remove the
+Fully detectable. The rule reports either attribute value outright: a
+two-branch selector is the whole rule, and the fix always removes the
 element.
 
 ## Resources
 
-- [W3C — P3P 1.0 obsoleted 30 August 2018](https://www.w3.org/TR/2018/OBSL-P3P-20180830/) — obsolete, do not implement; no current user agent interprets P3P policies.
-- [W3C — PICS Superseded by POWDER (2009)](https://www.w3.org/2009/08/pics_superseded.html) — no further PICS development; POWDER deliberately drops HTML-embedded labels.
-- [Microsoft Learn — P3P is no longer supported (archived IE docs)](https://learn.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/compatibility/mt146424(v=vs.85)) — P3P obsolete in Windows 10, support removed, do not deploy.
+- [W3C: P3P 1.0 obsoleted 30 August 2018](https://www.w3.org/TR/2018/OBSL-P3P-20180830/): obsolete, do not implement; no current user agent interprets P3P policies.
+- [W3C: PICS Superseded by POWDER (2009)](https://www.w3.org/2009/08/pics_superseded.html): no further PICS development; POWDER deliberately drops HTML-embedded labels.
+- [Microsoft Learn: P3P is no longer supported (archived IE docs)](https://learn.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/compatibility/mt146424(v=vs.85)): P3P obsolete in Windows 10, support removed, do not deploy.

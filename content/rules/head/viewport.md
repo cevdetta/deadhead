@@ -19,7 +19,7 @@ related: ["meta/viewport-user-scalable"]
 
 A page with no `<meta name="viewport">` tells a mobile browser nothing about how wide to
 lay it out, and the browser assumes the worst: a desktop page, written before phones
-existed. So it renders the page in a virtual window about 980 pixels wide and shrinks the
+existed. It renders the page in a virtual window about 980 pixels wide and shrinks the
 result onto a screen a third of that.
 
 ## Why avoid
@@ -52,28 +52,28 @@ pixels, so media queries and `vw` units mean what they say. `initial-scale=1` se
 ratio between CSS pixels and those device pixels in either orientation. Don't add
 `user-scalable=no` or a low `maximum-scale` to it (see `meta/viewport-user-scalable`).
 
-A page that really is desktop-only, like an internal admin tool, an iframe-only embed or an
-HTML email body, can go without. Say so where it happens:
+A desktop-only page can go without: an internal admin tool or an iframe-only embed
+qualifies. An HTML email body qualifies too. Say so where it happens:
 `<!-- deadhead-disable head/viewport -->`.
 
 ## Detectability
 
 Fully detectable, as a document rule, because the finding is about an element that isn't
-there. It lands on `<head>`. A viewport `<meta>` anywhere in the document counts, since
+there. The finding lands on `<head>`. A viewport `<meta>` anywhere in the document counts, since
 browsers apply one even when it's misplaced in `<body>`. Presence is all this checks: a
 viewport without `width=device-width` is a different problem.
 
-Nothing is reported unless there is a `<head>` with at least one element in it. Fragments,
+The rule reports nothing unless there is a `<head>` with at least one element in it. Fragments,
 partials and component templates aren't whole documents, and shouldn't be told to add a
 tag that belongs to the page around them. One edge remains: a file with head content but no
-`<head>` tag, like `<!doctype html><title>…`, is reported by the CLI without a line
+`<head>` tag, like `<!doctype html><title>…`, gets reported by the CLI without a line
 number and not by the ESLint plugin, because only the CLI's parser invents the missing head.
 
 There is no autofix. The remedy adds an element, and every fix here only removes.
 
 ## Resources
 
-- [MDN — `<meta name="viewport">`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/meta/name/viewport) — the ~980px virtual viewport, shrink-to-fit, and how it breaks media queries.
-- [web.dev — Responsive web design basics: set the viewport](https://web.dev/articles/responsive-web-design-basics#viewport) — desktop-width rendering without the tag; what `width=device-width` and `initial-scale=1` each do.
-- [Chrome for Developers — Lighthouse: viewport meta tag](https://developer.chrome.com/docs/lighthouse/pwa/viewport) — pages without the tag are "difficult to read"; the audit's failure conditions.
-- [CSS Viewport Module Level 1 — viewport meta](https://drafts.csswg.org/css-viewport/#viewport-meta) — the tag as written down by the CSS Working Group.
+- [MDN: `<meta name="viewport">`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/meta/name/viewport): the ~980px virtual viewport, shrink-to-fit, and how it breaks media queries.
+- [web.dev: Responsive web design basics: set the viewport](https://web.dev/articles/responsive-web-design-basics#viewport): desktop-width rendering without the tag; what `width=device-width` and `initial-scale=1` each do.
+- [Chrome for Developers: Lighthouse: viewport meta tag](https://developer.chrome.com/docs/lighthouse/pwa/viewport): pages without the tag are "difficult to read"; the audit's failure conditions.
+- [CSS Viewport Module Level 1: viewport meta](https://drafts.csswg.org/css-viewport/#viewport-meta): the tag as written down by the CSS Working Group.

@@ -10,7 +10,7 @@ import Layout, { REPO } from "../layouts/Layout.astro";
     <header class="flow">
       <h1>Install</h1>
       <p class="lede">
-        Node 24 or newer. No configuration is required to start — the defaults
+        Node 24 or newer. No configuration is required to start. The defaults
         are the point.
       </p>
     </header>
@@ -18,7 +18,7 @@ import Layout, { REPO } from "../layouts/Layout.astro";
     <h2>CLI</h2>
     <pre><code>npx deadhead dist</code></pre>
     <p>
-      It takes files, directories or globs, and expands globs itself so they
+      It takes files and directories, and expands globs itself so they
       behave the same in every shell:
     </p>
     <pre><code>deadhead dist                     # walk a directory for .html and .htm
@@ -37,8 +37,9 @@ deadhead --fix dist               # rewrite files, then report what is left</cod
     <p>
       <code>--fix</code> splices byte ranges out of the original file. It never
       parses your document and prints it back, because that rewrites quote
-      style, attribute order, whitespace and character references across the
-      whole file — turning a one-line fix into a thousand-line diff.
+      style and attribute order across the
+      whole file. Whitespace and character references shift with them, turning
+      a one-line fix into a thousand-line diff.
     </p>
     <p>
       Two things are never fixed automatically: a rule declaring{" "}
@@ -54,11 +55,12 @@ deadhead --fix dist               # rewrite files, then report what is left</cod
 &lt;!-- deadhead-enable --&gt;</code></pre>
     <p>
       A bare <code>deadhead-disable</code> with no rule id suppresses everything
-      until the matching enable. Contents of <code>&lt;pre&gt;</code>,{" "}
+      until the matching enable. The engine skips contents of{" "}
+      <code>&lt;pre&gt;</code>,{" "}
       <code>&lt;code&gt;</code>,{" "}
       <code>&lt;textarea&gt;</code>,{" "}
       <code>&lt;samp&gt;</code> and{" "}
-      <code>&lt;kbd&gt;</code> are skipped as content rather than markup.
+      <code>&lt;kbd&gt;</code> as content rather than markup.
     </p>
 
     <h2>Bookmarklet</h2>
@@ -73,8 +75,8 @@ deadhead --fix dist               # rewrite files, then report what is left</cod
     <h2>ESLint</h2>
     <p>
       <code>eslint-plugin-deadhead</code> reports the same findings through{" "}
-      <code>@html-eslint/parser</code>, with autofix. It is a convenience rather
-      than the foundation: if your head tags live in JSX, Vue or Svelte, an HTML
+      <code>@html-eslint/parser</code>, with autofix. It is a convenience for
+      editor feedback: if your head tags live in JSX, Vue or Svelte, an HTML
       parser will not see them, and the bookmarklet will.
     </p>
 

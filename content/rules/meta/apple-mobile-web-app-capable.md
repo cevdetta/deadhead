@@ -17,11 +17,12 @@ impacts: ["maintainability"]
 related: ["meta/mobile-web-app-capable", "link/apple-touch-icon-precomposed"]
 ---
 
-`<meta name="apple-mobile-web-app-capable" content="yes">` told iOS that a page saved to
+The web app manifest replaces `<meta name="apple-mobile-web-app-capable">`. The tag told
+iOS that a page saved to
 the Home Screen should launch like an app, without Safari's address bar and toolbar. Apple
 introduced it in the Safari Web Content Guide years before the web had a standard way to
-say the same thing, and it travels with a family of `apple-` tags for status-bar style,
-titles and startup images.
+say the same thing, and it travels with a family of `apple-` tags for status-bar style
+and titles, plus startup images.
 
 ## Why avoid
 
@@ -37,7 +38,7 @@ console deprecation warning for it. A page carrying it gets a warning in the mos
 engine for a setting its manifest should already hold. A page carrying both states its
 launch mode twice, in two formats, and only one of them is portable.
 
-**Removing it is not free on iOS, and that has to be said plainly.** iOS still reads the
+**Removing it is not free on iOS.** iOS still reads the
 tag:
 
 - **Without a manifest** that sets `display` to `standalone` or `fullscreen`, iOS 16.4 and
@@ -69,16 +70,16 @@ That is the same idea without the prefix, and the manifest replaces both.
 
 ## Detectability
 
-Fully detectable. `<meta name>` holds a single value, so the selector uses `=` with the
-`i` flag.
+Fully detectable. `<meta name>` holds a single value, so the rule matches with `=`
+and the `i` flag.
 
 The fix removes the element, and unlike most removals here it changes what iOS does, as
 described above. Add the manifest and its `display` member before applying it.
 
 ## Resources
 
-- [Apple Developer — Configuring Web Applications (Safari Web Content Guide, archived)](https://developer.apple.com/library/archive/documentation/AppleApplications/Reference/SafariWebContent/ConfiguringWebApplications/ConfiguringWebApplications.html) — where the tag and `apple-touch-startup-image` were defined; a Documentation Archive page.
-- [WebKit — Web Push for Web Apps on iOS and iPadOS (February 2023)](https://webkit.org/blog/13878/web-push-for-web-apps-on-ios-and-ipados/) — a manifest with `display` set to `standalone` or `fullscreen` makes a Home Screen web app; with neither that nor "a meta tag marking the site as web app capable", it is a bookmark opening in the default browser.
-- [W3C — Web Application Manifest: display member](https://www.w3.org/TR/appmanifest/#display-member) — the standard replacement.
-- [Chromium — `components/webapps/renderer/web_page_metadata_extraction.cc`](https://github.com/chromium/chromium/blob/main/components/webapps/renderer/web_page_metadata_extraction.cc) — Chromium reads `apple-mobile-web-app-capable` into page metadata as well.
-- [vercel/next.js#74524 — removal of apple-mobile-web-app-capable results in splash screens not working](https://github.com/vercel/next.js/issues/74524) — the iOS startup-image consequence of removing the tag.
+- [Apple Developer: Configuring Web Applications (Safari Web Content Guide, archived)](https://developer.apple.com/library/archive/documentation/AppleApplications/Reference/SafariWebContent/ConfiguringWebApplications/ConfiguringWebApplications.html): where the tag and `apple-touch-startup-image` were defined; a Documentation Archive page.
+- [WebKit: Web Push for Web Apps on iOS and iPadOS (February 2023)](https://webkit.org/blog/13878/web-push-for-web-apps-on-ios-and-ipados/): a manifest with `display` set to `standalone` or `fullscreen` makes a Home Screen web app; with neither that nor "a meta tag marking the site as web app capable", it is a bookmark opening in the default browser.
+- [W3C: Web Application Manifest: display member](https://www.w3.org/TR/appmanifest/#display-member): the standard replacement.
+- [Chromium: `components/webapps/renderer/web_page_metadata_extraction.cc`](https://github.com/chromium/chromium/blob/main/components/webapps/renderer/web_page_metadata_extraction.cc): Chromium reads `apple-mobile-web-app-capable` into page metadata as well.
+- [vercel/next.js#74524: removal of apple-mobile-web-app-capable results in splash screens not working](https://github.com/vercel/next.js/issues/74524): the iOS startup-image consequence of removing the tag.

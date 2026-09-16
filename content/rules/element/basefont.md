@@ -17,7 +17,8 @@ impacts: ["maintainability"]
 related: ["element/font", "element/acronym"]
 ---
 
-`<basefont size="4" color="navy" face="Verdana">` was meant to set the default font for a
+`<basefont>` sets nothing. `<basefont size="4" color="navy" face="Verdana">` was meant
+to set the default font for a
 whole document in one place, so every later `<font size="+1">` would count from it. Internet
 Explorer honoured it. Netscape and its successors never did. Today it is a line of markup that
 looks as if it sets the page's type, and sets nothing.
@@ -55,7 +56,8 @@ to offer.
 
 ## Detectability
 
-Fully detectable by tag name, in `<head>` or `<body>`: the parser handles `basefont` like
+Fully detectable by tag name. The rule matches the tag outright, in `<head>` or `<body>`:
+the parser handles `basefont` like
 `<link>` wherever it appears, as a void element with no end tag.
 
 There is no autofix. Deleting it would change nothing a reader sees, since it does nothing,
@@ -63,7 +65,7 @@ but whether to remove it is left to the author.
 
 ## Resources
 
-- [HTML Standard — Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#non-conforming-features) — `basefont` is entirely obsolete: "Use appropriate elements or CSS instead."
-- [HTML Standard — Rendering: hidden elements](https://html.spec.whatwg.org/multipage/rendering.html#hidden-elements) — `basefont` is `display: none`, with no presentational hints for its attributes.
-- [HTML Standard — Parsing: the "in head" insertion mode](https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inhead) — `basefont` start tags are processed with `base`, `bgsound` and `link`.
-- [Mozilla Bugzilla 3875 — deprecated `<basefont>` element not supported](https://bugzilla.mozilla.org/show_bug.cgi?id=3875) — resolved WONTFIX: Firefox never applied it.
+- [HTML Standard: Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#non-conforming-features): `basefont` is entirely obsolete: "Use appropriate elements or CSS instead."
+- [HTML Standard: Rendering: hidden elements](https://html.spec.whatwg.org/multipage/rendering.html#hidden-elements): `basefont` is `display: none`, with no presentational hints for its attributes.
+- [HTML Standard: Parsing: the "in head" insertion mode](https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inhead): `basefont` start tags are processed with `base`, `bgsound` and `link`.
+- [Mozilla Bugzilla 3875: deprecated `<basefont>` element not supported](https://bugzilla.mozilla.org/show_bug.cgi?id=3875): resolved WONTFIX: Firefox never applied it.

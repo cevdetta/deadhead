@@ -17,9 +17,11 @@ impacts: ["maintainability"]
 related: ["element/center", "element/nobr"]
 ---
 
-`<spacer type="horizontal" size="40">` asked the browser for a blank gap of a given size. It was a
-Netscape extension from the days before CSS, used to push table cells, images and navigation
-links apart. It still turns up in old templates, usually between links or at the start of a
+`<spacer>` adds no space. `<spacer type="horizontal" size="40">` asked the browser for
+a blank gap of a given size. It was a
+Netscape extension from the days before CSS, used to push table cells and images apart.
+Navigation links got the same treatment. It still turns up in old templates, between links
+or at the start of a
 paragraph.
 
 ## Why avoid
@@ -29,7 +31,7 @@ and must not be used by authors", with the advice: "Use appropriate elements or 
 
 It also does nothing. The DOM section maps `spacer` to `HTMLUnknownElement`, and the rendering
 section defines no styles for it. The browser ignores its `type`, `size`, `width`, `height` and
-`align` attributes, so the space the author wanted is simply missing from the page, and nothing
+`align` attributes, so the space the author wanted is missing from the page, and nothing
 warns anyone.
 
 It isn't harmless either, because `spacer` is not a void element. The spec's list of void
@@ -72,12 +74,13 @@ in the container". For space next to one element, use a margin on that element:
 
 ## Detectability
 
-Fully detectable by tag name. There is no autofix: an unclosed `spacer` contains the content that
+Fully detectable by tag name. The rule matches the tag outright. There is no autofix:
+an unclosed `spacer` contains the content that
 follows it, so removing the element would delete that content.
 
 ## Resources
 
-- [HTML Standard — Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#non-conforming-features) — `spacer` is entirely obsolete; use CSS instead.
-- [HTML Standard — Elements in the DOM](https://html.spec.whatwg.org/multipage/dom.html#elements-in-the-dom) — `spacer` maps to `HTMLUnknownElement`.
-- [HTML Standard — Void elements](https://html.spec.whatwg.org/multipage/syntax.html#void-elements) — `spacer` is not void, so an unclosed one wraps the content after it.
-- [CSS Box Alignment Module Level 3 — gap](https://www.w3.org/TR/css-align-3/#gap-shorthand) — fixed-length gutters between items in flex, grid and multi-column containers.
+- [HTML Standard: Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#non-conforming-features): `spacer` is entirely obsolete; use CSS instead.
+- [HTML Standard: Elements in the DOM](https://html.spec.whatwg.org/multipage/dom.html#elements-in-the-dom): `spacer` maps to `HTMLUnknownElement`.
+- [HTML Standard: Void elements](https://html.spec.whatwg.org/multipage/syntax.html#void-elements): `spacer` is not void, so an unclosed one wraps the content after it.
+- [CSS Box Alignment Module Level 3: gap](https://www.w3.org/TR/css-align-3/#gap-shorthand): fixed-length gutters between items in flex, grid and multi-column containers.

@@ -17,21 +17,22 @@ impacts: ["maintainability"]
 related: ["meta/http-equiv-x-ua-compatible"]
 ---
 
-`<meta http-equiv="set-cookie">` used to set cookies from markup. The HTML
-Standard lists the pragma as non-conforming — "has no effect", and "user
-agents are required to ignore" it — and browsers finished removing it years
+`<meta http-equiv="set-cookie">` sets no cookie. It used to set cookies from markup.
+The HTML
+Standard lists the pragma as non-conforming: "has no effect", and "user
+agents are required to ignore" it. Browsers finished removing it years
 ago: Chrome blocked it in M65, Firefox in 68, Edge alongside them.
 
 ## Why avoid
 
-The cookie is never set, so whatever depended on the tag is already broken —
+The cookie is never set, so whatever depended on the tag is already broken,
 silently. The removal was a security hardening: a `set-cookie` pragma let a
 non-script content injection manipulate cookies and upgrade itself toward
 session fixation, even under a strong Content Security Policy. Requiring
 either HTTP headers or script execution for cookies closed that vector.
 
 What is left is a tag that looks like cookie management and does nothing.
-Delete it, and move the cookie to where cookies actually live.
+Delete it, and move the cookie to the Set-Cookie header.
 
 ## Use instead
 
@@ -43,14 +44,15 @@ Set-Cookie: session=abc123; Secure; HttpOnly; SameSite=Lax
 
 ## Detectability
 
-Fully detectable. The pragma is a single element identified by one attribute
-value, so a selector match is the whole rule. The fix removes the element:
-deletion loses nothing, because no browser reads it — but the author still
+Fully detectable. The rule matches the selector outright: the pragma is a single
+element identified by one attribute
+value. The fix removes the element:
+deletion loses nothing, because no browser reads it. The author still
 has to re-create the cookie as a header, which is why the replacement says
 so explicitly.
 
 ## Resources
 
-- [HTML Standard — Pragma directives](https://html.spec.whatwg.org/multipage/semantics.html#pragma-directives) — set-cookie is non-conforming, has no effect, and must be ignored.
-- [Chrome 65 deprecations](https://developer.chrome.com/blog/chrome-65-deprecations) — the removal and its session-fixation rationale, with Intent-to-Remove and tracker links.
-- [MDN — `<meta http-equiv>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/meta/http-equiv) — browsers now ignore this pragma; use the Set-Cookie response header or document.cookie instead.
+- [HTML Standard: Pragma directives](https://html.spec.whatwg.org/multipage/semantics.html#pragma-directives): set-cookie is non-conforming, has no effect, and must be ignored.
+- [Chrome 65 deprecations](https://developer.chrome.com/blog/chrome-65-deprecations): the removal and its session-fixation rationale, with Intent-to-Remove and tracker links.
+- [MDN: `<meta http-equiv>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/meta/http-equiv): browsers now ignore this pragma; use the Set-Cookie response header or document.cookie instead.

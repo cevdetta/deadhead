@@ -17,7 +17,8 @@ impacts: ["seo", "maintainability"]
 related: ["link/shortcut-icon"]
 ---
 
-For a couple of years either side of 2009, the way to tell another site which image to
+`<link rel="image_src">` is dead: nothing reads it. For a couple of years either side of 2009,
+the way to tell another site which image to
 show alongside a link to yours was `<link rel="image_src">`. Yahoo! Search used it to
 fill a 54×98 pixel thumbnail beside a result, and Facebook read it when someone shared a
 URL. It arrived before Open Graph existed, was proposed as a link relation, and never got
@@ -27,14 +28,14 @@ any further.
 
 It is not a link relation and never was. The rel registry that the HTML Standard points
 to for extensions still carries `image_src`, with its status at `proposed` and its
-specification column reading `Unknown` — alongside a note that it is "probably redundant
+specification column reading `Unknown`, with a note alongside that it is "probably redundant
 with `rel=icon`". A browser tokenises `rel`, fails to recognise the keyword, and discards
 it, exactly as it does with `shortcut`.
 
 The sites it was written for are gone. Facebook shipped the Open Graph protocol in 2010
 and `og:image` replaced this mechanism wholesale; the Yahoo! Search thumbnail feature it
-fed no longer exists. Nothing in a modern stack reads the element — not a browser, not a
-crawler, not a social scraper.
+fed no longer exists. Nothing in a modern stack reads the element. Browsers discard the
+unrecognised keyword, and the scrapers that once read it moved to Open Graph in 2010.
 
 What is left is worse than inert, because it looks authoritative. A page carrying both
 `image_src` and `og:image` states its preview image twice, the two can drift apart, and
@@ -55,8 +56,8 @@ own tag next to it rather than reviving a generic one.
 
 ## Detectability
 
-Fully detectable. The selector uses `~=` because `rel` is a space-separated token set and
-that is how a browser parses it — the same reasoning as `link/shortcut-icon`, even though
+Fully detectable. The rule matches with `~=` because `rel` is a space-separated token set and
+that is how a browser parses it, the same reasoning as `link/shortcut-icon`, even though
 `image_src` is almost always the only token present.
 
 The fix removes the element outright, which is safe here in a way it is not for a legacy
@@ -66,7 +67,7 @@ still does a job, and an element whose whole purpose has been superseded.
 
 ## Resources
 
-- [microformats — existing rel values](http://microformats.org/wiki/existing-rel-values) — the official `rel` registry named by the HTML Standard; lists `image_src` as `proposed`, specification `Unknown`.
-- [HTML Standard — other link types](https://html.spec.whatwg.org/multipage/links.html#other-link-types) — establishes that registry as where `rel` extensions are recorded, and what happens to keywords outside it.
-- [Niall Kennedy — "Create enhanced results on Yahoo! and Facebook with Share markup" (16 March 2009)](http://www.niallkennedy.com/blog/2009/03/enhanced-social-share.html) — contemporaneous primary documentation of the mechanism and its consumers.
-- [The Open Graph protocol](https://ogp.me/) — the replacement.
+- [microformats: existing rel values](http://microformats.org/wiki/existing-rel-values): the official `rel` registry named by the HTML Standard; lists `image_src` as `proposed`, specification `Unknown`.
+- [HTML Standard: other link types](https://html.spec.whatwg.org/multipage/links.html#other-link-types): establishes that registry as where `rel` extensions are recorded, and what happens to keywords outside it.
+- [Niall Kennedy: "Create enhanced results on Yahoo! and Facebook with Share markup" (16 March 2009)](http://www.niallkennedy.com/blog/2009/03/enhanced-social-share.html): contemporaneous primary documentation of the mechanism and its consumers.
+- [The Open Graph protocol](https://ogp.me/): the replacement.

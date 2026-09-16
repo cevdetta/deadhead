@@ -17,10 +17,12 @@ impacts: ["seo"]
 related: ["script/type-javascript-mime"]
 ---
 
-Structured data in a `<script type="application/ld+json">` block is how most sites describe
-their articles, products, events and breadcrumbs to search engines. The block is a data
+One stray comma discards the whole JSON-LD block. Structured data in a `<script type="application/ld+json">`
+block is how most sites describe
+their articles and products to search engines. Events and breadcrumbs travel in the same
+blocks. The block is a data
 block: the browser never runs or renders it, so nothing on the page shows whether it's valid.
-A single stray comma makes it not JSON at all, and nobody finds out until Search Console does.
+Search Console is where authors find out.
 
 ## Why avoid
 
@@ -36,7 +38,7 @@ structured data errors". The examples it lists are ordinary JSON slips: "Missing
 closing brace", "Invalid escape sequence used in a string value". A page whose markup can't be
 parsed isn't eligible for the rich results the markup was written to earn.
 
-It's almost always a template bug. A loop that leaves a comma after the last item, a title
+It's a template bug. A loop that leaves a comma after the last item, a title
 with an unescaped double quote or a raw newline, a `//` comment, single-quoted strings copied
 from JavaScript. Because the block is invisible, the bug ships to every page the template
 renders.
@@ -62,8 +64,8 @@ about exactly that sequence.
 
 ## Detectability
 
-Fully detectable. Every `script[type="application/ld+json"]` is parsed with `JSON.parse`, and
-a block that fails is reported with the parser's own message as the detail. That message
+Fully detectable. The rule parses every `script[type="application/ld+json"]` with `JSON.parse`, and
+reports a block that fails with the parser's own message as the detail. That message
 comes from the JavaScript engine running the check, so its wording differs between the CLI
 and a bookmarklet in another browser. Empty and whitespace-only blocks are reported too.
 
@@ -76,7 +78,7 @@ parser message to the finding. There is no autofix.
 
 ## Resources
 
-- [W3C — JSON-LD 1.1 Processing Algorithms and API](https://www.w3.org/TR/json-ld11-api/) — "If source is not a valid JSON document, an invalid script element has been detected, and processing is aborted."
-- [W3C — JSON-LD 1.1: Embedding JSON-LD in HTML documents](https://www.w3.org/TR/json-ld11/#embedding-json-ld-in-html-documents) — the `application/ld+json` data block, and the restrictions on what its contents may contain.
-- [Google Search Console Help — Unparsable structured data report](https://support.google.com/webmasters/answer/9166415) — a parsing error means the type can't be determined; every item is a critical error.
-- [Google Search Central — General structured data guidelines](https://developers.google.com/search/docs/appearance/structured-data/sd-policies) — test with the Rich Results Test; items with issues aren't eligible for rich results.
+- [W3C: JSON-LD 1.1 Processing Algorithms and API](https://www.w3.org/TR/json-ld11-api/): "If source is not a valid JSON document, an invalid script element has been detected, and processing is aborted."
+- [W3C: JSON-LD 1.1: Embedding JSON-LD in HTML documents](https://www.w3.org/TR/json-ld11/#embedding-json-ld-in-html-documents): the `application/ld+json` data block, and the restrictions on its contents.
+- [Google Search Console Help: Unparsable structured data report](https://support.google.com/webmasters/answer/9166415): a parsing error means the type can't be determined; every item is a critical error.
+- [Google Search Central: General structured data guidelines](https://developers.google.com/search/docs/appearance/structured-data/sd-policies): test with the Rich Results Test; items with issues aren't eligible for rich results.

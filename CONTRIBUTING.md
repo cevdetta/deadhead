@@ -36,8 +36,8 @@ The pull request template carries the full definition of done.
 - [ ] Frontmatter validates (`pnpm validate:rules`), and `ruleId` matches the file path
 - [ ] At least two independent sources under `## Resources` (spec text, browser bug
       tracker, vendor documentation, or a well-argued primary post)
-- [ ] `## Why avoid` (or `## Why use`) states the concrete consequence, not just
-      "it's old"
+- [ ] `## Why avoid` (or `## Why use`) states the concrete consequence for users,
+      never "it's old"
 - [ ] `## Use instead` has runnable markup, or explicitly says "delete it"
 - [ ] `severity` is justified: `harmful` breaks something for users; `deprecated` is
       formally obsolete but inert; `unnecessary` works but is dead weight

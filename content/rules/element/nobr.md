@@ -17,7 +17,8 @@ impacts: ["maintainability"]
 related: ["element/center", "element/big"]
 ---
 
-`<nobr>` keeps its text on one line: the browser won't wrap it, however narrow the space gets.
+`<nobr>` hard-codes wrapping into the markup. `<nobr>` keeps its text on one line: the
+browser won't wrap it, however narrow the space gets.
 It dates from before CSS could say the same thing, and it still turns up around phone numbers,
 prices, product names and dates in old templates.
 
@@ -48,8 +49,8 @@ Put the text in a `<span>` and let CSS stop the wrapping:
 CSS Text defines `nowrap` as: "Like normal, this value collapses white space; but like pre, it
 does not allow wrapping." That is exactly what `<nobr>` did.
 
-One detail is easy to lose. Inside `<nobr>`, a `<wbr>` still marks a place where the line may
-break, because the user-agent stylesheet also says `nobr wbr { white-space: normal; }`. A plain
+One detail is easy to lose. Inside `<nobr>`, a `<wbr>` still marks a place where the line
+breaks: the user-agent stylesheet also says `nobr wbr { white-space: normal; }`. A plain
 `nowrap` span doesn't do that. If the old markup relied on `<wbr>`, add the same reset:
 
 ```css
@@ -58,12 +59,13 @@ break, because the user-agent stylesheet also says `nobr wbr { white-space: norm
 
 ## Detectability
 
-Fully detectable by tag name. There is no autofix: removing the element would delete the text
+Fully detectable by tag name. The rule matches the tag outright. There is no autofix:
+removing the element would delete the text
 inside it, and fixes can't unwrap an element to keep its content.
 
 ## Resources
 
-- [HTML Standard — Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#non-conforming-features) — `nobr` is entirely obsolete; use CSS instead.
-- [HTML Standard — Rendering: phrasing content](https://html.spec.whatwg.org/multipage/rendering.html#phrasing-content-3) — the user-agent stylesheet: `nobr { white-space: nowrap; }` and `nobr wbr { white-space: normal; }`.
-- [HTML Standard — Elements in the DOM](https://html.spec.whatwg.org/multipage/dom.html#elements-in-the-dom) — `nobr` maps to plain `HTMLElement`, with no interface of its own.
-- [CSS Text Module Level 3 — white-space: nowrap](https://www.w3.org/TR/css-text-3/#valdef-white-space-nowrap) — the replacement collapses white space and does not allow wrapping.
+- [HTML Standard: Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#non-conforming-features): `nobr` is entirely obsolete; use CSS instead.
+- [HTML Standard: Rendering: phrasing content](https://html.spec.whatwg.org/multipage/rendering.html#phrasing-content-3): the user-agent stylesheet: `nobr { white-space: nowrap; }` and `nobr wbr { white-space: normal; }`.
+- [HTML Standard: Elements in the DOM](https://html.spec.whatwg.org/multipage/dom.html#elements-in-the-dom): `nobr` maps to plain `HTMLElement`, with no interface of its own.
+- [CSS Text Module Level 3: white-space: nowrap](https://www.w3.org/TR/css-text-3/#valdef-white-space-nowrap): the replacement collapses white space and does not allow wrapping.

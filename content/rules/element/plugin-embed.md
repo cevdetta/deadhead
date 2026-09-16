@@ -17,9 +17,11 @@ impacts: ["interop", "maintainability"]
 related: ["element/applet"]
 ---
 
-`<object>` and `<embed>` load external content into a page. For years, their main job was starting
-a browser plug-in: Adobe Flash for `.swf` files, the Java plug-in for applets, or Microsoft
-Silverlight. That markup still turns up in old pages, often with a "get Flash Player" link as
+Plug-in content stays blank. `<object>` and `<embed>` load external content into a
+page. For years, their main job was starting
+a browser plug-in: Adobe Flash for `.swf` files and the Java plug-in for applets.
+Microsoft Silverlight played video. That markup still turns up in old pages, with a "get
+Flash Player" link as
 fallback.
 
 ## Why avoid
@@ -76,8 +78,8 @@ content is the only part that still reaches visitors, and removing the element w
 
 ## Resources
 
-- [Chromium Blog — The Final Countdown for NPAPI](https://blog.chromium.org/2014/11/the-final-countdown-for-npapi.html) — plug-in support permanently removed from Chrome in September 2015.
-- [Adobe — Flash Player End of Life](https://www.adobe.com/products/flashplayer/end-of-life.html) — support ended on 31 December 2020, and Flash content has been blocked since 12 January 2021.
-- [Microsoft Lifecycle — Silverlight 5](https://learn.microsoft.com/en-us/lifecycle/products/silverlight-5) — support ended in October 2021.
-- [JEP 398: Deprecate the Applet API for Removal](https://openjdk.org/jeps/398) — browser vendors removed Java plug-in support.
-- [HTML Standard — Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#non-conforming-features) — `classid` on `object` is obsolete.
+- [Chromium Blog: The Final Countdown for NPAPI](https://blog.chromium.org/2014/11/the-final-countdown-for-npapi.html): plug-in support permanently removed from Chrome in September 2015.
+- [Adobe: Flash Player End of Life](https://www.adobe.com/products/flashplayer/end-of-life.html): support ended on 31 December 2020, and Flash content has been blocked since 12 January 2021.
+- [Microsoft Lifecycle: Silverlight 5](https://learn.microsoft.com/en-us/lifecycle/products/silverlight-5): support ended in October 2021.
+- [JEP 398: Deprecate the Applet API for Removal](https://openjdk.org/jeps/398): browser vendors removed Java plug-in support.
+- [HTML Standard: Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#non-conforming-features): `classid` on `object` is obsolete.

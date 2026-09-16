@@ -17,8 +17,9 @@ impacts: ["a11y", "maintainability"]
 related: ["element/font", "element/center"]
 ---
 
-`<strike>` draws a line through its text. It is presentational markup from before CSS, and it
-still turns up for crossed-out prices, corrected dates and "done" items in old pages and pasted
+`<strike>` means nothing to assistive technology. `<strike>` draws a line through its
+text. It is presentational markup from before CSS, and it
+still turns up for crossed-out prices and corrected dates in old pages and pasted
 rich text.
 
 ## Why avoid
@@ -57,13 +58,14 @@ purely decorative and means nothing, use CSS `text-decoration: line-through` on 
 
 ## Detectability
 
-Fully detectable by tag name. There is no autofix: fixes can only remove markup, not rename it,
+Fully detectable by tag name. The rule matches the tag outright. There is no autofix:
+fixes can only remove markup, not rename it,
 and choosing between `del` and `s` depends on what the text means.
 
 ## Resources
 
-- [HTML Standard — Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#non-conforming-features) — `strike` is obsolete; use `del` for edits, otherwise `s`.
-- [HTML Standard — The s element](https://html.spec.whatwg.org/multipage/text-level-semantics.html#the-s-element) — contents that are no longer accurate or relevant; not for document edits.
-- [HTML Standard — The del element](https://html.spec.whatwg.org/multipage/edits.html#the-del-element) — a removal from the document.
-- [HTML Standard — Rendering: phrasing content](https://html.spec.whatwg.org/multipage/rendering.html#phrasing-content-3) — `del, s, strike { text-decoration: line-through; }`, the same look for all three.
-- [W3C — HTML Accessibility API Mappings](https://www.w3.org/TR/html-aam-1.0/#el-s) — `s` and `del` map to the ARIA `deletion` role; `strike` has no mapping.
+- [HTML Standard: Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#non-conforming-features): `strike` is obsolete; use `del` for edits, otherwise `s`.
+- [HTML Standard: The s element](https://html.spec.whatwg.org/multipage/text-level-semantics.html#the-s-element): contents that are no longer accurate or relevant; not for document edits.
+- [HTML Standard: The del element](https://html.spec.whatwg.org/multipage/edits.html#the-del-element): a removal from the document.
+- [HTML Standard: Rendering: phrasing content](https://html.spec.whatwg.org/multipage/rendering.html#phrasing-content-3): `del, s, strike { text-decoration: line-through; }`, the same look for all three.
+- [W3C: HTML Accessibility API Mappings](https://www.w3.org/TR/html-aam-1.0/#el-s): `s` and `del` map to the ARIA `deletion` role; `strike` has no mapping.

@@ -17,7 +17,8 @@ impacts: ["a11y", "maintainability"]
 related: ["element/plugin-embed", "element/applet"]
 ---
 
-`<noembed>` was meant to sit next to an `<embed>` and hold what to show instead when the embedded
+`<noembed>` never displays its content. `<noembed>` was meant to sit next to an
+`<embed>` and hold what to show instead when the embedded
 content couldn't play: a link, a picture, a sentence explaining what was missing. It still turns up
 beside old media and plug-in embeds.
 
@@ -27,15 +28,15 @@ It is obsolete. The HTML Standard lists `noembed` among the elements that "are e
 and must not be used by authors", with the instruction: "Use `object` instead of `embed` when
 fallback is necessary."
 
-More to the point, nobody ever sees what's inside it. The rendering section hides it outright,
+Nobody ever sees what's inside it. The rendering section hides it outright,
 alongside `script`, `style` and `template`: `noembed { display: none; }`. There is no condition
 attached, so it stays hidden whether the `embed` next to it works or not. Its content isn't even
 markup: the parser reads it with "the generic raw text element parsing algorithm", so a link
-written inside is just text.
+written inside is plain text.
 
 The `embed` it was paired with has no fallback either: "The `embed` element has no fallback content;
 its descendants are ignored." When it fails, the reader gets nothing, and the fallback the author
-wrote, often the only accessible alternative to the embedded content, never reaches them.
+wrote, the only accessible alternative to the embedded content, never reaches them.
 
 ## Use instead
 
@@ -51,14 +52,15 @@ the resource can't be:
 
 ## Detectability
 
-Fully detectable by tag name. deadhead never lints the content of a `noembed`, because a browser
+Fully detectable by tag name. The rule matches the tag outright; it never lints the
+content of a `noembed`, because a browser
 reads it as text. There is no autofix. Deleting the element would change nothing on screen, since
 it's hidden, but it would also delete the fallback text you still need to move into an `object`.
 
 ## Resources
 
-- [HTML Standard — Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#non-conforming-features) — `noembed` is obsolete; use `object` when fallback is necessary.
-- [HTML Standard — Rendering: hidden elements](https://html.spec.whatwg.org/multipage/rendering.html#hidden-elements) — `noembed { display: none; }`, unconditionally.
-- [HTML Standard — The embed element](https://html.spec.whatwg.org/multipage/iframe-embed-object.html#the-embed-element) — `embed` has no fallback content.
-- [HTML Standard — The object element](https://html.spec.whatwg.org/multipage/iframe-embed-object.html#the-object-element) — an `object`'s children are its fallback content.
-- [MDN — `<noembed>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/noembed) — obsolete and non-standard; use `object` with fallback content between its tags.
+- [HTML Standard: Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#non-conforming-features): `noembed` is obsolete; use `object` when fallback is necessary.
+- [HTML Standard: Rendering: hidden elements](https://html.spec.whatwg.org/multipage/rendering.html#hidden-elements): `noembed { display: none; }`, unconditionally.
+- [HTML Standard: The embed element](https://html.spec.whatwg.org/multipage/iframe-embed-object.html#the-embed-element): `embed` has no fallback content.
+- [HTML Standard: The object element](https://html.spec.whatwg.org/multipage/iframe-embed-object.html#the-object-element): an `object`'s children are its fallback content.
+- [MDN: `<noembed>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/noembed): obsolete and non-standard; use `object` with fallback content between its tags.

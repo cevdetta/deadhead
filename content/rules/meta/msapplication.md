@@ -17,12 +17,12 @@ impacts: ["maintainability"]
 related: ["meta/http-equiv-x-ua-compatible", "meta/application-name"]
 ---
 
-Internet Explorer 9 let a user pin a site to the Windows taskbar, and Internet Explorer 11
+Nothing reads `msapplication-*` tags anymore. Internet Explorer 9 let a user pin a site
+to the Windows taskbar, and Internet Explorer 11
 extended that to live tiles on the Windows 8 and 10 Start screen. A site described its tile
-with a family of Microsoft-only `<meta>` names: `msapplication-TileColor`,
-`msapplication-TileImage`, `msapplication-square150x150logo`, `msapplication-notification`,
-`msapplication-config` and more. Favicon generators still emit the whole set, usually with
-a `browserconfig.xml` alongside.
+with a family of Microsoft-only `<meta>` names for tile colour and tile images, and a
+`browserconfig.xml` referenced from `msapplication-config`. Favicon generators still emit
+the whole set, with a `browserconfig.xml` alongside.
 
 ## Why avoid
 
@@ -33,13 +33,13 @@ archived. The Internet Explorer 11 desktop application went out of support on Ju
 of support on March 9, 2021. Edge's IE mode renders legacy pages inside Edge and does not
 offer Start-screen pinning, so it gives the tags no reader either.
 
-The surface they configured is gone too. Windows 11 dropped live tiles outright — "Live
-Tiles are no longer available" — so a tile colour, a 310×150 logo and a notification polling
+The surface they configured is gone too. Windows 11 dropped live tiles outright ("Live
+Tiles are no longer available"), so a tile colour, a 310×150 logo and a notification polling
 URI describe something the operating system no longer draws.
 
 The only remaining consumer is the IE11 desktop app on long-term-servicing Windows 10,
-Windows Server and Embedded installs, pinning to a Windows 10 Start menu — no supported
-consumer browser. For everyone else the block is dead weight in every page's `<head>`, and
+Windows Server and Embedded installs, pinning to a Windows 10 Start menu. No supported
+consumer browser reads them. For everyone else the block is dead weight in every page's `<head>`, and
 `msapplication-config` keeps a second file, `browserconfig.xml`, alive for nobody. The tags
 were never standardised, so there is no spec that will revive them.
 
@@ -67,7 +67,7 @@ Delete `browserconfig.xml` along with the tags.
 ## Detectability
 
 Fully detectable. `<meta name>` holds a single value rather than a token set, so the
-selector is a case-insensitive prefix match on `msapplication-` — the documented names mix
+rule matches the `msapplication-` prefix case-insensitively. The documented names mix
 case freely (`msapplication-TileColor`). It deliberately leaves `application-name` alone:
 IE used it for the pinned-site title, but it is a standard HTML metadata name with its own
 meaning, and `meta/application-name` covers it.
@@ -78,7 +78,7 @@ without IE11 there is no request to suppress.
 
 ## Resources
 
-- [Microsoft Learn — Pinned Sites (Internet Explorer), archived](https://learn.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/platform-apis/hh772707(v=vs.85)) — defines the msapplication-* metadata, browserconfig.xml and `msapplication-config` as IE11 pinned-site features.
-- [Microsoft Lifecycle FAQ — Internet Explorer and Microsoft Edge](https://learn.microsoft.com/en-us/lifecycle/faq/internet-explorer-microsoft-edge) — IE11 desktop app out of support June 15, 2022 and disabled on Windows 10; legacy Edge out of support March 9, 2021; where IE11 remains supported.
-- [Microsoft — Windows 11 specifications, feature deprecations](https://www.microsoft.com/en-us/windows/windows-11-specifications) — "Live Tiles are no longer available."
-- [W3C — Web Application Manifest](https://www.w3.org/TR/appmanifest/) — the cross-browser home for app name, colours and icons.
+- [Microsoft Learn: Pinned Sites (Internet Explorer), archived](https://learn.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/platform-apis/hh772707(v=vs.85)): defines the msapplication-* metadata, browserconfig.xml and `msapplication-config` as IE11 pinned-site features.
+- [Microsoft Lifecycle FAQ: Internet Explorer and Microsoft Edge](https://learn.microsoft.com/en-us/lifecycle/faq/internet-explorer-microsoft-edge): IE11 desktop app out of support June 15, 2022 and disabled on Windows 10; legacy Edge out of support March 9, 2021; where IE11 remains supported.
+- [Microsoft: Windows 11 specifications, feature deprecations](https://www.microsoft.com/en-us/windows/windows-11-specifications): "Live Tiles are no longer available."
+- [W3C: Web Application Manifest](https://www.w3.org/TR/appmanifest/): the cross-browser home for app name, colours and icons.

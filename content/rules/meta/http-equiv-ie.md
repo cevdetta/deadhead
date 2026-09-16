@@ -18,11 +18,9 @@ impacts: ["maintainability"]
 related: ["meta/http-equiv-x-ua-compatible"]
 ---
 
-A cluster of http-equiv values only ever worked in Internet Explorer:
-`imagetoolbar` (the IE 6 image toolbar), `msthemecompatible` (Windows XP
-visual styles for form controls), and the `page-enter`, `page-exit`,
-`site-enter`, `site-exit` interpage transitions (PowerPoint-style wipes
-between page loads, declared with DX filter strings).
+A cluster of http-equiv values only ever worked in Internet Explorer. `imagetoolbar`
+silenced the IE 6 image toolbar and `msthemecompatible` took Windows XP visual
+styles. A transitions family played PowerPoint-style wipes between page loads.
 
 ## Why avoid
 
@@ -30,8 +28,8 @@ The audience is retired. IE 11 ended support on 15 June 2022 and its
 desktop application was later permanently disabled; every other browser
 has always ignored these values. The transitions family was already
 deprecated as of IE9 in Microsoft's own documentation. What remains is
-fairly prevalent dead weight — `imagetoolbar` alone survives on over a
-hundred thousand sites — maintained for a browser that no longer runs.
+fairly prevalent dead weight: `imagetoolbar` alone survives on over a
+hundred thousand sites, maintained for a browser that no longer runs.
 
 ## Use instead
 
@@ -41,16 +39,16 @@ DX-filter transitions.
 
 ## Detectability
 
-The selector `meta[http-equiv]` is only a pre-filter: the verdict depends
+The rule pre-filters with `meta[http-equiv]`: the verdict depends
 on whether the trimmed value, compared ASCII case-insensitively, is one of
 the six IE-only keywords. The decision therefore lives in
 `packages/rules/logic/meta/http-equiv-ie.ts`. Deliberately excluded:
-`cleartype` — no primary Microsoft source for an http-equiv switch
+`cleartype`: no primary Microsoft source for an http-equiv switch
 surfaced, so it stays unclaimed rather than guessed. The fix removes the
 element: no surviving browser acts on any claimed value.
 
 ## Resources
 
-- [Microsoft Learn — Introduction to Filters and Transitions (archived IE docs)](https://learn.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/platform-apis/ms532847(v=vs.85)) — Page-Enter/Page-Exit/Site-Enter/Site-Exit interpage transitions via meta tags; deprecated as of IE9.
-- [Microsoft Learn — IE11 end of support](https://learn.microsoft.com/en-us/lifecycle/announcements/internet-explorer-11-end-of-support) — IE 11 ended support June 15, 2022.
-- [HTML Standard — Pragma directives](https://html.spec.whatwg.org/multipage/semantics.html#pragma-directives) — none of these values is a pragma keyword, so all map to no state.
+- [Microsoft Learn: Introduction to Filters and Transitions (archived IE docs)](https://learn.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/platform-apis/ms532847(v=vs.85)): Page-Enter/Page-Exit/Site-Enter/Site-Exit interpage transitions via meta tags; deprecated as of IE9.
+- [Microsoft Learn: IE11 end of support](https://learn.microsoft.com/en-us/lifecycle/announcements/internet-explorer-11-end-of-support): IE 11 ended support June 15, 2022.
+- [HTML Standard: Pragma directives](https://html.spec.whatwg.org/multipage/semantics.html#pragma-directives): none of these values is a pragma keyword, so all map to no state.

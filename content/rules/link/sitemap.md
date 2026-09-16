@@ -17,7 +17,8 @@ impacts: ["seo", "maintainability"]
 related: ["link/image-src", "meta/keywords"]
 ---
 
-`<link rel="sitemap" type="application/xml" href="/sitemap.xml">` points from a page to
+No search engine reads `<link rel="sitemap">`. `<link rel="sitemap" type="application/xml" href="/sitemap.xml">`
+points from a page to
 the site's XML sitemap. It looks like the obvious place to announce one, which is why
 framework guides and SEO plugins keep adding it to every page's `<head>`. It is not where
 search engines look.
@@ -55,7 +56,7 @@ the same URL there too, and use IndexNow if you want changed URLs picked up quic
 
 ## Detectability
 
-Fully detectable. The selector uses `~=` because `rel` is a space-separated token set,
+Fully detectable. The rule matches with `~=` because `rel` is a space-separated token set,
 the same reasoning as `link/image-src`.
 
 The fix removes the element. No documented consumer discovers sitemaps from HTML, so
@@ -65,8 +66,8 @@ rule can't see robots.txt, so it can't check that for you.
 
 ## Resources
 
-- [sitemaps.org — Sitemaps XML format: informing search engine crawlers](https://www.sitemaps.org/protocol.html#informing) — the protocol's discovery methods: submission interface, robots.txt `Sitemap:` directive, ping.
-- [Google Search Central — Build and submit a sitemap](https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap) — Search Console, the Search Console API and robots.txt; no HTML link.
-- [Google Search Central Blog — Sitemaps ping endpoint is going away (June 2023)](https://developers.google.com/search/blog/2023/06/sitemaps-lastmod-ping) — the ping retired; robots.txt and Search Console remain.
-- [Bing Webmaster Blog — Removed Bing anonymous sitemap submission (May 2022)](https://blogs.bing.com/webmaster/may-2022/Spring-cleaning-Removed-Bing-anonymous-sitemap-submission) — robots.txt at the host root, Bing Webmaster Tools and IndexNow.
-- [microformats — existing rel values](https://microformats.org/wiki/existing-rel-values) — `sitemap` listed as `proposed` among HTML5 link type extensions.
+- [sitemaps.org: Sitemaps XML format: informing search engine crawlers](https://www.sitemaps.org/protocol.html#informing): the protocol's discovery methods: submission interface, robots.txt `Sitemap:` directive, ping.
+- [Google Search Central: Build and submit a sitemap](https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap): Search Console, the Search Console API and robots.txt; no HTML link.
+- [Google Search Central Blog: Sitemaps ping endpoint is going away (June 2023)](https://developers.google.com/search/blog/2023/06/sitemaps-lastmod-ping): the ping retired; robots.txt and Search Console remain.
+- [Bing Webmaster Blog: Removed Bing anonymous sitemap submission (May 2022)](https://blogs.bing.com/webmaster/may-2022/Spring-cleaning-Removed-Bing-anonymous-sitemap-submission): robots.txt at the host root, Bing Webmaster Tools and IndexNow.
+- [microformats: existing rel values](https://microformats.org/wiki/existing-rel-values): `sitemap` listed as `proposed` among HTML5 link type extensions.

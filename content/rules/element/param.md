@@ -17,8 +17,9 @@ impacts: ["interop", "maintainability"]
 related: ["element/applet", "element/plugin-embed"]
 ---
 
-`<param>` passed name/value pairs to the plug-in loaded by its parent `<object>` —
-which movie to play, whether fullscreen was allowed, the Flash variables. The
+`<param>` feeds nothing. `<param>` passed name/value pairs to the plug-in loaded by
+its parent `<object>`: which movie to play and whether fullscreen was allowed. Flash
+variables rode along the same way. The
 plug-ins it served are dead, and the element went with them: it is entirely
 obsolete, still parsed as a void element, and read by nothing.
 
@@ -31,7 +32,7 @@ only replacement advice is to set the URL of the external resource with the
 
 It never represented anything on its own. Historically it existed solely to
 initialise plug-ins invoked by `<object>`, and the current `object` section
-defines a transparent content model with no `param` processing step — the
+defines a transparent content model with no `param` processing step. The
 pipeline never consumes params. The rendering section hides it outright, in the same
 unconditional list as `script`, `style` and `noembed`. What survives in the standard
 is the obsolete listing plus a compatibility `HTMLParamElement` interface.
@@ -44,7 +45,7 @@ tuned is gone for every visitor, with no warning in the markup.
 
 ## Use instead
 
-There is no mechanical translation — plug-in parameters cannot become web
+There is no mechanical translation: plug-in parameters cannot become web
 platform markup. Point `<object>` at the real resource with `data` and `type`,
 keeping fallback content between the tags for readers the resource cannot reach:
 
@@ -64,18 +65,19 @@ For media, prefer the native element outright:
 
 ## Detectability
 
-Fully detectable. `param` is a void element that only ever appears as a child
-of `object`, so matching the tag is exact — there is no attribute form and no
+Fully detectable. The rule matches the tag outright: `param` is a void element that
+only ever appears as a child
+of `object`. There is no attribute form and no
 modern element to confuse it with. No logic module is needed.
 
-The fix is `none`, not because removing the element would be unsafe — a void
-element with no rendering of its own takes nothing visible with it — but
-because its name/value pairs cannot be mapped to anything that works. Deleting
+The fix is `none`. Removing the element would be safe, since a void
+element with no rendering of its own takes nothing visible with it. Its
+name/value pairs still cannot be mapped to anything that works, so deleting
 the markup is left to the author rebuilding the feature.
 
 ## Resources
 
-- [HTML Standard — Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#non-conforming-features) — lists `param` as entirely obsolete, with the `data`-attribute replacement wording.
-- [HTML Standard — The `object` element](https://html.spec.whatwg.org/multipage/iframe-embed-object.html#the-object-element) — content model is transparent with no `param` processing, so current object handling never consumes params.
-- [HTML Standard — Rendering: hidden elements](https://html.spec.whatwg.org/multipage/rendering.html#hidden-elements) — `param` is hidden unconditionally, alongside `script`, `style` and `noembed`.
-- [MDN — `<param>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/param) — marks the element Deprecated and void (no content, no ARIA role), pointing back at the spec's non-conforming-features section.
+- [HTML Standard: Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#non-conforming-features): lists `param` as entirely obsolete, with the `data`-attribute replacement wording.
+- [HTML Standard: The `object` element](https://html.spec.whatwg.org/multipage/iframe-embed-object.html#the-object-element): content model is transparent with no `param` processing, so current object handling never consumes params.
+- [HTML Standard: Rendering: hidden elements](https://html.spec.whatwg.org/multipage/rendering.html#hidden-elements): `param` is hidden unconditionally, alongside `script`, `style` and `noembed`.
+- [MDN: `<param>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/param): marks the element Deprecated and void (no content, no ARIA role), pointing back at the spec's non-conforming-features section.
