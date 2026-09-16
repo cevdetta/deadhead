@@ -35,6 +35,7 @@
     "linkedom": "^0.18.13",
     "parse5": "^8.0.1",
     "publint": "^0.3.24",
+    "rolldown": "^1.2.8",
     "typescript": "^7.0.2",
     "yaml": "^2.9.0"
   },

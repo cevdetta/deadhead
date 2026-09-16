@@ -2,30 +2,35 @@
 /**
  * Bundle the browser build into one self-contained IIFE.
  *
- * No bundler. Not out of purity: a `javascript:` URL has to be a single
- * expression with everything inlined, and the module graph here is nine files
- * of our own code in a uniform style. `stripTypeScriptTypes` (the same library
- * Node uses internally) removes the types; the rest is resolving imports in
- * dependency order and giving each module its own scope.
+ * Rolldown does the bundling and minifying: the module graph here is our own
+ * uniform ESM+TS, which is exactly what it eats natively, and it belongs to
+ * the same toolchain family as the site (Vite 8 runs on rolldown), so this
+ * is one dependency pulling in one direction rather than two. The hand-rolled
+ * bundler and minifier this replaces are gone; what remains is the part no
+ * bundler can do, assembling the rule set.
  *
  * Two properties the output must keep:
  *
- * - **No `fetch`, no `import()`.** Everything, including `rules.json` and the
- *   logic modules, is inlined. A page with a strict Content-Security-Policy is
- *   exactly the kind worth inspecting, and it must not be able to block this.
- * - **Own scope per module.** Two logic modules both exporting `match` is the
- *   normal case, so flat concatenation would break the moment a second rule
- *   needs code.
+ * - **No `fetch`, no `import()`.** Everything, including the rule literals
+ *   and the logic modules, is inlined. A page with a strict
+ *   Content-Security-Policy is exactly the kind worth inspecting, and it must
+ *   not be able to block this.
+ * - **Findings come back out.** The entry re-exports `boot` and every logic
+ *   entry point under a single `__deadhead` global, and the build appends one
+ *   `__deadhead.boot([...])` call. The snippet's completion value is the
+ *   findings array, which is what the conformance suite executes against.
+ *   (An IIFE tail `return` would be the obvious shape, but oxc-family
+ *   compress drops it as unused — the appended call survives every minifier.)
  *
  * Emits `packages/browser/bookmarklet.js`, which doubles as the devtools
  * snippet — paste it into Sources → Snippets and run. The `javascript:` URL is
  * printed for the bookmark itself.
  */
 
-import { readFile, writeFile } from "node:fs/promises";
-import { stripTypeScriptTypes } from "node:module";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, relative, resolve } from "node:path";
 import { styleText } from "node:util";
+import { rolldown } from "rolldown";
 
 import type { RuleMeta } from "../packages/core/vocabulary.ts";
 import { ROOT, rel } from "./rules-source.ts";
@@ -33,154 +38,13 @@ import { ROOT, rel } from "./rules-source.ts";
 const ENTRY = resolve(ROOT, "packages/browser/bookmarklet.ts");
 const RULES_JSON = resolve(ROOT, "packages/rules/rules.json");
 const OUT = resolve(ROOT, "packages/browser/bookmarklet.js");
-
-/** `import ... from "./relative.ts"` — the only import form this codebase uses. */
-const IMPORT = /^\s*import\s+(?:([\w$]+)\s*,\s*)?(?:\{([^}]*)\}|([\w$]+))\s+from\s+["']([^"']+)["'];?\s*$/gm;
-/** Re-exports, which `packages/core/index.ts` is made of. */
-const REEXPORT = /^\s*export\s*\{([^}]*)\}\s*from\s+["']([^"']+)["'];?\s*$/gm;
-
-const moduleName = (file: string): string =>
-  `__m_${relative(ROOT, file).replace(/[^a-zA-Z0-9]/g, "_")}`;
-
-type Module = { file: string; body: string; deps: string[]; exports: string[] };
-
-/**
- * Named exports of a stripped module.
- *
- * The re-export form matters as much as the declaration form:
- * `packages/core/index.ts` is nothing but `export { ... } from "./x.ts"`, so a
- * scanner that only understood declarations would give the package's public
- * entry point an empty export list and every consumer would see `undefined`.
- */
-function exportsOf(source: string): string[] {
-  const names = new Set<string>();
-
-  for (const m of source.matchAll(/^\s*export\s+(?:const|let|var|function|class)\s+([\w$]+)/gm)) {
-    names.add(m[1] as string);
-  }
-  // `export { a, b as c };` and `export { a, b as c } from "./x.ts";` alike.
-  for (const m of source.matchAll(/^\s*export\s*\{([^}]*)\}\s*(?:from\s+["'][^"']+["'])?\s*;?\s*$/gm)) {
-    for (const part of (m[1] as string).split(",")) {
-      const name = part.trim().split(/\s+as\s+/).pop()?.trim();
-      // `type` specifiers are gone after stripping, but guard anyway.
-      if (name && name !== "type") names.add(name);
-    }
-  }
-  return [...names];
-}
-
-/**
- * Compact a module before it is inlined: strip docblock comments (`/** ... *\/`)
- * and drop blank lines.
- *
- * Deliberately line-anchored rather than a character scan: a lexer would have
- * to tell `//` comments from `https://` strings and `\/\//` regexes (both
- * occur in the bundled sources), while every docblock here occupies whole
- * lines — the opener is the first non-blank on its line. Constraints this
- * relies on: never put a line-leading `/**` inside a string literal, and
- * never put a blank line inside a multi-line string (the only one today is
- * the stylesheet in `bookmarklet.ts`, which has none).
- */
-function compact(source: string): string {
-  const out: string[] = [];
-  let inBlock = false;
-  for (const line of source.split("\n")) {
-    if (!inBlock) {
-      const open = line.search(/^[ \t]*\/\*\*/);
-      if (open === -1) {
-        if (line.trim() !== "") out.push(line);
-        continue;
-      }
-      const opener = line.indexOf("/**", open);
-      const close = line.indexOf("*/", opener + 3);
-      if (close === -1) {
-        inBlock = true;
-        continue;
-      }
-      const rest = line.slice(0, opener) + line.slice(close + 2);
-      if (rest.trim() !== "") out.push(rest);
-      continue;
-    }
-    const close = line.indexOf("*/");
-    if (close === -1) {
-      continue;
-    }
-    inBlock = false;
-    const rest = line.slice(close + 2);
-    if (rest.trim() !== "") out.push(rest);
-  }
-  return out.join("\n");
-}
-
-/** Rewrite ESM syntax into plain statements inside the module's own scope. */
-function rewrite(source: string, file: string): { body: string; deps: string[] } {
-  const deps: string[] = [];
-
-  const resolveDep = (specifier: string): string => {
-    const target = resolve(dirname(file), specifier);
-    deps.push(target);
-    return moduleName(target);
-  };
-
-  let body = source.replace(REEXPORT, (_all, names: string, specifier: string) => {
-    const from = resolveDep(specifier);
-    // `a as b` becomes `a: b` so the local binding carries the exported name.
-    const bindings = names
-      .split(",")
-      .map((part) => part.trim())
-      .filter((part) => part !== "")
-      .map((part) => part.replace(/\s+as\s+/, ": "))
-      .join(", ");
-    return `const {${bindings}} = ${from};`;
-  });
-
-  body = body.replace(IMPORT, (all, def: string | undefined, named: string | undefined, star: string | undefined, specifier: string) => {
-    if (!specifier.startsWith(".")) {
-      throw new Error(`${rel(file)}: bare import ${JSON.stringify(specifier)} cannot be inlined`);
-    }
-    const from = resolveDep(specifier);
-    if (star !== undefined) return `const ${star} = ${from};`;
-    const parts: string[] = [];
-    if (def !== undefined) parts.push(`const ${def} = ${from}.default;`);
-    if (named !== undefined) parts.push(`const {${named}} = ${from};`);
-    return parts.join(" ") || `/* ${all.trim()} */`;
-  });
-
-  // `export` is only a marker once each module has its own scope; the export
-  // object is built explicitly at the end of the wrapper.
-  body = body.replace(/^\s*export\s+(?=const|let|var|function|class|async)/gm, "");
-  body = body.replace(/^\s*export\s*\{[^}]*\}\s*;?\s*$/gm, "");
-
-  return { body, deps };
-}
-
-/** Depth-first walk of the import graph, emitting dependencies before dependents. */
-async function collect(entry: string): Promise<Module[]> {
-  const ordered: Module[] = [];
-  const state = new Map<string, "visiting" | "done">();
-
-  const visit = async (file: string): Promise<void> => {
-    const seen = state.get(file);
-    if (seen === "done") return;
-    if (seen === "visiting") throw new Error(`import cycle at ${rel(file)}`);
-    state.set(file, "visiting");
-
-    const source = compact(stripTypeScriptTypes(await readFile(file, "utf8"), { mode: "strip" }));
-    const { body, deps } = rewrite(source, file);
-    for (const dep of deps) await visit(dep);
-
-    ordered.push({ file, body, deps, exports: exportsOf(source) });
-    state.set(file, "done");
-  };
-
-  await visit(entry);
-  return ordered;
-}
-
-const wrap = (module: Module): string =>
-  `const ${moduleName(module.file)} = (() => {\n${module.body}\nreturn {${module.exports.join(", ")}};\n})();`;
-
-// --- build ------------------------------------------------------------------
+// Generated entry, not source: it exists so rolldown sees the logic modules,
+// which rules.json reaches without an import. Under .git/ it never pollutes
+// the tree and never ships.
+const GEN_DIR = resolve(ROOT, ".git/deadhead/bundle-entry");
+const GEN_ENTRY = resolve(GEN_DIR, "entry.ts");
+/** The one page-global the snippet leaves behind. Double runs redeclare it. */
+const GLOBAL = "__deadhead";
 
 const { rules } = JSON.parse(await readFile(RULES_JSON, "utf8")) as { rules: RuleMeta[] };
 
@@ -190,20 +54,24 @@ for (const meta of rules) {
   logicFiles.set(meta.ruleId, resolve(ROOT, "packages/rules/logic", `${meta.ruleId}.ts`));
 }
 
-const modules = await collect(ENTRY);
-// Logic modules are reached through rules.json, not through an import, so they
-// have to be pulled into the graph explicitly.
-for (const file of logicFiles.values()) {
-  if (!modules.some((m) => m.file === file)) modules.unshift(...(await collect(file)));
-}
+/** Import specifier from the generated entry to a repo file. */
+const spec = (file: string): string => {
+  const turned = relative(dirname(GEN_ENTRY), file).replace(/\\/g, "/");
+  return turned.startsWith(".") ? turned : `./${turned}`;
+};
 
-const seen = new Set<string>();
-const unique = modules.filter((m) => (seen.has(m.file) ? false : (seen.add(m.file), true)));
-
+const imports = [`import { boot } from "${spec(ENTRY)}";`];
+const names = ["boot"];
 const ruleLiterals = rules.map((meta) => {
   const file = logicFiles.get(meta.ruleId);
   const entry = meta.kind === "document" ? "check" : "match";
-  const logic = file === undefined ? "" : `, ${entry}: ${moduleName(file)}.${entry}`;
+  let logic = "";
+  if (file !== undefined) {
+    const name = `${entry}_${meta.ruleId.replace(/[^a-zA-Z0-9]/g, "_")}`;
+    imports.push(`import { ${entry} as ${name} } from "${spec(file)}";`);
+    names.push(name);
+    logic = `, ${entry}: ${GLOBAL}.${name}`;
+  }
   // Only the keys the bookmarklet reads: the engine dispatches on selector,
   // kind, scope and match, and reports ruleId, severity, description,
   // replacement, detectability and fix. The rest (title, pubDate, status,
@@ -224,21 +92,27 @@ const ruleLiterals = rules.map((meta) => {
   return `{ meta: ${JSON.stringify(slim)}${logic} }`;
 });
 
+await mkdir(GEN_DIR, { recursive: true });
+await writeFile(GEN_ENTRY, `${imports.join("\n")}\nexport { ${names.join(", ")} };\n`);
+
+const built = await rolldown({ input: GEN_ENTRY });
+const { output } = await built.generate({ format: "iife", name: GLOBAL, minify: true });
+await built.close();
+const chunk = output[0];
+if (chunk === undefined || !("code" in chunk)) throw new Error("rolldown emitted no chunk");
+
 const bundle = `/* deadhead bookmarklet — generated by scripts/build-bookmarklet.ts. Do not edit.
  * ${rules.length} rule(s) inlined. No network access: nothing here can be blocked by CSP.
  * Paste into devtools → Sources → Snippets, or use the javascript: URL. */
-(() => {
-${unique.map(wrap).join("\n\n")}
-
-return ${moduleName(ENTRY)}.boot([\n${ruleLiterals.join(",\n")}\n]);
-})();
+${chunk.code.trimEnd()}
+${GLOBAL}.boot([\n${ruleLiterals.join(",\n")}\n]);
 `;
 
 await writeFile(OUT, bundle, "utf8");
 
 const url = `javascript:${encodeURIComponent(bundle)}`;
 process.stdout.write(
-  `${styleText("green", "✓")} ${unique.length} module(s), ${rules.length} rule(s) → ${rel(OUT)}\n` +
+  `${styleText("green", "✓")} ${rules.length} rule(s) → ${rel(OUT)}\n` +
     `  snippet: paste the file into devtools → Sources → Snippets\n` +
     `  bookmarklet URL: ${(url.length / 1024).toFixed(1)} kB\n`,
 );

@@ -64,9 +64,11 @@ test("the bundle carries every rule, including the ones that need code", () => {
       `${rule.meta.ruleId} is not inlined in the bundle`,
     );
   }
-  // The logic modules must be inlined too, not merely referenced.
-  assert.match(bundle, /JAVASCRIPT_MIME_ESSENCES/, "script logic missing");
-  assert.match(bundle, /PRESCAN_LIMIT/, "charset logic missing");
+  // The logic modules must be inlined too, not merely referenced. Rolldown
+  // mangles internal identifiers, so assert on the assembly's stable wiring:
+  // the appended call reaching each logic entry through the snippet global.
+  assert.match(bundle, /__deadhead\.match_script_type_javascript_mime/, "script logic missing");
+  assert.match(bundle, /__deadhead\.check_head_charset_position/, "charset logic missing");
 });
 
 test("nothing in the bundle can be blocked by a Content-Security-Policy", () => {
