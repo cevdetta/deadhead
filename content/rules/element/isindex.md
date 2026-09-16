@@ -17,7 +17,8 @@ impacts: ["maintainability", "security"]
 related: ["element/bgsound", "element/blink"]
 ---
 
-`<isindex prompt="Search this site:">` was the web's first search box, older than forms. The parser
+`<isindex>` renders no search box. `<isindex prompt="Search this site:">` was the web's
+first search box, older than forms. The parser
 treated it as a macro: one tag expanded into a small form with a rule, a label and a text field,
 and pressing Enter sent the words back to the page's own URL as a query. It survived in the parser
 for twenty years after forms made it pointless.
@@ -35,7 +36,7 @@ it in version 56. Today the Standard's parser has no special case for it, and th
 `HTMLUnknownElement`, the interface for tags the browser doesn't recognise.
 
 So a page that still relies on it has quietly lost its search box. There is no form, no text
-field and nothing to submit, just an unknown element, and no error to say what happened.
+field and nothing to submit, only an unknown element, and no error to say what happened.
 
 ## Use instead
 
@@ -53,12 +54,13 @@ form, so give search fields an ordinary name like `q`.
 
 ## Detectability
 
-Fully detectable by tag name. There is no autofix: the replacement is a form with a field, a label
+Fully detectable by tag name. The rule matches the tag outright. There is no autofix:
+the replacement is a form with a field, a label
 and a submit button, not something a removal can produce.
 
 ## Resources
 
-- [HTML Standard — Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#non-conforming-features) — `isindex` is entirely obsolete: "Use an explicit form and text control combination instead."
-- [whatwg/html — Remove `<isindex>` and `<input name=isindex>`](https://github.com/whatwg/html/commit/5c44abc734eb483f9a7ec79da5844d2fe63d9c3b) — the parser macro was "a potential XSS problem"; Chrome and Edge had already removed it.
-- [Mozilla Bugzilla 1266495 — removing `<isindex>` from the parser and form submission](https://bugzilla.mozilla.org/show_bug.cgi?id=1266495) — fixed for Firefox 56.
-- [HTML Standard — Elements in the DOM](https://html.spec.whatwg.org/multipage/dom.html#elements-in-the-dom) — `isindex` maps to `HTMLUnknownElement`.
+- [HTML Standard: Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#non-conforming-features): `isindex` is entirely obsolete: "Use an explicit form and text control combination instead."
+- [whatwg/html: Remove `<isindex>` and `<input name=isindex>`](https://github.com/whatwg/html/commit/5c44abc734eb483f9a7ec79da5844d2fe63d9c3b): the parser macro was "a potential XSS problem"; Chrome and Edge had already removed it.
+- [Mozilla Bugzilla 1266495: removing `<isindex>` from the parser and form submission](https://bugzilla.mozilla.org/show_bug.cgi?id=1266495): fixed for Firefox 56.
+- [HTML Standard: Elements in the DOM](https://html.spec.whatwg.org/multipage/dom.html#elements-in-the-dom): `isindex` maps to `HTMLUnknownElement`.

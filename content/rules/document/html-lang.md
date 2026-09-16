@@ -20,8 +20,7 @@ related: ["head/viewport"]
 
 `<html>` with no `lang`, or with `lang=""`, doesn't say what language the page is written
 in. Browsers and assistive technology still have to render and read it in *some* language,
-so they fall back to a guess, usually the user's own default, whatever the page actually
-contains.
+so they fall back to a guess, the user's own default, whatever language the page contains.
 
 ## Why avoid
 
@@ -41,8 +40,8 @@ A header doesn't make up for it. The W3C ACT rule for this criterion accepts onl
 attribute that is "neither empty nor only ASCII whitespace". Language set through HTTP
 headers or `<meta>` is "not supported by all assistive technologies", and `xml:lang` on its
 own fails. The same missing value degrades everything else that keys off language:
-browser translation offers, spell-checking in form fields, `hyphens: auto`, and font
-selection for CJK text.
+browser translation offers and spell-checking in form fields. `hyphens: auto` and font
+selection for CJK text key off it too.
 
 ## Use instead
 
@@ -58,17 +57,18 @@ language on its own element: `<span lang="fr">c'est la vie</span>`.
 
 Fully detectable. The selector finds `<html>`, and the logic reports it when `lang` is
 missing, empty or only whitespace. A selector alone can't express the whitespace case.
-Whether a present value is a *valid* language tag isn't checked here.
+The rule does not check whether a present value is a *valid* language tag.
 
 Like `head/viewport`, nothing is reported unless the document has a `<head>` with at least
-one element in it, so fragments, partials and component templates don't fire. A document
-that only ever loads inside an `<iframe>` is still reported, because a file on disk can't
+one element in it, so fragments, partials and component templates don't fire. The rule
+still reports a document
+that only ever loads inside an `<iframe>`, because a file on disk can't
 know it will be framed. Mark that case with `<!-- deadhead-disable document/html-lang -->`.
 
 There is no autofix: the value is the page's language, which only the author knows.
 
 ## Resources
 
-- [HTML Standard — the lang and xml:lang attributes](https://html.spec.whatwg.org/multipage/dom.html#the-lang-and-xml:lang-attributes) — the empty string means unknown; the fallback chain; "authors should specify the lang attribute on the root html element".
-- [W3C — Understanding WCAG 2.2 SC 3.1.1: Language of Page](https://www.w3.org/WAI/WCAG22/Understanding/language-of-page.html) — the Level A criterion, pronunciation rules for screen readers, and technique H57.
-- [W3C ACT rule b5c3f8 — HTML page has lang attribute](https://www.w3.org/WAI/standards-guidelines/act/rules/b5c3f8/) — `lang` must be neither empty nor only whitespace; headers, `<meta>` and `xml:lang` alone don't satisfy it.
+- [HTML Standard: the lang and xml:lang attributes](https://html.spec.whatwg.org/multipage/dom.html#the-lang-and-xml:lang-attributes): the empty string means unknown; the fallback chain; "authors should specify the lang attribute on the root html element".
+- [W3C: Understanding WCAG 2.2 SC 3.1.1: Language of Page](https://www.w3.org/WAI/WCAG22/Understanding/language-of-page.html): the Level A criterion, pronunciation rules for screen readers, and technique H57.
+- [W3C ACT rule b5c3f8: HTML page has lang attribute](https://www.w3.org/WAI/standards-guidelines/act/rules/b5c3f8/): `lang` must be neither empty nor only whitespace; headers, `<meta>` and `xml:lang` alone don't satisfy it.

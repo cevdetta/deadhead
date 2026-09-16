@@ -17,7 +17,8 @@ impacts: ["maintainability"]
 related: ["element/xmp", "element/listing"]
 ---
 
-`<plaintext>` tells the browser to stop reading HTML. Everything after the start tag is shown as
+Never use `<plaintext>`: everything after it becomes text. `<plaintext>` tells the
+browser to stop reading HTML. Everything after the start tag is shown as
 typed, in a monospace font, to the end of the file. MDN traces it to HTML 2.
 
 ## Why avoid
@@ -31,7 +32,7 @@ tokens will be character tokens (and a final end-of-file token) because there is
 the tokenizer out of the PLAINTEXT state." The PLAINTEXT state has no case for `<` or `&`, so
 nothing after the start tag is markup:
 
-- **It has no end tag.** Writing `</plaintext>` just shows the characters `</plaintext>`.
+- **It has no end tag.** Writing `</plaintext>` shows the characters `</plaintext>`.
 - **The rest of the page becomes text.** `</body>`, `</html>`, a footer or a script after it all
   appear on screen as source code instead of doing anything.
 - **Character references aren't decoded.** `&amp;` stays five characters.
@@ -52,8 +53,9 @@ To show text inside an HTML page, use `pre` and `code`, and escape `<` and `&`:
 
 ## Detectability
 
-Fully detectable by tag name, anywhere in the document: a `<plaintext>` written in `<head>` is moved
-into `<body>` by a browser but not by every parser deadhead uses, so the rule doesn't limit itself to
+Fully detectable by tag name, anywhere in the document. The rule matches the tag
+outright: a `<plaintext>` written in `<head>` is moved
+into `<body>` by a browser but not by every parser the rule runs on, so the rule doesn't limit itself to
 either. Nothing after the start tag is linted, because a browser reads it as text.
 
 There is no autofix. Removing the start tag would turn the rest of the file back into markup, which
@@ -61,8 +63,8 @@ changes the page, and moving to `pre` and `code` means escaping the content.
 
 ## Resources
 
-- [HTML Standard — Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#non-conforming-features) — `plaintext` is obsolete; use the `text/plain` MIME type instead.
-- [HTML Standard — Parsing: the "in body" insertion mode](https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inbody) — the start tag switches the tokenizer to PLAINTEXT, with no way back.
-- [HTML Standard — PLAINTEXT state](https://html.spec.whatwg.org/multipage/parsing.html#plaintext-state) — every character, `<` and `&` included, is emitted as text.
-- [HTML Standard — Rendering: flow content](https://html.spec.whatwg.org/multipage/rendering.html#flow-content-3) — `plaintext` is displayed like `pre`.
-- [MDN — `<plaintext>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/plaintext) — obsolete; serve `text/plain`, or use `pre` or `code` with `<`, `>` and `&` escaped.
+- [HTML Standard: Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#non-conforming-features): `plaintext` is obsolete; use the `text/plain` MIME type instead.
+- [HTML Standard: Parsing: the "in body" insertion mode](https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inbody): the start tag switches the tokenizer to PLAINTEXT, with no way back.
+- [HTML Standard: PLAINTEXT state](https://html.spec.whatwg.org/multipage/parsing.html#plaintext-state): every character, `<` and `&` included, is emitted as text.
+- [HTML Standard: Rendering: flow content](https://html.spec.whatwg.org/multipage/rendering.html#flow-content-3): `plaintext` is displayed like `pre`.
+- [MDN: `<plaintext>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/plaintext): obsolete; serve `text/plain`, or use `pre` or `code` with `<`, `>` and `&` escaped.

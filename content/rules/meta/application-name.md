@@ -17,7 +17,8 @@ impacts: ["maintainability"]
 related: ["meta/msapplication", "link/apple-touch-icon-precomposed"]
 ---
 
-`<meta name="application-name" content="Example Mail">` names the web application a page
+Most pages carrying `application-name` are not applications. `<meta name="application-name" content="Example Mail">`
+names the web application a page
 belongs to, as opposed to the page itself. It is not a vendor invention or a relic: it is a
 current standard metadata name in the HTML Standard. Internet Explorer 11 made it popular
 as the name on a pinned-site tile, and favicon generators have emitted it on every page
@@ -35,7 +36,7 @@ application-name metadata name must not be used." Most pages carrying it are ord
 documents, blog posts and marketing pages, where a generator put it. For them the tag is
 non-conforming as used.
 
-For pages that really are applications, the web app manifest has taken the job. Its
+For pages that are applications, the web app manifest has taken the job. Its
 `name` and `short_name` members name the installed app in every browser that installs web
 apps, and `short_name` gives the space-constrained form that a single `content` string
 can't. A site that ships both states the app's name twice, in two files, and the two
@@ -67,9 +68,9 @@ For a page that isn't an app, nothing: `<title>` already names it.
 
 ## Detectability
 
-Fully detectable. `<meta name>` holds a single value, not a token set, so the selector
-uses `=` with the `i` flag. The standard compares the name ASCII case-insensitively.
-A page may carry one per language via `lang`, and each is reported.
+Fully detectable. `<meta name>` holds a single value, not a token set, so the rule
+matches with `=` and the `i` flag. The standard compares the name ASCII case-insensitively.
+A page carries one per language via `lang`, and the rule reports each.
 
 The fix removes the element unconditionally. On a page with a manifest `name`, that
 changes nothing. On a page with no manifest, Chromium's install or shortcut flow may now
@@ -78,7 +79,7 @@ job to settle, so add one rather than keep the tag.
 
 ## Resources
 
-- [HTML Standard — standard metadata names: application-name](https://html.spec.whatwg.org/multipage/semantics.html#meta-application-name) — the definition, the "must not be used" rule for pages that aren't web applications, and the allowance to prefer it over `<title>`.
-- [W3C — Web Application Manifest: name member](https://www.w3.org/TR/appmanifest/#name-member) — the standard home for an installable application's name, with `short_name` alongside it.
-- [Chromium — `components/webapps/renderer/web_page_metadata_extraction.cc`](https://github.com/chromium/chromium/blob/main/components/webapps/renderer/web_page_metadata_extraction.cc) — reads `application-name` into the page metadata Chromium's web app code consumes.
-- [Microsoft Learn — Pinned Sites (Internet Explorer), archived](https://learn.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/platform-apis/hh772707(v=vs.85)) — `application-name` as the IE11 pinned-site name, the other historical reader.
+- [HTML Standard: standard metadata names: application-name](https://html.spec.whatwg.org/multipage/semantics.html#meta-application-name): the definition, the "must not be used" rule for pages that aren't web applications, and the allowance to prefer it over `<title>`.
+- [W3C: Web Application Manifest: name member](https://www.w3.org/TR/appmanifest/#name-member): the standard home for an installable application's name, with `short_name` alongside it.
+- [Chromium: `components/webapps/renderer/web_page_metadata_extraction.cc`](https://github.com/chromium/chromium/blob/main/components/webapps/renderer/web_page_metadata_extraction.cc): reads `application-name` into the page metadata Chromium's web app code consumes.
+- [Microsoft Learn: Pinned Sites (Internet Explorer), archived](https://learn.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/platform-apis/hh772707(v=vs.85)): `application-name` as the IE11 pinned-site name, the other historical reader.

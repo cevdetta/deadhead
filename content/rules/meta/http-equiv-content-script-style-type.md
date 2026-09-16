@@ -17,8 +17,9 @@ impacts: ["maintainability"]
 related: ["script/type-javascript-mime"]
 ---
 
-HTML 4.01 asked authors to declare the document's default scripting and
-style sheet languages, because pages could be written in Tcl, VBScript, or
+Delete `content-script-type` and `content-style-type`: JavaScript and CSS are the
+defaults. HTML 4.01 asked authors to declare the document's default scripting and
+style sheet languages, because pages could be written in Tcl or VBScript, among
 other contenders:
 
 ```html
@@ -26,7 +27,7 @@ other contenders:
 <META http-equiv="Content-Style-Type" content="text/css">
 ```
 
-That world is gone, and the HTML Standard has no such pragmas — both values
+That world is gone, and the HTML Standard has no such pragmas: both values
 map to no state and are ignored.
 
 ## Why avoid
@@ -47,12 +48,12 @@ non-default uses:
 
 ## Detectability
 
-Fully detectable. Either attribute value identifies the tag outright, so a
-two-branch selector is the whole rule and the fix is always to remove the
+Fully detectable. The rule reports either attribute value outright: a
+two-branch selector is the whole rule, and the fix always removes the
 element.
 
 ## Resources
 
-- [HTML 4.01 §18.2.2 — Specifying the scripting language](https://www.w3.org/TR/html401/interact/scripts.html) — the obsolete origin: default scripting language via Content-Script-Type META.
-- [HTML 4.01 §14.2.1 — Setting the default style sheet language](https://www.w3.org/TR/html401/present/styles.html) — the obsolete origin: default style language via Content-Style-Type META, defaulting to text/css.
-- [HTML Standard — Pragma directives](https://html.spec.whatwg.org/multipage/semantics.html#pragma-directives) — neither keyword exists in the pragma table, so both map to no state.
+- [HTML 4.01 §18.2.2: Specifying the scripting language](https://www.w3.org/TR/html401/interact/scripts.html): the obsolete origin: default scripting language via Content-Script-Type META.
+- [HTML 4.01 §14.2.1: Setting the default style sheet language](https://www.w3.org/TR/html401/present/styles.html): the obsolete origin: default style language via Content-Style-Type META, defaulting to text/css.
+- [HTML Standard: Pragma directives](https://html.spec.whatwg.org/multipage/semantics.html#pragma-directives): neither keyword exists in the pragma table, so both map to no state.

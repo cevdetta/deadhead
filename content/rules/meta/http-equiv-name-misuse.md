@@ -18,17 +18,18 @@ impacts: ["maintainability", "interop"]
 related: ["meta/http-equiv-robots", "meta/http-equiv-description", "meta/keywords", "head/charset-position", "meta/http-equiv-content-type", "meta/http-equiv-content-language"]
 ---
 
-`http-equiv` turns a `<meta>` element into a pragma directive: an instruction that
+Metadata names in `http-equiv` do nothing. `http-equiv` turns a `<meta>` element
+into a pragma directive: an instruction that
 simulates an HTTP response header, like `refresh` or `content-security-policy`. It
 is not a general metadata slot, but boilerplate keeps putting metadata names
-there — `keywords`, `author`, `theme-color` — values the pragma table maps to no
+there: `keywords` and `author`. Values the pragma table maps to no
 state, where the browser ignores them. A crawl of the web finds
 `http-equiv=keywords` alone over 30,000 times.
 
 ## Why avoid
 
 It does nothing. Unrecognized pragma values are ignored, so the metadata never
-reaches any consumer — not a browser, not a crawler — and MDN warns this produces
+reaches any consumer. No browser and no crawler sees it, and MDN warns this produces
 inconsistent behavior across implementations.
 
 What is left is worse than inert, because it hides real metadata. A `theme-color`
@@ -59,28 +60,27 @@ Move each value where it belongs:
 ```
 
 `keywords` (see `meta/keywords`), `copyright`, `title`, `distribution`,
-`classification` and `resource-type` have no home anywhere — delete them.
+`classification` and `resource-type` have no home anywhere. Delete them.
 
 ## Detectability
 
-Fully detectable, but not by the selector alone. `meta[http-equiv]` is only a
+Fully detectable, but the rule does not work by selector alone. `meta[http-equiv]` is only a
 pre-filter: the verdict depends on whether the value is one of seventeen
 misused names, matched ASCII case-insensitively, which the selector subset cannot
 enumerate. The decision therefore lives in
 `packages/rules/logic/meta/http-equiv-name-misuse.ts`.
 
 Two exclusions are load-bearing: `robots` and `description` are *not* reported
-here — own rules (`meta/http-equiv-robots`, `meta/http-equiv-description`) cover
-them, so each element is reported exactly once.
+here. Own rules (`meta/http-equiv-robots`, `meta/http-equiv-description`) cover
+them, so the rule reports each element exactly once.
 
-There is no autofix. Each hit needs a different repair — rename to `name`, move
-to `<meta charset>`, move to `<html lang>`, or delete — and no single text edit is
+There is no autofix. Each hit needs a different repair, and no single text edit is
 correct for all of them. A fixer that guessed would mangle metadata.
 
 ## Resources
 
-- [HTML Standard — Pragma directives](https://html.spec.whatwg.org/multipage/semantics.html#pragma-directives) — the table lists exactly seven keywords; every value in this rule maps to no state.
-- [HTML Standard — Standard metadata names](https://html.spec.whatwg.org/multipage/semantics.html#standard-metadata-names) — `author`, `generator`, `theme-color` and `keywords` are defined as `name` values, not pragmas.
-- [MDN — `<meta http-equiv>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/meta/http-equiv) — only a subset of headers is supported as `http-equiv` values; unrecognized values are ignored, which leads to inconsistent behavior.
-- [You probably don't need http-equiv meta tags](https://rviscomi.dev/2023/07/you-probably-dont-need-http-equiv-meta-tags/) — crawl counts for `http-equiv=keywords` (30,526), `revisit-after`, `charset`, `generator`, `lang` and `resource-type`, all non-conforming.
-- [WHATWG MetaExtensions](https://wiki.whatwg.org/wiki/MetaExtensions) — `audience`, `revisit-after` and `apple-mobile-web-app-capable` are registered `name` extensions; `distribution`, `classification` and `resource-type` appear nowhere in it.
+- [HTML Standard: Pragma directives](https://html.spec.whatwg.org/multipage/semantics.html#pragma-directives): the table lists exactly seven keywords; every value in this rule maps to no state.
+- [HTML Standard: Standard metadata names](https://html.spec.whatwg.org/multipage/semantics.html#standard-metadata-names): `author`, `generator`, `theme-color` and `keywords` are defined as `name` values, not pragmas.
+- [MDN: `<meta http-equiv>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/meta/http-equiv): only a subset of headers is supported as `http-equiv` values; unrecognized values are ignored, which leads to inconsistent behavior.
+- [You probably don't need http-equiv meta tags](https://rviscomi.dev/2023/07/you-probably-dont-need-http-equiv-meta-tags/): crawl counts for `http-equiv=keywords` (30,526), `revisit-after`, `charset`, `generator`, `lang` and `resource-type`, all non-conforming.
+- [WHATWG MetaExtensions](https://wiki.whatwg.org/wiki/MetaExtensions): `audience`, `revisit-after` and `apple-mobile-web-app-capable` are registered `name` extensions; `distribution`, `classification` and `resource-type` appear nowhere in it.

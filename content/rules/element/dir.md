@@ -17,7 +17,8 @@ impacts: ["maintainability"]
 related: ["element/acronym"]
 ---
 
-`<dir>` was HTML's list for directory listings, a list of file names that browsers might one
+Use `<ul>`; `<dir>` is obsolete. `<dir>` was HTML's list for directory listings, a
+list of file names that browsers might one
 day show with icons or in columns. None of them ever did anything special with it. It rendered as
 an ordinary bulleted list from the start, and the name has only caused confusion since.
 
@@ -57,7 +58,7 @@ sees or hears.
 
 ## Detectability
 
-Fully detectable by tag name. The selector matches the `dir` element only, never the `dir`
+Fully detectable by tag name. The rule matches the `dir` element only, never the `dir`
 attribute on other elements.
 
 There is no autofix, even though renaming `dir` to `ul` would be safe. Fixes only ever remove
@@ -65,7 +66,7 @@ markup, and renaming an element isn't a removal.
 
 ## Resources
 
-- [HTML Standard — Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#non-conforming-features) — `dir` is entirely obsolete: "Use ul instead."
-- [HTML Standard — Other elements, attributes and APIs](https://html.spec.whatwg.org/multipage/obsolete.html#other-elements,-attributes-and-apis) — user agents must treat `dir` as equivalent to `ul` in semantics and rendering.
-- [HTML Standard — Rendering: lists](https://html.spec.whatwg.org/multipage/rendering.html#lists) — `dir` shares every default list style with `ul`.
-- [MDN — `<dir>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/dir) — removed from standards; use `<ul>`; `compact` is unreliable; not the global `dir` attribute.
+- [HTML Standard: Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#non-conforming-features): `dir` is entirely obsolete: "Use ul instead."
+- [HTML Standard: Other elements, attributes and APIs](https://html.spec.whatwg.org/multipage/obsolete.html#other-elements,-attributes-and-apis): user agents must treat `dir` as equivalent to `ul` in semantics and rendering.
+- [HTML Standard: Rendering: lists](https://html.spec.whatwg.org/multipage/rendering.html#lists): `dir` shares every default list style with `ul`.
+- [MDN: `<dir>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/dir): removed from standards; use `<ul>`; `compact` is unreliable; not the global `dir` attribute.

@@ -17,22 +17,23 @@ impacts: ["maintainability"]
 related: ["meta/http-equiv-x-ua-compatible"]
 ---
 
-`rel="shortcut icon"` is the spelling Internet Explorer 5 introduced for the "favorites
+The `shortcut` token does nothing. `rel="shortcut icon"` is the spelling Internet Explorer 5
+introduced for the "favorites
 icon" in 1999, before there was a specification for any of it. Every boilerplate of the
-following decade copied it, and it is still being copied today — usually alongside a
-second `<link rel="icon">` that does the same job.
+following decade copied it, and copies survive today next to a second `<link rel="icon">`
+that does the same job.
 
 ## Why avoid
 
 `shortcut` is not a link relation. The HTML Standard defines `icon` and registers the
-keywords a `rel` may contain; `shortcut` is not among them. The `rel` attribute is a
+keywords `rel` carries; `shortcut` is not among them. The `rel` attribute is a
 space-separated set of tokens, so a browser parsing `shortcut icon` finds two tokens,
 recognises `icon`, does not recognise `shortcut`, and discards it. The markup that runs
 is `rel="icon"` either way.
 
 That makes the token worse than merely redundant: it is a decision a reader has to make
-and cannot resolve from the markup. The usual guess is that `shortcut` is there for old
-browsers, which is backwards — Internet Explorer accepted plain `rel="icon"` too, and no
+and cannot resolve from the markup. Readers guess `shortcut` is there for old
+browsers. That guess is backwards: Internet Explorer accepted plain `rel="icon"` too, and no
 browser has ever needed the longer form. So it survives on inertia, and every copy
 teaches the next author that it is required.
 
@@ -47,19 +48,19 @@ Delete the token. Nothing else about the element changes:
 
 ## Detectability
 
-Fully detectable. `~=` matches one whitespace-separated token, which is exactly how a
+Fully detectable. The rule matches one whitespace-separated token with `~=`, which is exactly how a
 browser parses `rel`, so the selector agrees with the parser rather than approximating
 it. The `i` flag is load-bearing: link types are ASCII case-insensitive and older
 boilerplate is full of `rel="Shortcut Icon"`.
 
 The fix removes the single token rather than asserting a new value for `rel`, so a
 `rel="shortcut icon mask-icon"` keeps its `mask-icon`, and the quoting is left exactly
-as written — the edit happens inside the delimiter. If `shortcut` is somehow the only
+as written: the edit happens inside the delimiter. If `shortcut` is somehow the only
 token, no fix is offered: emptying `rel` would say something different from what the
 author wrote, and that is a decision for a person.
 
 ## Resources
 
-- [HTML Standard — `rel="icon"`](https://html.spec.whatwg.org/multipage/links.html#rel-icon) — the keyword the specification actually defines, and its processing.
-- [HTML Standard — link types](https://html.spec.whatwg.org/multipage/links.html#linkTypes) — the registry of permitted `rel` keywords, which `shortcut` is absent from.
-- [Mathias Bynens — `rel="shortcut icon"` considered harmful](https://mathiasbynens.be/notes/rel-shortcut-icon) — the primary write-up of where the spelling came from and why it is unnecessary.
+- [HTML Standard: `rel="icon"`](https://html.spec.whatwg.org/multipage/links.html#rel-icon): the keyword the specification defines, and its processing.
+- [HTML Standard: link types](https://html.spec.whatwg.org/multipage/links.html#linkTypes): the registry of permitted `rel` keywords, which `shortcut` is absent from.
+- [Mathias Bynens: `rel="shortcut icon"` considered harmful](https://mathiasbynens.be/notes/rel-shortcut-icon): the primary write-up of where the spelling came from and why it is unnecessary.

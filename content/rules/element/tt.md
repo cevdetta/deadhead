@@ -17,8 +17,9 @@ impacts: ["a11y", "maintainability"]
 related: ["element/big", "element/font"]
 ---
 
-`<tt>` sets its text in a monospace font. It was a common way to mark up commands, file names and
-program output, and it still turns up in old documentation and man-page conversions.
+`<tt>` says nothing about what its text is. `<tt>` sets its text in a monospace font.
+It was a common way to mark up commands and file names. Program output came in it too,
+and it still turns up in old documentation and man-page conversions.
 
 ## Why avoid
 
@@ -58,13 +59,14 @@ If the text is none of these and you only want the typeface, do it in CSS:
 
 ## Detectability
 
-Fully detectable by tag name. deadhead doesn't lint inside `code`, `kbd`, `samp` or `pre`, so a
+Fully detectable by tag name. The engine never lints inside `code`, `kbd`, `samp` or
+`pre`, so a
 `<tt>` nested in one of them isn't reported. There is no autofix: fixes can only remove markup, not
 rename it, and choosing the replacement depends on what the text means.
 
 ## Resources
 
-- [HTML Standard — Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#non-conforming-features) — `tt` is obsolete; use `kbd`, `var`, `code` or `samp` according to meaning.
-- [HTML Standard — Rendering: phrasing content](https://html.spec.whatwg.org/multipage/rendering.html#phrasing-content-3) — `code, kbd, samp, tt { font-family: monospace; }` and `var { font-style: italic; }`.
-- [HTML Standard — The code element](https://html.spec.whatwg.org/multipage/text-level-semantics.html#the-code-element) — with the `var`, `samp` and `kbd` sections that follow it: what each replacement means.
-- [W3C — HTML Accessibility API Mappings](https://www.w3.org/TR/html-aam-1.0/#el-code) — `code` maps to the ARIA `code` role, `kbd` and `var` have computed roles, and `tt` has no mapping.
+- [HTML Standard: Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#non-conforming-features): `tt` is obsolete; use `kbd`, `var`, `code` or `samp` according to meaning.
+- [HTML Standard: Rendering: phrasing content](https://html.spec.whatwg.org/multipage/rendering.html#phrasing-content-3): `code, kbd, samp, tt { font-family: monospace; }` and `var { font-style: italic; }`.
+- [HTML Standard: The code element](https://html.spec.whatwg.org/multipage/text-level-semantics.html#the-code-element): with the `var`, `samp` and `kbd` sections that follow it: what each replacement means.
+- [W3C: HTML Accessibility API Mappings](https://www.w3.org/TR/html-aam-1.0/#el-code): `code` maps to the ARIA `code` role, `kbd` and `var` have computed roles, and `tt` has no mapping.

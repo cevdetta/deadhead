@@ -17,7 +17,8 @@ impacts: ["a11y", "maintainability"]
 related: ["element/blink", "element/bgsound"]
 ---
 
-`<marquee>Breaking news…</marquee>` slides its content across the page, over and over, for as
+`<marquee>` scrolls text no reader can pause. `<marquee>Breaking news…</marquee>` slides
+its content across the page, over and over, for as
 long as the page stays open. Internet Explorer introduced it in the 1990s, every other browser
 copied it so that pages built for IE would keep working, and it never left. It still turns up in
 old templates, school pages and intranet notice boards.
@@ -54,7 +55,7 @@ Most of the time nothing should move. Keep the text and drop the tag:
 <p><strong>Breaking:</strong> trains on line 3 are delayed until 18:00.</p>
 ```
 
-If the content genuinely has to scroll, animate it in CSS, give the reader a visible pause
+If the content has to scroll, animate it in CSS, give the reader a visible pause
 button, and switch the motion off for people who have asked their system for less of it:
 
 ```html
@@ -91,18 +92,19 @@ document.querySelector("[aria-controls=ticker]").addEventListener("click", (even
 The button is the mechanism SC 2.2.2 asks for. The media query honours the operating system's
 reduce-motion setting: Media Queries Level 5 defines `prefers-reduced-motion: reduce` as the
 user having told their system they want motion-based animation removed, reduced or replaced, and
-in that case the text simply sits still.
+in that case the text sits still.
 
 ## Detectability
 
-Fully detectable by tag name. There is no autofix: removing the element would delete the text
+Fully detectable by tag name. The rule matches the tag outright. There is no autofix:
+removing the element would delete the text
 inside it, and fixes can't unwrap an element to keep its content.
 
 ## Resources
 
-- [HTML Standard — Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#non-conforming-features) — `marquee` is entirely obsolete and must not be used by authors.
-- [HTML Standard — Requirements for implementations: the marquee element](https://html.spec.whatwg.org/multipage/obsolete.html#the-marquee-element) — browsers must implement `HTMLMarqueeElement`; the element is turned on when created; "CSS transitions and animations are a more appropriate mechanism".
-- [HTML Standard — Rendering: the marquee element](https://html.spec.whatwg.org/multipage/rendering.html#the-marquee-element-2) — while turned on it is expected to animate, and to restart when a pass ends.
-- [W3C — Understanding WCAG 2.2 SC 2.2.2: Pause, Stop, Hide](https://www.w3.org/WAI/WCAG22/Understanding/pause-stop-hide.html) — auto-starting scrolling content that lasts more than five seconds needs a pause, stop or hide mechanism.
-- [W3C — WCAG Technique F16: scrolling content without a mechanism to pause and restart it](https://www.w3.org/WAI/WCAG22/Techniques/failures/F16) — the failure a marquee commits; the news-ticker example.
-- [Media Queries Level 5 — prefers-reduced-motion](https://www.w3.org/TR/mediaqueries-5/#prefers-reduced-motion) — the media feature the replacement is gated on.
+- [HTML Standard: Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#non-conforming-features): `marquee` is entirely obsolete and must not be used by authors.
+- [HTML Standard: Requirements for implementations: the marquee element](https://html.spec.whatwg.org/multipage/obsolete.html#the-marquee-element): browsers must implement `HTMLMarqueeElement`; the element is turned on when created; "CSS transitions and animations are a more appropriate mechanism".
+- [HTML Standard: Rendering: the marquee element](https://html.spec.whatwg.org/multipage/rendering.html#the-marquee-element-2): while turned on it is expected to animate, and to restart when a pass ends.
+- [W3C: Understanding WCAG 2.2 SC 2.2.2: Pause, Stop, Hide](https://www.w3.org/WAI/WCAG22/Understanding/pause-stop-hide.html): auto-starting scrolling content that lasts more than five seconds needs a pause, stop or hide mechanism.
+- [W3C: WCAG Technique F16: scrolling content without a mechanism to pause and restart it](https://www.w3.org/WAI/WCAG22/Techniques/failures/F16): the failure a marquee commits; the news-ticker example.
+- [Media Queries Level 5: prefers-reduced-motion](https://www.w3.org/TR/mediaqueries-5/#prefers-reduced-motion): the media feature the replacement is gated on.

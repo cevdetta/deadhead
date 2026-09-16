@@ -54,7 +54,7 @@ also needs `Access-Control-Allow-Origin` on its response, preload or not.
 
 ## Detectability
 
-Fully detectable. The selector matches a `preload` token in `rel`, `as="font"`
+Fully detectable. The rule matches a `preload` token in `rel`, `as="font"`
 case-insensitively, and no `crossorigin` attribute at all.
 
 `crossorigin="use-credentials"` mismatches too, because it sends credentials the font
@@ -63,8 +63,8 @@ attribute, and every fix here only removes.
 
 ## Resources
 
-- [CSS Fonts Module Level 4 — font fetching requirements](https://drafts.csswg.org/css-fonts-4/#font-fetching-requirements) — fonts are fetched with destination "font" and CORS mode "cors".
-- [HTML Standard — link type "preload"](https://html.spec.whatwg.org/multipage/links.html#link-type-preload) — preloaded responses are keyed on URL, destination, mode and credentials mode.
-- [Chromium — `resource_fetcher.cc`, `PrintPreloadMismatch`](https://github.com/chromium/chromium/blob/main/third_party/blink/renderer/platform/loader/fetch/resource_fetcher.cc) — "is found, but is not used because the request mode does not match. Consider taking a look at crossorigin attribute."
-- [web.dev — Preload critical assets to improve loading speed](https://web.dev/articles/preload-critical-assets) — "Fonts preloaded without the crossorigin attribute will be fetched twice!"
-- [MDN — rel=preload: CORS-enabled fetches](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/rel/preload#cors-enabled_fetches) — `crossorigin` must match the resource's CORS and credentials mode even for same-origin fetches.
+- [CSS Fonts Module Level 4: font fetching requirements](https://drafts.csswg.org/css-fonts-4/#font-fetching-requirements): fonts are fetched with destination "font" and CORS mode "cors".
+- [HTML Standard: link type "preload"](https://html.spec.whatwg.org/multipage/links.html#link-type-preload): preloaded responses are keyed on URL, destination, mode and credentials mode.
+- [Chromium: `resource_fetcher.cc`, `PrintPreloadMismatch`](https://github.com/chromium/chromium/blob/main/third_party/blink/renderer/platform/loader/fetch/resource_fetcher.cc): "is found, but is not used because the request mode does not match. Consider taking a look at crossorigin attribute."
+- [web.dev: Preload critical assets to improve loading speed](https://web.dev/articles/preload-critical-assets): "Fonts preloaded without the crossorigin attribute will be fetched twice!"
+- [MDN: rel=preload: CORS-enabled fetches](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/rel/preload#cors-enabled_fetches): `crossorigin` must match the resource's CORS and credentials mode even for same-origin fetches.

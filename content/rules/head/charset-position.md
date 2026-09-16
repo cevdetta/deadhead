@@ -17,16 +17,16 @@ impacts: ["interop", "security"]
 related: ["meta/http-equiv-x-ua-compatible"]
 ---
 
-Before a browser can parse a document it has to decide how to decode the bytes. With no
+An encoding declaration past the first 1024 bytes does not exist as far as the parser is
+concerned. Before a browser can parse a document it has to decide how to decode the bytes. With no
 HTTP `charset` parameter and no byte order mark, it runs a *prescan*: it reads the start
 of the byte stream looking for an encoding declaration, and the HTML Standard caps that
-prescan at 1024 bytes. An encoding declaration that is not completely serialized inside
-that window does not exist as far as the parser is concerned.
+prescan at 1024 bytes.
 
 ## Why avoid
 
-Past the window, the browser falls back to a locale-dependent guess and may then discover
-the real declaration mid-parse — at which point it has to throw away the tree and reparse
+Past the window, the browser falls back to a locale-dependent guess. When it discovers
+the real declaration mid-parse, it throws away the tree and reparses
 the document from the beginning. The visible failure is mojibake: `café` rendered as
 `cafÃ©` for some visitors and correctly for others, depending on their locale, which is
 exactly the kind of bug that does not reproduce on the developer's machine.
@@ -54,8 +54,8 @@ Put the declaration first, before anything else in `<head>`:
 </html>
 ```
 
-Sending `Content-Type: text/html; charset=utf-8` on the response is stronger still — it
-is authoritative and needs no prescan — but keep the `<meta>` too, so the file stays
+Sending `Content-Type: text/html; charset=utf-8` on the response is stronger still: it
+is authoritative and needs no prescan. Keep the `<meta>` too, so the file stays
 correct when it is opened from disk or served by something you do not control.
 
 ## Detectability
@@ -67,7 +67,7 @@ ESLint plugin but stays silent in the browser adapter, where a live DOM node has
 source offsets to compare.
 
 Two deliberate limits. It measures offsets in characters rather than bytes, and any
-non-ASCII byte ahead of the declaration only makes the true count larger — so the check
+non-ASCII byte ahead of the declaration only makes the true count larger, so the check
 can under-report but never invents a finding. And it looks at `<meta charset>` only: an
 `http-equiv="Content-Type"` declaration is bound by the same 1024 bytes, but deciding
 whether one is a *valid* declaration means parsing its `content`, and that is a separate
@@ -75,6 +75,6 @@ rule.
 
 ## Resources
 
-- [HTML Standard — character encoding declaration](https://html.spec.whatwg.org/multipage/semantics.html#charset) — "must be serialized completely within the first 1024 bytes".
-- [HTML Standard — prescan a byte stream to determine its encoding](https://html.spec.whatwg.org/multipage/parsing.html#prescan-a-byte-stream-to-determine-its-encoding) — the 1024-byte cap, and the reparse that follows a late discovery.
-- [W3C Internationalization — declaring character encodings](https://www.w3.org/International/questions/qa-html-encoding-declarations) — the practical guidance, including the HTTP header interaction.
+- [HTML Standard: character encoding declaration](https://html.spec.whatwg.org/multipage/semantics.html#charset): "must be serialized completely within the first 1024 bytes".
+- [HTML Standard: prescan a byte stream to determine its encoding](https://html.spec.whatwg.org/multipage/parsing.html#prescan-a-byte-stream-to-determine-its-encoding): the 1024-byte cap, and the reparse that follows a late discovery.
+- [W3C Internationalization: declaring character encodings](https://www.w3.org/International/questions/qa-html-encoding-declarations): the practical guidance, including the HTTP header interaction.

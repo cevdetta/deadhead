@@ -31,7 +31,7 @@ dist/index.html
       <h1>Deadheading is cutting the spent growth off a plant.</h1>
       <p class="lede">
         This does that to your <code>&lt;head&gt;</code>. It finds markup that
-        is harmful, deprecated or merely dead weight — and for every finding,
+        is harmful, deprecated or dead weight. For every finding, it
         links to a written explanation of why, with sources.
       </p>
     </header>
@@ -40,9 +40,9 @@ dist/index.html
 
     <h2>Why another linter</h2>
     <p>
-      Most tools tell you <em>that</em> something is wrong. The interesting
-      question with head markup is <em>why</em>, and whether the advice you read
-      in 2014 still holds. Every rule here is a markdown document carrying at
+      Most tools tell you <em>that</em> something is wrong. Head markup needs{" "}
+      <em>why</em>: whether the advice you read in 2014 still holds. Every rule
+      here is a markdown document carrying at
       least two independent sources, and the linter is generated from those
       documents. A rule that cannot be explained does not ship.
     </p>
@@ -59,7 +59,8 @@ dist/index.html
       <li>
         <h3>CLI</h3>
         <p>
-          Walks files, directories and globs. Stylish, JSON and SARIF output, so
+          Walks files and directories, and expands globs itself. Stylish, JSON and
+          SARIF output, so
           CI annotates the diff. Exit codes are the contract.
         </p>
       </li>
@@ -81,7 +82,7 @@ dist/index.html
     </ul>
     <p>
       A conformance suite runs every fixture through all three and asserts
-      identical findings. That, rather than shared code, is what stops them
+      identical findings. That is what stops them
       drifting.
     </p>
 

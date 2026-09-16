@@ -17,7 +17,8 @@ impacts: ["interop", "maintainability"]
 related: ["element/shadow"]
 ---
 
-`content` was the insertion point of Shadow DOM v0 — the placeholder
+`<content>` distributes nothing. `content` was the insertion point of Shadow DOM v0:
+the placeholder
 inside a shadow tree where the host's light-DOM children were distributed,
 optionally filtered by a `select` query. It belonged to the pre-standard
 era of Web Components, when Chrome shipped v0 behind its own
@@ -43,7 +44,7 @@ distribution point today.
 
 The replacement is Baseline. MDN marks `<slot>` widely available across
 browsers since January 2020, specified in both HTML (`#the-slot-element`)
-and DOM (`#shadow-tree-slots`) — the rewrite is not theoretical.
+and DOM (`#shadow-tree-slots`). Every engine ships it.
 
 A leftover is silently dead. In a v1 tree a `<content>` element behaves as
 an unknown element, so its `select` query distributes nothing while
@@ -64,8 +65,8 @@ nodes with the `slot` attribute, keeping fallback content inside the
 
 ## Detectability
 
-Fully detectable. The selector is the bare element name `content`, with no
-logic module — every instance is the obsolete insertion point. No other
+Fully detectable. The rule matches the bare element name `content`, with no
+logic module: every instance is the obsolete insertion point. No other
 HTML or SVG element shares the name, so the selector cannot false-positive;
 the `content` attribute (for example on `<meta>`) is untouched by an
 element selector.
@@ -76,7 +77,7 @@ fallback; rewriting the distribution as a v1 `slot` is a manual edit.
 
 ## Resources
 
-- [DOM Standard — Slots](https://dom.spec.whatwg.org/#shadow-tree-slots) — the standard shadow-tree model defines slots and slottables; there is no `content` insertion point.
-- [Chrome for Developers — Deprecations and Removals in Chrome 70](https://developer.chrome.com/blog/chrome-70-deps-rems) — Shadow DOM v0 deprecated with removal expected in Chrome 73, as an experimental version not implemented in other browsers.
-- [MDN — `<slot>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/slot) — Baseline, widely available since January 2020; the specified replacement, linking both the HTML and DOM definitions.
-- [blink-dev — Intent to Deprecate and Remove: Shadow DOM V0, Custom Elements V0, HTML Imports](https://groups.google.com/a/chromium.org/g/blink-dev/c/h-JwMiPUnuU/m/8yiBD1SWAwAJ) — the removal rationale (no other engines adopted v0) and timeline (disable, then remove the code).
+- [DOM Standard: Slots](https://dom.spec.whatwg.org/#shadow-tree-slots): the standard shadow-tree model defines slots and slottables; there is no `content` insertion point.
+- [Chrome for Developers: Deprecations and Removals in Chrome 70](https://developer.chrome.com/blog/chrome-70-deps-rems): Shadow DOM v0 deprecated with removal expected in Chrome 73, as an experimental version not implemented in other browsers.
+- [MDN: `<slot>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/slot): Baseline, widely available since January 2020; the specified replacement, linking both the HTML and DOM definitions.
+- [blink-dev: Intent to Deprecate and Remove: Shadow DOM V0, Custom Elements V0, HTML Imports](https://groups.google.com/a/chromium.org/g/blink-dev/c/h-JwMiPUnuU/m/8yiBD1SWAwAJ): the removal rationale (no other engines adopted v0) and timeline (disable, then remove the code).

@@ -18,19 +18,20 @@ impacts: ["maintainability"]
 related: ["meta/http-equiv-x-ua-compatible"]
 ---
 
-`type="text/javascript"` dates from a time when the script language was genuinely in
+Omit `type="text/javascript"`: it is the default. The spelling dates from a time when the
+script language was in
 question: Netscape shipped JavaScript, Internet Explorer shipped JScript and VBScript,
 and HTML 4.01 made `type` a required attribute with no default. That stopped being true
 in HTML5, which defines the classic-script path as what happens when `type` is absent.
 
 ## Why avoid
 
-The attribute is not merely redundant, it is the *only* spelling the spec advises
+The attribute is the *only* spelling the spec advises
 against. A `<script>` whose `type` is a JavaScript MIME type is processed exactly as one
 with no `type` at all, and the HTML Standard says authors should omit it. The value is
 also a legacy compatibility surface: `text/javascript1.3`, `text/jscript` and
 `text/livescript` are still accepted for content that has not been touched since the
-1990s, which means a typo like `text/javasript` does not error — it silently makes the
+1990s, which means a typo like `text/javasript` does not error: it silently makes the
 element a data block that never executes.
 
 Carrying it forward teaches the wrong model of the attribute. `type` is now meaningful
@@ -71,6 +72,6 @@ not claim them.
 
 ## Resources
 
-- [HTML Standard — the `type` attribute](https://html.spec.whatwg.org/multipage/scripting.html#attr-script-type) — classic scripts are the no-`type` path; authors should omit it.
-- [MIME Sniffing Standard — JavaScript MIME type](https://mimesniff.spec.whatwg.org/#javascript-mime-type) — the normative list of essences this rule matches.
-- [MDN — `<script>`: `type`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script#type) — the legacy values and what each modern value selects.
+- [HTML Standard: the `type` attribute](https://html.spec.whatwg.org/multipage/scripting.html#attr-script-type): classic scripts are the no-`type` path; authors should omit it.
+- [MIME Sniffing Standard: JavaScript MIME type](https://mimesniff.spec.whatwg.org/#javascript-mime-type): the normative list of essences this rule matches.
+- [MDN: `<script>`: `type`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script#type): the legacy values and what each modern value selects.

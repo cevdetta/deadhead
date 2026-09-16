@@ -17,8 +17,9 @@ impacts: ["interop", "maintainability"]
 related: ["element/bgsound", "element/isindex"]
 ---
 
-`<applet code="Clock.class">` embedded a Java program in the page, run by a Java plug-in inside the
-browser. The markup still turns up in old pages, usually with a "you need Java" message inside it.
+No browser runs `<applet>`. `<applet code="Clock.class">` embedded a Java program in
+the page, run by a Java plug-in inside the
+browser. The markup still turns up in old pages, with a "you need Java" message inside it.
 
 ## Why avoid
 
@@ -56,14 +57,15 @@ If the program has to stay a Java application, link to it as a download rather t
 
 ## Detectability
 
-Fully detectable by tag name. There is no autofix: removing the element would also remove its
+Fully detectable by tag name. The rule matches the tag outright. There is no autofix:
+removing the element would also remove its
 fallback content, which is the only part that still reaches visitors.
 
 ## Resources
 
-- [HTML Standard — Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#non-conforming-features) — `applet` is entirely obsolete.
-- [HTML Standard — Elements in the DOM](https://html.spec.whatwg.org/multipage/dom.html#elements-in-the-dom) — `applet` maps to `HTMLUnknownElement`.
-- [HTML Standard — document.applets](https://html.spec.whatwg.org/multipage/obsolete.html#dom-document-applets) — the collection matches nothing and exists only for historical reasons.
-- [JEP 289: Deprecate the Applet API](https://openjdk.org/jeps/289) — deprecated in JDK 9 as browser vendors removed Java plug-in support.
-- [JEP 398: Deprecate the Applet API for Removal](https://openjdk.org/jeps/398) — all browser vendors had removed Java plug-in support or announced its removal.
-- [JEP 504: Remove the Applet API](https://openjdk.org/jeps/504) — removed in JDK 26; neither current JDKs nor browsers support applets.
+- [HTML Standard: Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#non-conforming-features): `applet` is entirely obsolete.
+- [HTML Standard: Elements in the DOM](https://html.spec.whatwg.org/multipage/dom.html#elements-in-the-dom): `applet` maps to `HTMLUnknownElement`.
+- [HTML Standard: document.applets](https://html.spec.whatwg.org/multipage/obsolete.html#dom-document-applets): the collection matches nothing and exists only for historical reasons.
+- [JEP 289: Deprecate the Applet API](https://openjdk.org/jeps/289): deprecated in JDK 9 as browser vendors removed Java plug-in support.
+- [JEP 398: Deprecate the Applet API for Removal](https://openjdk.org/jeps/398): all browser vendors had removed Java plug-in support or announced its removal.
+- [JEP 504: Remove the Applet API](https://openjdk.org/jeps/504): removed in JDK 26; neither current JDKs nor browsers support applets.

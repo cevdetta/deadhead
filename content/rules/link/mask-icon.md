@@ -17,7 +17,8 @@ impacts: ["maintainability"]
 related: ["link/shortcut-icon", "link/apple-touch-icon"]
 ---
 
-Safari 9 on OS X El Capitan introduced pinned tabs, and with them a new kind of icon:
+`<link rel="mask-icon">` serves one retired surface: Safari pinned tabs. Safari 9 on OS X
+El Capitan introduced pinned tabs, and with them a new kind of icon:
 `<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#cc241d">`. The SVG had to be
 a single layer of 100% black on transparent, drawn on a 16×16 viewBox, and Safari tinted
 it with the `color` attribute. Favicon generators still emit it, along with a
@@ -57,20 +58,20 @@ Then delete the `<link rel="mask-icon">` and `safari-pinned-tab.svg`.
 
 ## Detectability
 
-Fully detectable. The selector uses `~=` because `rel` is a space-separated token set,
+Fully detectable. The rule matches with `~=` because `rel` is a space-separated token set,
 the same reasoning as `link/shortcut-icon`.
 
 There is no autofix. Safari still picks the mask icon over the favicon when both are
 present, so deleting the element changes what a pinned tab looks like, and a fix must
-never change behaviour. Removing it is the right call, but it's a visible change the
-site owner should make on purpose, with a favicon that works as a pinned-tab icon.
+never change behaviour. The site owner should remove it on purpose, with a favicon that
+works as a pinned-tab icon.
 That preference is known only from user reports, not from Apple documentation.
 
 ## Resources
 
-- [Apple Developer — Creating Pinned Tab Icons (Safari Web Content Guide, archived)](https://developer.apple.com/library/archive/documentation/AppleApplications/Reference/SafariWebContent/pinnedTabs/pinnedTabs.html) — the only definition of `mask-icon` and its `color` attribute; a Documentation Archive page last updated 2016-12-12.
-- [microformats — existing rel values](https://microformats.org/wiki/existing-rel-values) — the registry named by the HTML Standard; lists `mask-icon` as `proposed`, "probably redundant with rel-icon".
-- [WebKit — `Source/WebCore/html/LinkRelAttribute.cpp`](https://github.com/WebKit/WebKit/blob/main/Source/WebCore/html/LinkRelAttribute.cpp) — the engine's rel parser recognises `icon`, `shortcut icon` and the `apple-touch-icon` pair, and not `mask-icon`.
-- [HTML Standard — link types](https://html.spec.whatwg.org/multipage/links.html#linkTypes) — `mask-icon` is not a defined keyword, and `<link>` defines no `color` attribute.
-- [Apple Developer — Safari 12 Release Notes](https://developer.apple.com/documentation/safari-release-notes/safari-12-release-notes) — "Icons in Tabs. Show website icons in tabs."
-- [gethomepage/homepage#2323 — "The safari-pinned-tab mask-icon overrides custom favicon"](https://github.com/gethomepage/homepage/issues/2323) — a user report that Safari still prefers the mask icon when present; the reason the fix is `none`.
+- [Apple Developer: Creating Pinned Tab Icons (Safari Web Content Guide, archived)](https://developer.apple.com/library/archive/documentation/AppleApplications/Reference/SafariWebContent/pinnedTabs/pinnedTabs.html): the only definition of `mask-icon` and its `color` attribute; a Documentation Archive page last updated 2016-12-12.
+- [microformats: existing rel values](https://microformats.org/wiki/existing-rel-values): the registry named by the HTML Standard; lists `mask-icon` as `proposed`, "probably redundant with rel-icon".
+- [WebKit: `Source/WebCore/html/LinkRelAttribute.cpp`](https://github.com/WebKit/WebKit/blob/main/Source/WebCore/html/LinkRelAttribute.cpp): the engine's rel parser recognises `icon`, `shortcut icon` and the `apple-touch-icon` pair, and not `mask-icon`.
+- [HTML Standard: link types](https://html.spec.whatwg.org/multipage/links.html#linkTypes): `mask-icon` is not a defined keyword, and `<link>` defines no `color` attribute.
+- [Apple Developer: Safari 12 Release Notes](https://developer.apple.com/documentation/safari-release-notes/safari-12-release-notes): "Icons in Tabs. Show website icons in tabs."
+- [gethomepage/homepage#2323: "The safari-pinned-tab mask-icon overrides custom favicon"](https://github.com/gethomepage/homepage/issues/2323): a user report that Safari still prefers the mask icon when present; the reason the fix is `none`.

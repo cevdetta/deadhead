@@ -17,7 +17,8 @@ impacts: ["interop"]
 related: ["head/charset-position", "document/html-lang"]
 ---
 
-The doctype is the first line of an HTML file, and in HTML it has exactly one form:
+A page without `<!doctype html>` as its first line risks quirks mode. In HTML the doctype
+has exactly one form:
 `<!doctype html>`. It declares no version and points at no DTD. Its only job left is to tell
 the browser to render the page by today's rules. Leave it out, or keep an old
 `<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">`, and many browsers switch to
@@ -76,20 +77,21 @@ not: after those, the parser has already chosen quirks mode and ignores the doct
 
 Detectable in all three runtimes. The rule mirrors the parser's own test: the doctype must be
 named `html`, have no public identifier, and have either no system identifier or
-`about:legacy-compat`. A missing doctype is reported on the `<html>` element. A doctype after text
-or an element is reported as missing too, because the browser ignores it.
+`about:legacy-compat`. The rule reports a missing doctype on the `<html>` element. It reports
+a doctype after text
+or an element as missing too, because the browser ignores it.
 
 Every non-conforming doctype is reported, including the few, like HTML 4.01 Strict, that render
 in no-quirks mode. The finding's detail names what is wrong rather than the rendering mode.
 
-Some malformed doctypes aren't caught: one that switches the parser to quirks mode while still
+The rule misses some malformed doctypes: one that switches the parser to quirks mode while still
 reading as a plain `html` doctype, such as `<!DOCTYPE html bogus>`, and an explicitly empty
 identifier, such as `PUBLIC ""`. There is no autofix, because changing a doctype changes the
 rendering mode, which is the one thing a fix must never do.
 
 ## Resources
 
-- [HTML Standard — The DOCTYPE](https://html.spec.whatwg.org/multipage/syntax.html#the-doctype) — the doctype is required; `<!DOCTYPE html>` is its only form, plus the discouraged legacy string.
-- [HTML Standard — The "initial" insertion mode](https://html.spec.whatwg.org/multipage/parsing.html#the-initial-insertion-mode) — which doctypes are parse errors, which set quirks or limited-quirks mode, and that a missing doctype sets quirks mode.
-- [Quirks Mode Standard](https://quirks.spec.whatwg.org/) — the CSS and layout differences in quirks and limited-quirks mode.
-- [MDN — Quirks mode and standards mode](https://developer.mozilla.org/en-US/docs/Web/HTML/Guides/Quirks_mode_and_standards_mode) — the three modes, and `document.compatMode` as the way to check.
+- [HTML Standard: The DOCTYPE](https://html.spec.whatwg.org/multipage/syntax.html#the-doctype): the doctype is required; `<!DOCTYPE html>` is its only form, plus the discouraged legacy string.
+- [HTML Standard: The "initial" insertion mode](https://html.spec.whatwg.org/multipage/parsing.html#the-initial-insertion-mode): which doctypes are parse errors, which set quirks or limited-quirks mode, and that a missing doctype sets quirks mode.
+- [Quirks Mode Standard](https://quirks.spec.whatwg.org/): the CSS and layout differences in quirks and limited-quirks mode.
+- [MDN: Quirks mode and standards mode](https://developer.mozilla.org/en-US/docs/Web/HTML/Guides/Quirks_mode_and_standards_mode): the three modes, and `document.compatMode` as the way to check.

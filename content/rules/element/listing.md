@@ -17,7 +17,8 @@ impacts: ["maintainability"]
 related: ["element/xmp", "element/plaintext"]
 ---
 
-`<listing>` is an early-HTML element for computer listings that browsers render
+`<listing>` is `<pre>` without the meaning. `<listing>` is an early-HTML element for
+computer listings that browsers render
 like `<pre>`: a block of monospace, preformatted text. The HTML Standard lists
 it under non-conforming features with the direction "Use `pre` and `code`
 instead", and W3C's HTML5 author guidance says the same.
@@ -49,8 +50,8 @@ A preformatted code block, with markup escaped so it stays literal:
 
 ## Detectability
 
-Fully detectable. The selector is the bare element name `listing`; no logic
-module is needed, and the roadmap probe found all three adapters agree on it.
+Fully detectable. The rule matches the bare element name `listing`; no logic
+module is needed, and all three adapters agree on it.
 
 There is no autofix. Removing the element deletes its content, and rewriting it
 as `pre` plus `code` is a rename rather than a subtraction, so the fix op is
@@ -58,6 +59,6 @@ as `pre` plus `code` is a rename rather than a subtraction, so the fix op is
 
 ## Resources
 
-- [HTML Standard — Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#non-conforming-features) — `listing` is entirely obsolete; `pre` and `code` instead.
-- [HTML Standard — Other elements, attributes and APIs](https://html.spec.whatwg.org/multipage/obsolete.html#other-elements,-attributes-and-apis) — user agents must treat `listing` equivalent to `pre` in semantics and rendering.
-- [W3C HTML5: Edition for Web Authors — Obsolete features](https://www.w3.org/TR/2011/WD-html5-author-20110809/obsolete.html) — independent W3C list with the same verdict and replacement.
+- [HTML Standard: Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#non-conforming-features): `listing` is entirely obsolete; `pre` and `code` instead.
+- [HTML Standard: Other elements, attributes and APIs](https://html.spec.whatwg.org/multipage/obsolete.html#other-elements,-attributes-and-apis): user agents must treat `listing` equivalent to `pre` in semantics and rendering.
+- [W3C HTML5: Edition for Web Authors: Obsolete features](https://www.w3.org/TR/2011/WD-html5-author-20110809/obsolete.html): independent W3C list with the same verdict and replacement.

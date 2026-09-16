@@ -17,7 +17,8 @@ impacts: ["interop", "maintainability"]
 related: []
 ---
 
-`menuitem` was the command inside a popup menu — the item a user could
+`<menuitem>` wires up no menu. `menuitem` was the command inside a popup menu: the item
+a user could
 invoke through a `<menu type="context">` context menu or a menu button.
 It belonged to the HTML context-menu feature, which paired `menu`,
 `menuitem`, and the `contextmenu` attribute into a declarative way to add
@@ -41,7 +42,7 @@ Only Firefox ever shipped it, and Firefox removed it. Bug 1372276 removed
 
 It never became interoperable. The WHATWG removal discussion records
 Chrome WONTFIXing its context-menu implementation and removing the
-related code, leaving Firefox as the sole implementer — the feature was
+related code, leaving Firefox as the sole implementer. The feature was
 cut from the standard for lack of multi-implementer interest.
 
 Today it does nothing. With the feature and its interface gone, `menuitem`
@@ -74,8 +75,8 @@ standard interactive elements:
 
 ## Detectability
 
-Fully detectable. The selector is the bare element name `menuitem`, with
-no logic module — every instance is the obsolete command element.
+Fully detectable. The rule matches the bare element name `menuitem`, with
+no logic module: every instance is the obsolete command element.
 
 There is no autofix. `menuitem` carries the intended command (label, icon,
 action wiring), so removing the element would delete the command itself;
@@ -83,7 +84,7 @@ rebuilding it as a script-driven menu is a manual edit.
 
 ## Resources
 
-- [HTML Standard — Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#non-conforming-features) — lists `menuitem` as entirely obsolete, with the script-handling-`contextmenu` replacement wording.
-- [Bug 1372276 — Remove HTML context menu (`<menu>` and `<menuitem>` tag) support](https://bugzilla.mozilla.org/show_bug.cgi?id=1372276) — RESOLVED FIXED against the 103 Branch; removed `HTMLMenuItemElement`, the menu builder, and related tests.
-- [MDN — Firefox 103 release notes for developers](https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Releases/103) — documents removal of `<menuitem>` support with the `dom.menuitem.enabled` preference, pointing at Bug 1372276.
-- [MDN — HTML elements reference](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements) — lists `<menuitem>` under obsolete and deprecated elements ("a command that a user is able to invoke through a popup menu").
+- [HTML Standard: Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#non-conforming-features): lists `menuitem` as entirely obsolete, with the script-handling-`contextmenu` replacement wording.
+- [Bug 1372276: Remove HTML context menu (`<menu>` and `<menuitem>` tag) support](https://bugzilla.mozilla.org/show_bug.cgi?id=1372276): RESOLVED FIXED against the 103 Branch; removed `HTMLMenuItemElement`, the menu builder, and related tests.
+- [MDN: Firefox 103 release notes for developers](https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Releases/103): documents removal of `<menuitem>` support with the `dom.menuitem.enabled` preference, pointing at Bug 1372276.
+- [MDN: HTML elements reference](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements): lists `<menuitem>` under obsolete and deprecated elements ("a command that a user is able to invoke through a popup menu").

@@ -22,15 +22,15 @@ x 1 finding (1 unnecessary)
 Severity is `harmful`, `deprecated` or `unnecessary` -- what the finding costs you,
 not how loudly the tool wants to say it.
 
-That last line is the whole point: every rule is published at
+That last line is the whole point, and every rule is published at
 **[deadhead.cevdet.ch](https://deadhead.cevdet.ch)**, generated from the same markdown
 the linter is built from. The finding and its explanation cannot drift, because they
 are the same file.
 
 ## Why another linter
 
-Most tools tell you *that* something is wrong. The interesting question with head
-markup is *why*, and whether the advice you read in 2014 still holds. Every rule here
+Most tools tell you *that* something is wrong. Head markup needs *why*: whether
+the advice you read in 2014 still holds. Every rule here
 is a markdown document with at least two independent sources, and the linter is
 generated from those documents. If a rule cannot be explained, it does not ship.
 
@@ -76,19 +76,21 @@ like a clean run.
 ### Fixes are text edits, never re-serialised markup
 
 `--fix` splices byte ranges out of the original file. It never parses your document and
-prints it back, because that rewrites quote style, attribute order, whitespace and
-character references across the whole file — turning a one-line fix into a thousand-line
+prints it back, because that rewrites quote style and attribute order across the whole
+file. Whitespace and character references shift with them, turning a one-line fix into
+a thousand-line
 diff. The same property is what makes ESLint autofix free, and the conformance suite
 asserts the two produce byte-identical output.
 
 A fix is one of `remove-element`, `remove-attribute`, `remove-token` or `none`. They all
 subtract: nothing asserts a value the rule was never asked about. `remove-token` drops a
-single keyword from a space-separated attribute — `rel="shortcut icon mask-icon"` becomes
-`rel="icon mask-icon"` — and edits inside the quotes, so the delimiter you chose survives.
+single keyword from a space-separated attribute: `rel="shortcut icon mask-icon"` becomes
+`rel="icon mask-icon"`. It edits inside the quotes, so the delimiter you chose survives.
 
 Two things are never fixed automatically: a rule that declares `fix: { op: "none" }`, and
-any rule whose `detectability` is `partial` — if the rule is not certain, it does not get
-to edit your file. Overlapping fixes are skipped rather than merged, and a second pass
+any rule whose `detectability` is `partial`: if the rule is not certain, it does not get
+to edit your file. The fixer skips overlapping fixes rather than merging them, and a
+second pass
 picks them up.
 
 ### Configuration
@@ -111,7 +113,7 @@ export default {
 Once the packages are published, wrapping the object in `defineConfig` from
 `@deadhead/cli` gets you completion and type checking; a plain object works either way.
 
-A typo in a rule id is an error rather than a setting that silently does nothing — the
+A typo in a rule id is an error rather than a setting that silently does nothing. The
 failure it prevents is a rule you thought you had disabled still being on.
 
 ### Baseline
@@ -125,8 +127,8 @@ deadhead --baseline .deadhead-baseline.json dist                     # fail only
 
 The baseline records a **count per file per rule**, not line numbers or source hashes.
 Those rot: reindent a file, or add an element above, and every entry below it would go
-stale and light up CI with findings nobody introduced. The honest cost is that an
-allowance of 3 will absorb a *different* third finding of the same rule in the same file.
+stale and light up CI with findings nobody introduced. An
+allowance of 3 absorbs a *different* third finding of the same rule in the same file.
 When the backlog shrinks, deadhead says so and suggests pruning.
 
 Silence a finding in the markup itself:
@@ -137,8 +139,8 @@ Silence a finding in the markup itself:
 ```
 
 `<!-- deadhead-disable -->` (optionally with rule ids) turns findings off until
-`<!-- deadhead-enable -->`. Contents of `<pre>`, `<code>`, `<textarea>`, `<samp>` and
-`<kbd>` are never linted -- documenting bad markup is not writing it.
+`<!-- deadhead-enable -->`. The engine never lints contents of `<pre>`, `<code>`, `<textarea>`, `<samp>` and
+`<kbd>` -- documenting bad markup is not writing it.
 
 Other commands:
 
@@ -169,7 +171,7 @@ render a severity the engine rejects will not typecheck.
 
 It is also a fixture. `pnpm check:site` runs the CLI over the rendered output, which
 means the head this project ships is held to the rules this project ships -- in a
-document assembled by a framework, which is where head markup usually goes wrong.
+document assembled by a framework, which is where head markup goes wrong.
 
 ## Three ways to run it
 
@@ -177,12 +179,12 @@ document assembled by a framework, which is where head markup usually goes wrong
 - **Bookmarklet** to inspect any page you are looking at, including pages you did not
   build. It reads the rendered DOM, which is the ground truth for what shipped.
 - **ESLint plugin** for editor feedback while you type. A convenience, not the
-  foundation: for framework users the head tags often live in JSX, Vue or Svelte where
+  foundation: for framework users the head tags live in JSX, Vue or Svelte where
   an HTML parser never sees them.
 
 All three run the same rule set and are tested against each other, so they cannot
 disagree. `pnpm test:conformance` runs every fixture through every adapter and fails
-if they diverge — including the built bookmarklet, executed as a bundle.
+if they diverge, including the built bookmarklet, executed as a bundle.
 
 ### Browser artifacts
 
@@ -191,8 +193,8 @@ pnpm build && pnpm build:bookmarklet && pnpm build:css
 ```
 
 `packages/browser/bookmarklet.js` is one self-contained IIFE with the rules inlined and
-no network access at all, so a strict Content-Security-Policy cannot block it — which
-matters, because a locked-down page is often the one worth inspecting. The same file is
+no network access at all, so a strict Content-Security-Policy cannot block it.
+That matters, because a locked-down page is the one worth inspecting. The same file is
 the devtools snippet: paste it into **Sources → Snippets** and run.
 
 `packages/browser/deadhead.css` outlines offenders in place, in the
@@ -219,7 +221,7 @@ export default [
 ];
 ```
 
-Rule names are the `ruleId` verbatim — `deadhead/meta/http-equiv-x-ua-compatible` —
+Rule names are the `ruleId` verbatim (`deadhead/meta/http-equiv-x-ua-compatible`),
 because ESLint splits an unscoped rule id on its first slash. The ESLint config, the CLI
 output, your suppression comments and the markdown all say the same permanent string.
 
@@ -229,9 +231,11 @@ rule. Severity stays yours to set.
 ### What the DOM cannot see
 
 A rendered document has no source text, so `range()` and `loc()` are `null` in the
-browser, fixes are unavailable, and suppression comments are not read. A rule whose
-verdict depends on byte offsets — `head/charset-position` asks whether a declaration
-lands inside the first 1024 bytes — simply does not fire there. That asymmetry is
+browser. The browser adapter offers no fixes, and the engine does not read suppression
+comments there. A rule whose
+verdict depends on byte offsets does not fire there. `head/charset-position` asks whether
+a declaration
+lands inside the first 1024 bytes, and a live DOM has no offsets to compare. That asymmetry is
 declared in the conformance suite and asserted in both directions, so it cannot quietly
 become drift.
 

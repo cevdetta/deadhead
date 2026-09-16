@@ -17,10 +17,11 @@ impacts: ["seo"]
 related: ["link/sitemap"]
 ---
 
-`<link rel="canonical">` names the one URL that should represent a page when the same content
-is reachable at several: with and without tracking parameters, with and without a trailing
-slash, over `http` and `https`. It only works as a single answer. Two of them on one page
-don't split the difference. They cancel each other out.
+A page with two canonicals has none: Google ignores all of them. `<link rel="canonical">`
+names the one URL that should represent a page when the same content
+is reachable at several: with and without tracking parameters, and with and without a trailing
+slash. `http` and `https` double it again. It only works as a single answer. Two of them
+on one page cancel each other out.
 
 ## Why avoid
 
@@ -36,7 +37,7 @@ consider/label/designate more than one IRI as authoritative.)"
 
 It almost never happens on purpose. A theme emits a canonical and an SEO plugin adds another.
 A CMS writes one and the layout writes one. A client-side router appends a fresh canonical
-on navigation without removing the server-rendered one. The two often point at different
+on navigation without removing the server-rendered one. The two point at different
 URLs, nothing on the page looks wrong, and the first sign is a Search Console report weeks
 later.
 
@@ -62,7 +63,7 @@ versions of a page", with `rel="alternate"` and `hreflang` for language and coun
 ## Detectability
 
 Fully detectable, as a document rule, because a selector can't count. Once a page has two
-or more `link[rel~="canonical"]`, every one of them is reported. Google ignores all of them,
+or more `link[rel~="canonical"]`, the rule reports every one of them. Google ignores all of them,
 and which to keep is the author's decision. Identical duplicates count, since the problem is
 the number of declarations. A canonical in `<body>` counts too: Google wouldn't accept it on
 its own, but it is still a second declaration.
@@ -71,7 +72,7 @@ There is no autofix: removing either one means choosing the canonical URL.
 
 ## Resources
 
-- [Google Search Central Blog — 5 common mistakes with rel=canonical](https://developers.google.com/search/blog/2013/04/5-common-mistakes-with-relcanonical) — "When more than one is specified, all rel=canonical links will be ignored."
-- [Google Search Central — How to specify a canonical URL](https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls) — don't give different canonicals through different techniques; use `rel="alternate"` with `hreflang` for alternate versions; canonical only in `<head>`, with absolute URLs.
-- [Google Search Central — Tell Google about localized versions of your page](https://developers.google.com/search/docs/specialty/international/localized-versions) — the `<link rel="alternate" hreflang>` syntax.
-- [RFC 6596 — The Canonical Link Relation](https://www.rfc-editor.org/rfc/rfc6596#section-4) — "Specify only one canonical link relation for a resource."
+- [Google Search Central Blog: 5 common mistakes with rel=canonical](https://developers.google.com/search/blog/2013/04/5-common-mistakes-with-relcanonical): "When more than one is specified, all rel=canonical links will be ignored."
+- [Google Search Central: How to specify a canonical URL](https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls): don't give different canonicals through different techniques; use `rel="alternate"` with `hreflang` for alternate versions; canonical only in `<head>`, with absolute URLs.
+- [Google Search Central: Tell Google about localized versions of your page](https://developers.google.com/search/docs/specialty/international/localized-versions): the `<link rel="alternate" hreflang>` syntax.
+- [RFC 6596: The Canonical Link Relation](https://www.rfc-editor.org/rfc/rfc6596#section-4): "Specify only one canonical link relation for a resource."

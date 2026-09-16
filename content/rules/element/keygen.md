@@ -17,10 +17,10 @@ impacts: ["interop", "maintainability"]
 related: []
 ---
 
-`<keygen>` was the form control that generated a keypair in the browser and
+No browser generates a key with `<keygen>`. `<keygen>` was the form control that
+generated a keypair in the browser and
 submitted the public key for certificate enrollment. It was removed from the
-HTML Standard outright — only parser behavior was retained — and no browser
-generates a key anymore.
+HTML Standard outright: only parser behavior was retained.
 
 ## Why avoid
 
@@ -64,7 +64,7 @@ install:
 
 ## Detectability
 
-Fully detectable. The selector is the bare tag name `keygen`; no logic module
+Fully detectable. The rule matches the bare tag name `keygen`; no logic module
 is needed.
 
 The fix removes the element outright, which is safe here: `<keygen>` is void,
@@ -73,7 +73,7 @@ working.
 
 ## Resources
 
-- [HTML Standard — Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#non-conforming-features) — the obsolete `keygen` entry with the per-use-case replacement (native management / WebCrypto + manual install).
-- [Chromium — Remove support for the keygen tag](https://chromium.googlesource.com/chromium/src/+/5d916f6c6b47472770e03cb483f06a18ca79a0c2) — neuters `<keygen>` to `HTMLUnknownElement`, drops form association and IPC, keeps parser behavior.
-- [Bug 1315460 — Remove support for HTML Keygen](https://bugzilla.mozilla.org/show_bug.cgi?id=1315460) — RESOLVED FIXED in Firefox 69; removes the handler, keygen thread, and IDL.
-- [WHATWG HTML — Remove `<keygen>` (PR #2221)](https://github.com/whatwg/html/pull/2221) — removes the element from the specification except parser behavior; records WebKit's willingness to drop it.
+- [HTML Standard: Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#non-conforming-features): the obsolete `keygen` entry with the per-use-case replacement (native management / WebCrypto + manual install).
+- [Chromium: Remove support for the keygen tag](https://chromium.googlesource.com/chromium/src/+/5d916f6c6b47472770e03cb483f06a18ca79a0c2): neuters `<keygen>` to `HTMLUnknownElement`, drops form association and IPC, keeps parser behavior.
+- [Bug 1315460: Remove support for HTML Keygen](https://bugzilla.mozilla.org/show_bug.cgi?id=1315460): RESOLVED FIXED in Firefox 69; removes the handler, keygen thread, and IDL.
+- [WHATWG HTML: Remove `<keygen>` (PR #2221)](https://github.com/whatwg/html/pull/2221): removes the element from the specification except parser behavior; records WebKit's willingness to drop it.

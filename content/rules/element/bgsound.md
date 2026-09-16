@@ -17,7 +17,8 @@ impacts: ["a11y", "maintainability"]
 related: ["element/basefont", "element/marquee"]
 ---
 
-`<bgsound src="theme.mid" loop="-1">` started a sound as the page loaded and, with that `loop`,
+`<bgsound>` plays nothing. `<bgsound src="theme.mid" loop="-1">` started a sound as the
+page loaded and, with that `loop`,
 played it forever. Visitors had no button to stop it, because the element had no interface at
 all. It was an Internet Explorer feature, and it went wherever Internet Explorer went.
 
@@ -55,7 +56,8 @@ The tempting modernisation, `<audio autoplay loop>`, rebuilds the accessibility 
 
 ## Detectability
 
-Fully detectable by tag name, in `<head>` or `<body>`: the parser handles `bgsound` like
+Fully detectable by tag name. The rule matches the tag outright, in `<head>` or `<body>`:
+the parser handles `bgsound` like
 `<link>` wherever it appears, as a void element with no end tag.
 
 There is no autofix. Deleting it would change nothing anyone hears, since it plays nothing,
@@ -63,7 +65,7 @@ but whether to remove it or replace it with real audio is the author's decision.
 
 ## Resources
 
-- [HTML Standard — Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#non-conforming-features) — `bgsound` is entirely obsolete: "Use audio instead."
-- [HTML Standard — Elements in the DOM](https://html.spec.whatwg.org/multipage/dom.html#elements-in-the-dom) — the element interface for `bgsound` is `HTMLUnknownElement`.
-- [Microsoft Learn (archived) — IHTMLBGsound: loop property](https://learn.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/platform-apis/aa704322(v=vs.85)) — `bgsound` as an Internet Explorer engine API; `loop="-1"` loops infinitely.
-- [W3C — Understanding WCAG 2.2 SC 1.4.2: Audio Control](https://www.w3.org/WAI/WCAG22/Understanding/audio-control.html) — auto-playing audio needs a pause or volume control; starting sound automatically is discouraged.
+- [HTML Standard: Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#non-conforming-features): `bgsound` is entirely obsolete: "Use audio instead."
+- [HTML Standard: Elements in the DOM](https://html.spec.whatwg.org/multipage/dom.html#elements-in-the-dom): the element interface for `bgsound` is `HTMLUnknownElement`.
+- [Microsoft Learn (archived): IHTMLBGsound: loop property](https://learn.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/platform-apis/aa704322(v=vs.85)): `bgsound` as an Internet Explorer engine API; `loop="-1"` loops infinitely.
+- [W3C: Understanding WCAG 2.2 SC 1.4.2: Audio Control](https://www.w3.org/WAI/WCAG22/Understanding/audio-control.html): auto-playing audio needs a pause or volume control; starting sound automatically is discouraged.

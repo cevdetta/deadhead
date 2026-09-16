@@ -17,10 +17,10 @@ impacts: ["maintainability", "a11y"]
 related: ["element/basefont", "element/big"]
 ---
 
-`<font color="red" face="Arial" size="5">` set the colour, typeface and size of a run of text
-before stylesheets existed. It is the emblem of 1990s markup, and it lives on in email templates,
-WYSIWYG editor output and content pasted in from word processors, because every one of those
-tools could emit it.
+`<font>` styles text without saying why. `<font color="red" face="Arial" size="5">` set
+a run of red Arial at size 5
+before stylesheets existed. It is the emblem of 1990s markup. Email templates and
+WYSIWYG editor output still emit it, as does content pasted in from word processors.
 
 ## Why avoid
 
@@ -41,7 +41,7 @@ digit with U+0030 (0)" rather than rejecting the value. A misspelled colour name
 turns into some other colour, where CSS would have discarded the invalid declaration.
 
 And it means nothing. `<font color="red">Payment failed</font>` looks urgent, but the element
-carries no semantics, so to a screen reader it's just more text.
+carries no semantics, so a screen reader reads it as plain text.
 
 ## Use instead
 
@@ -64,12 +64,13 @@ Each attribute has a direct CSS counterpart: `color` becomes `color`, `face` bec
 
 ## Detectability
 
-Fully detectable by tag name. There is no autofix: `font` still applies its colour, typeface and
+Fully detectable by tag name. The rule matches the tag outright. There is no autofix:
+`font` still applies its colour, typeface and
 size, so removing it would visibly change the text.
 
 ## Resources
 
-- [HTML Standard — Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#non-conforming-features) — `font` is entirely obsolete: "Use appropriate elements or CSS instead."
-- [HTML Standard — Rendering: phrasing content](https://html.spec.whatwg.org/multipage/rendering.html#phrasing-content-3) — `color`, `face` and `size` on `font` are presentational hints for `color`, `font-family` and `font-size`.
-- [HTML Standard — Parsing a legacy color value](https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#rules-for-parsing-a-legacy-colour-value) — non-hex characters are replaced with `0` instead of being rejected.
-- [MDN — `<font>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/font) — deprecated; its attributes and their CSS replacements.
+- [HTML Standard: Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#non-conforming-features): `font` is entirely obsolete: "Use appropriate elements or CSS instead."
+- [HTML Standard: Rendering: phrasing content](https://html.spec.whatwg.org/multipage/rendering.html#phrasing-content-3): `color`, `face` and `size` on `font` are presentational hints for `color`, `font-family` and `font-size`.
+- [HTML Standard: Parsing a legacy color value](https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#rules-for-parsing-a-legacy-colour-value): non-hex characters are replaced with `0` instead of being rejected.
+- [MDN: `<font>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/font): deprecated; its attributes and their CSS replacements.

@@ -19,10 +19,8 @@ related: ["meta/http-equiv-header-only"]
 ---
 
 Three http-equiv values name security mechanisms that no longer exist even
-as headers: `x-xss-protection` (the reflected-XSS auditor switch),
-`x-webkit-csp` (Chrome 14 / Safari 6 era prefixed CSP), and
-`x-content-security-policy` (Firefox 4–22 era prefixed CSP, with a
-different directive vocabulary).
+as headers. The reflected-XSS auditor is gone, and the prefixed CSP headers
+went with it.
 
 ## Why avoid
 
@@ -32,7 +30,7 @@ XSS holes in otherwise safe sites, and recommends CSP instead. Chrome's
 CSP documentation says to ignore the prefixed headers outright: modern
 browsers support the unprefixed `Content-Security-Policy` header. Unlike
 the header-only family, there is no live header spelling to move these
-to — deletion plus a real CSP header is the whole migration.
+to. Deletion plus a real CSP header is the whole migration.
 
 ## Use instead
 
@@ -42,7 +40,7 @@ Content-Security-Policy: default-src 'self'
 
 ## Detectability
 
-The selector `meta[http-equiv]` is only a pre-filter: the verdict depends
+The rule pre-filters with `meta[http-equiv]`: the verdict depends
 on whether the trimmed value, compared ASCII case-insensitively, is one of
 the three retired keywords. The decision therefore lives in
 `packages/rules/logic/meta/http-equiv-legacy-security.ts`. The fix removes
@@ -51,5 +49,5 @@ them to.
 
 ## Resources
 
-- [MDN — X-XSS-Protection](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-XSS-Protection) — deprecated, non-standard response header; the auditor is unnecessary with CSP and its filtering created vulnerabilities.
-- [Chrome — Content Security Policy](https://developer.chrome.com/docs/privacy-security/csp) — ignore the X-WebKit-CSP / X-Content-Security-Policy prefixed headers; use the unprefixed Content-Security-Policy header.
+- [MDN: X-XSS-Protection](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-XSS-Protection): deprecated, non-standard response header; the auditor is unnecessary with CSP and its filtering created vulnerabilities.
+- [Chrome: Content Security Policy](https://developer.chrome.com/docs/privacy-security/csp): ignore the X-WebKit-CSP / X-Content-Security-Policy prefixed headers; use the unprefixed Content-Security-Policy header.

@@ -18,10 +18,11 @@ impacts: ["performance", "interop"]
 related: ["meta/http-equiv-name-misuse", "meta/http-equiv-content-type"]
 ---
 
-Client Hints let a server ask the browser for device and network facts —
-viewport width, device memory, platform version — so it can adapt responses.
-The mechanism is headers-first: the server advertises with `Accept-CH`, the
-browser caches the opt-in, and hints ride on subsequent requests. The same two
+The `<meta http-equiv>` form of Client Hints works only in Chromium and never persists.
+Client Hints let a server ask the browser for device and network facts, so it can adapt
+responses. Viewport width and device memory head the list.
+The mechanism is headers-first. The server advertises with `Accept-CH` and the
+browser caches the opt-in, so hints ride on subsequent requests. The same two
 keywords also exist as `<meta http-equiv>` tags, where they work only in
 Chromium, only for page-initiated requests, and never persist. A quarter-million
 sites carry the meta form, ~97% of them one CMS's boilerplate.
@@ -33,7 +34,7 @@ ignores both tags. An opt-in that only opts into one engine is a single-vendor
 dependency wearing standard syntax.
 
 It misses the requests that matter. The meta form covers page-initiated
-requests only — never subsequent navigations — while the header persists in the
+requests only, never subsequent navigations, while the header persists in the
 Accept-CH cache, and `Critical-CH` can even restart the first load to include
 critical hints. Markup arrives after the parser needed the decision.
 
@@ -43,7 +44,7 @@ top-level context, and never touches the cache. One blocking script above it
 silently voids the delegation.
 
 It is monoculture boilerplate. The crawl finds `accept-ch` on ~242,000 sites
-and `delegate-ch` on under 500 — the former almost entirely Squarespace
+and `delegate-ch` on under 500: the former almost entirely Squarespace
 templates. Not a decision per site but a default nobody chose, copied because
 nothing visibly breaks.
 
@@ -75,13 +76,13 @@ code, in one place. The decision lives in
 `packages/rules/logic/meta/http-equiv-client-hints.ts`.
 
 There is no autofix. The repair is a response header, which no text edit can
-send — and unlike an unread tag, the element does something in Chromium, so
+send. Unlike an unread tag, the element does something in Chromium, so
 deleting it drops working hints.
 
 ## Resources
 
-- [WICG — Client Hints Infrastructure, `Delegate-CH`](https://wicg.github.io/client-hints-infrastructure/#delegate-ch-algo) — the only specced meta form, and hedged: no-ops after any script/link/style, secure top-level only, never touches the Accept-CH cache.
-- [WICG — Client Hints Infrastructure, `Accept-CH` cache](https://wicg.github.io/client-hints-infrastructure/#accept-ch-cache-definition) — persistence, eviction and restart semantics exist only for the header; the infra defines no meta equivalent for `accept-ch`.
-- [Chrome — User-Agent Client Hints](https://developer.chrome.com/docs/privacy-security/user-agent-client-hints) — documents the meta form and its limit in the same breath: hints requested by meta go out on page-initiated requests only, not subsequent navigations.
-- [MDN — `Accept-CH` header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Accept-CH) — header-first design: persist it for all secure requests so hints are sent reliably.
-- [You probably don't need http-equiv meta tags](https://rviscomi.dev/2023/07/you-probably-dont-need-http-equiv-meta-tags/) — `accept-ch` at 242,017 sites (~97% Squarespace), `delegate-ch` at 492; non-standard per the HTML spec, supported by Chromium alone.
+- [WICG: Client Hints Infrastructure, `Delegate-CH`](https://wicg.github.io/client-hints-infrastructure/#delegate-ch-algo): the only specced meta form, hedged: no-ops after any script/link/style, secure top-level only, never touches the Accept-CH cache.
+- [WICG: Client Hints Infrastructure, `Accept-CH` cache](https://wicg.github.io/client-hints-infrastructure/#accept-ch-cache-definition): persistence, eviction and restart semantics exist only for the header; the infra defines no meta equivalent for `accept-ch`.
+- [Chrome: User-Agent Client Hints](https://developer.chrome.com/docs/privacy-security/user-agent-client-hints): documents the meta form and its limit in the same breath: hints requested by meta go out on page-initiated requests only, not subsequent navigations.
+- [MDN: `Accept-CH` header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Accept-CH): header-first design: persist it for all secure requests so hints are sent reliably.
+- [You probably don't need http-equiv meta tags](https://rviscomi.dev/2023/07/you-probably-dont-need-http-equiv-meta-tags/): `accept-ch` at 242,017 sites (~97% Squarespace), `delegate-ch` at 492; non-standard per the HTML spec, supported by Chromium alone.

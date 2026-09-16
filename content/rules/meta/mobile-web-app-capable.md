@@ -17,10 +17,11 @@ impacts: ["maintainability"]
 related: ["meta/apple-mobile-web-app-capable", "meta/application-name"]
 ---
 
-`<meta name="mobile-web-app-capable" content="yes">` is Chrome for Android's answer to
+The manifest replaced `mobile-web-app-capable`. `<meta name="mobile-web-app-capable" content="yes">`
+is Chrome for Android's answer to
 Apple's `apple-mobile-web-app-capable`: the same switch without the vendor prefix. Chrome 31
 introduced it in 2013 so that "Add to Home screen" could make a shortcut that launches like
-an app. It has had a second life lately, because Chrome's console suggests it as the
+an app. It has a second life, because Chrome's console suggests it as the
 replacement for the Apple tag, and frameworks took the hint.
 
 ## Why avoid
@@ -60,18 +61,19 @@ counts.
 
 ## Detectability
 
-Fully detectable. `<meta name>` holds a single value, so the selector uses `=` with the
-`i` flag.
+Fully detectable. `<meta name>` holds a single value, so the rule matches with `=`
+and the `i` flag.
 
 The fix removes the element unconditionally. With a manifest in place that is inert,
-because Chrome consults the manifest first. **Without one, Chrome for Android may save the
-page as a plain bookmark shortcut rather than an app shortcut.** Add the manifest and its
+because Chrome consults the manifest first. Without one, Chrome for Android falls back
+to the meta flag: the tag makes an app shortcut, its absence a plain bookmark shortcut.
+Add the manifest and its
 `display` member before applying the fix.
 
 ## Resources
 
-- [Mozilla Bugzilla 1114631 — Detect "web app capable" sites using meta mobile-web-app-capable](https://bugzilla.mozilla.org/show_bug.cgi?id=1114631) — Firefox declined, quoting Chrome's docs: "only recommended for Chrome prior to version M39, from M39 the new W3C web app manifest is the recommended way".
-- [WHATWG wiki — MetaExtensions](https://wiki.whatwg.org/wiki/MetaExtensions) — `mobile-web-app-capable` registered as a "Proposal", with `apple-mobile-web-app-capable` as its vendor synonym.
-- [Chromium — `components/webapps/browser/android/add_to_homescreen_data_fetcher.cc`](https://github.com/chromium/chromium/blob/main/components/webapps/browser/android/add_to_homescreen_data_fetcher.cc) — a manifest short-circuits; without one, the meta flag separates app shortcuts from bookmarks.
-- [Chromium — `components/webapps/renderer/web_page_metadata_extraction.cc`](https://github.com/chromium/chromium/blob/main/components/webapps/renderer/web_page_metadata_extraction.cc) — the renderer still extracts `mobile-web-app-capable`.
-- [W3C — Web Application Manifest: display member](https://www.w3.org/TR/appmanifest/#display-member) — the standard replacement.
+- [Mozilla Bugzilla 1114631: Detect "web app capable" sites using meta mobile-web-app-capable](https://bugzilla.mozilla.org/show_bug.cgi?id=1114631): Firefox declined, quoting Chrome's docs: "only recommended for Chrome prior to version M39, from M39 the new W3C web app manifest is the recommended way".
+- [WHATWG wiki: MetaExtensions](https://wiki.whatwg.org/wiki/MetaExtensions): `mobile-web-app-capable` registered as a "Proposal", with `apple-mobile-web-app-capable` as its vendor synonym.
+- [Chromium: `components/webapps/browser/android/add_to_homescreen_data_fetcher.cc`](https://github.com/chromium/chromium/blob/main/components/webapps/browser/android/add_to_homescreen_data_fetcher.cc): a manifest short-circuits; without one, the meta flag separates app shortcuts from bookmarks.
+- [Chromium: `components/webapps/renderer/web_page_metadata_extraction.cc`](https://github.com/chromium/chromium/blob/main/components/webapps/renderer/web_page_metadata_extraction.cc): the renderer still extracts `mobile-web-app-capable`.
+- [W3C: Web Application Manifest: display member](https://www.w3.org/TR/appmanifest/#display-member): the standard replacement.

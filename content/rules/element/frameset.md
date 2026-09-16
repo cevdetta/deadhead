@@ -17,7 +17,8 @@ impacts: ["maintainability"]
 related: ["element/plugin-embed"]
 ---
 
-A frameset page has no `<body>`. In its place, `<frameset cols="200,*">` splits the window into
+A frameset puts separate documents in one window. A frameset page has no `<body>`. In
+its place, `<frameset cols="200,*">` splits the window into
 panes, each `<frame src="…">` loads a separate HTML document into one of them, and `<noframes>`
 holds content for browsers that don't do frames. The markup still turns up in old documentation
 and intranet pages.
@@ -35,7 +36,7 @@ Browsers do still render it, and that is the problem. The spec keeps the machine
 isn't one document. It is a frame document plus one full document per pane, each with its own
 history. Following a link inside a pane loads a new document into that pane only. The window's
 URL stays the frameset's, so the address bar, a bookmark or a shared link can't say which page
-the reader was actually on.
+the reader was on.
 
 The layout is fixed, too. The rendering section draws a frameset "as a box with the height and
 width of the viewport" and divides it by the `cols` and `rows` attributes. Pane sizes are set in
@@ -61,7 +62,7 @@ through a server-side include, a template or a static site generator:
 Keep the navigation on screen with CSS, for example `position: sticky` or a grid layout, instead
 of a separate pane.
 
-If a piece of content really is a separate document, embed it with an `iframe` and give it a
+If a piece of content is a separate document, embed it with an `iframe` and give it a
 title:
 
 ```html
@@ -82,6 +83,6 @@ the only content some readers get.
 
 ## Resources
 
-- [HTML Standard — Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#non-conforming-features) — `frame`, `frameset` and `noframes` are entirely obsolete; use `iframe` and CSS or server-side includes instead.
-- [HTML Standard — Frames](https://html.spec.whatwg.org/multipage/obsolete.html#frames) — `frameset` acts as the body, and each `frame` creates a child navigable, like an `iframe`.
-- [HTML Standard — Rendering: frames and framesets](https://html.spec.whatwg.org/multipage/rendering.html#frames-and-framesets) — a frameset is a viewport-sized box divided by `cols` and `rows`, laying out only `frame` and `frameset` children.
+- [HTML Standard: Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#non-conforming-features): `frame`, `frameset` and `noframes` are entirely obsolete; use `iframe` and CSS or server-side includes instead.
+- [HTML Standard: Frames](https://html.spec.whatwg.org/multipage/obsolete.html#frames): `frameset` acts as the body, and each `frame` creates a child navigable, like an `iframe`.
+- [HTML Standard: Rendering: frames and framesets](https://html.spec.whatwg.org/multipage/rendering.html#frames-and-framesets): a frameset is a viewport-sized box divided by `cols` and `rows`, laying out only `frame` and `frameset` children.

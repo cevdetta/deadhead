@@ -17,8 +17,8 @@ impacts: ["seo", "maintainability"]
 related: ["link/image-src"]
 ---
 
-`<meta name="twitter:card" content="summary_large_image">`, and the `twitter:site`,
-`twitter:creator`, `twitter:title`, `twitter:description` and `twitter:image` that follow
+Twitter card tags duplicate Open Graph. `<meta name="twitter:card" content="summary_large_image">`,
+and the `twitter:title` and `twitter:description` that follow
 it, were Twitter's card markup: its own copy of the preview metadata Open Graph already
 carried. Generators and SEO plugins emit the whole block by default, so it sits next to
 an identical set of `og:*` tags on most of the web.
@@ -62,8 +62,8 @@ One description of the page, in Open Graph:
 
 ## Detectability
 
-Fully detectable. `<meta name>` holds a single value, so the selector is a
-case-insensitive prefix match on `twitter:`, for both `name` and `property`, which many
+Fully detectable. `<meta name>` holds a single value, so the rule matches the
+`twitter:` prefix case-insensitively, for both `name` and `property`, which many
 generators use interchangeably.
 
 Four names are deliberately left alone: `twitter:dnt`, `twitter:widgets:autoload`,
@@ -74,8 +74,8 @@ on.
 
 ## Resources
 
-- [X Developer Platform — Cards markup (archived, 2024)](https://web.archive.org/web/2024/https://developer.x.com/en/docs/x-for-websites/cards/overview/markup) — the last published tag reference: `twitter:card` sets "the card type"; without it, "a summary card may be rendered".
-- [X Developer Platform — X for websites](https://docs.x.com/x-for-websites/overview) — the current section, with no Cards documentation; the old markup URL redirects to docs.x.com.
-- [X Developer Platform — Webpage properties](https://docs.x.com/x-for-websites/webpage-properties) — `twitter:dnt` and `twitter:widgets:*`, the names this rule excludes.
-- [The Open Graph protocol](https://ogp.me/) — the replacement every link-preview consumer reads.
-- [Matt Haughey (Slack) — Everything you ever wanted to know about unfurling but were afraid to ask](https://a.wholelottanothing.org/everything-you-ever-wanted-to-know-about-unfurling-but-were-afraid-to-ask-or-how-to-make-your/) — Slack's explanation of how its unfurler reads `twitter:label1` and `twitter:data1`.
+- [X Developer Platform: Cards markup (archived, 2024)](https://web.archive.org/web/2024/https://developer.x.com/en/docs/x-for-websites/cards/overview/markup): the last published tag reference: `twitter:card` sets "the card type"; without it, "a summary card may be rendered".
+- [X Developer Platform: X for websites](https://docs.x.com/x-for-websites/overview): the current section, with no Cards documentation; the old markup URL redirects to docs.x.com.
+- [X Developer Platform: Webpage properties](https://docs.x.com/x-for-websites/webpage-properties): `twitter:dnt` and `twitter:widgets:*`, the names this rule excludes.
+- [The Open Graph protocol](https://ogp.me/): the replacement every link-preview consumer reads.
+- [Matt Haughey (Slack): Everything you ever wanted to know about unfurling but were afraid to ask](https://a.wholelottanothing.org/everything-you-ever-wanted-to-know-about-unfurling-but-were-afraid-to-ask-or-how-to-make-your/): Slack's explanation of how its unfurler reads `twitter:label1` and `twitter:data1`.
