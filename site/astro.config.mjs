@@ -1,6 +1,35 @@
 // @ts-check
+import { readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "astro/config";
 import sitemap from "@astrojs/sitemap";
+
+// Rule `pubDate` frontmatter mapped to sitemap `lastmod`, so crawlers
+// prioritize updates. Read here rather than in a content loader: the
+// sitemap integration only sees final URLs, so the config joins them.
+const contentRulesDir = fileURLToPath(new URL("../content/rules/", import.meta.url));
+
+/** @returns {Map<string, string>} URL path (`/rules/<ruleId>`) to `YYYY-MM-DD`. */
+function loadLastmod() {
+  const out = new Map();
+  let files = [];
+  try {
+    files = readdirSync(contentRulesDir, { recursive: true });
+  } catch {
+    return out;
+  }
+  for (const file of files) {
+    if (typeof file !== "string" || !file.endsWith(".md")) continue;
+    const ruleId = file.replace(/\.md$/, "").split("\\").join("/");
+    const body = readFileSync(join(contentRulesDir, file), "utf8");
+    const match = /^pubDate:\s*"(\d{4}-\d{2}-\d{2})"/m.exec(body);
+    if (match?.[1]) out.set(`/rules/${ruleId}`, match[1]);
+  }
+  return out;
+}
+
+const lastmodByPath = loadLastmod();
 
 export default defineConfig({
   site: "https://deadhead.cevdet.ch",
@@ -18,7 +47,17 @@ export default defineConfig({
   trailingSlash: "never",
   build: { format: "file" },
 
-  integrations: [sitemap()],
+  integrations: [
+    sitemap({
+      serialize(item) {
+        const path =
+          new URL(item.url).pathname.replace(/\/$/, "") || "/";
+        const lastmod = lastmodByPath.get(path);
+        if (lastmod) item.lastmod = lastmod;
+        return item;
+      },
+    }),
+  ],
   markdown: {
     shikiConfig: { themes: { light: "github-light", dark: "github-dark" } },
   },

@@ -1,7 +1,7 @@
 ---
 ruleId: "element/menuitem"
 title: "menuitem element"
-description: "`menuitem` is entirely obsolete: the popup-menu command element from the HTML context-menu feature that only Firefox shipped. Firefox removed it in version 103; handling the `contextmenu` event with script does the same job in every engine."
+description: "`menuitem` is the dead popup-menu command that only Firefox shipped. Firefox removed it in 103. Handle `contextmenu` with script."
 pubDate: "2026-09-14"
 status: "avoid"
 severity: "deprecated"

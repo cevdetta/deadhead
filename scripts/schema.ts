@@ -262,6 +262,14 @@ export function validateFrontmatter(data: unknown): FrontmatterResult {
 
   const title = nonEmptyString(data["title"], ["title"], issues);
   const description = nonEmptyString(data["description"], ["description"], issues);
+  if (description !== null && description.length > 160) {
+    issues.push(
+      field(
+        ["description"],
+        `must fit 160 chars for search results (found ${description.length})`,
+      ),
+    );
+  }
   const replacement = nonEmptyString(data["replacement"], ["replacement"], issues);
 
   const pubDateRaw: unknown = data["pubDate"];

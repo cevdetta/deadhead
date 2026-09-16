@@ -1,7 +1,7 @@
 ---
 ruleId: "document/doctype"
 title: "Missing or non-standard doctype"
-description: "The page has no doctype, or one other than <!doctype html>; a missing or legacy doctype can put the browser in quirks or limited-quirks mode, where CSS layout follows old compatibility rules."
+description: "The page lacks <!doctype html>. A missing or legacy doctype triggers quirks mode, where CSS layout follows old rules."
 pubDate: "2026-09-14"
 status: "avoid"
 severity: "harmful"

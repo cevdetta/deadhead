@@ -1,7 +1,7 @@
 ---
 ruleId: "element/content"
 title: "content element"
-description: "`content` is the Shadow DOM v0 insertion point: the distribution slot that only ever worked in Chrome's experimental v0 implementation. The v1 standard replaced it with `slot`, and Chrome removed v0 entirely — a leftover `<content>` distributes nothing in any current engine."
+description: "`content` is the dead Shadow DOM v0 slot. The v1 standard uses `slot`, and Chrome removed v0. A leftover distributes nothing."
 pubDate: "2026-09-14"
 status: "avoid"
 severity: "deprecated"

@@ -42,7 +42,7 @@ const rules = defineCollection({
     .object({
       ruleId: z.string().regex(RULE_ID),
       title: z.string().min(1),
-      description: z.string().min(1),
+      description: z.string().min(1).max(160),
       pubDate: z.coerce.date(),
       status: enumOf(STATUS),
       severity: enumOf(SEVERITY),

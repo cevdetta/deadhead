@@ -1,7 +1,7 @@
 ---
 ruleId: "meta/http-equiv-content-security-policy"
 title: "meta http-equiv=content-security-policy"
-description: "A <meta> policy can never equal a header policy: the spec strips frame-ancestors, report-uri and sandbox from meta-delivered policies and offers no report-only mode."
+description: "A meta policy cannot match a header policy. The spec strips frame-ancestors, report-uri and sandbox, with no report-only mode."
 pubDate: "2026-09-14"
 status: "avoid"
 severity: "harmful"

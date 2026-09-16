@@ -1,7 +1,7 @@
 ---
 ruleId: "element/plaintext"
 title: "plaintext element"
-description: "plaintext is obsolete and never ends: everything after it, including the page's closing tags, becomes text; serve a text/plain file or use pre and code with the content escaped."
+description: "plaintext never ends: all markup after it becomes text, including closing tags. Serve text/plain or escape content in pre."
 pubDate: "2026-09-14"
 status: "avoid"
 severity: "deprecated"

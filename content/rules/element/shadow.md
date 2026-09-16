@@ -1,7 +1,7 @@
 ---
 ruleId: "element/shadow"
 title: "shadow element"
-description: "`shadow` is the Shadow DOM v0 insertion point for nested shadow roots: the placeholder where an older shadow tree rendered inside a newer one. It only ever worked in Chrome's experimental v0 implementation, was removed with v0, and has no v1 equivalent — v1 composes a single shadow root with `slot`."
+description: "`shadow` is the dead Shadow DOM v0 slot for nested trees. Chrome removed v0. Use one v1 shadow root with `slot`."
 pubDate: "2026-09-14"
 status: "avoid"
 severity: "deprecated"
