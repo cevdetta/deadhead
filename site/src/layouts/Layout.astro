@@ -69,25 +69,33 @@ const nav = [
     )}
   </head>
   <body>
+    <a class="skip-link" href="#main">Skip to content</a>
     <header class="masthead">
       <div class="shell">
         <b>
-          <a href="/"><img src="/logo.svg" alt="" width="20" height="20" />deadhead</a>
+          <a href="/" aria-current={path === "/" ? "page" : undefined}><img src="/logo.svg" alt="" width="20" height="20" />deadhead</a>
         </b>
         <nav aria-label="Primary">
-          {nav.map((item) => (
-            <a
-              href={item.href}
-              aria-current={path === item.href ? "page" : undefined}
-            >
-              {item.label}
-            </a>
-          ))}
+          {nav.map((item) => {
+            const internal = item.href.startsWith("/");
+            const current =
+              internal &&
+              (path === item.href || path.startsWith(item.href + "/"));
+            return (
+              <a
+                href={item.href}
+                aria-current={current ? "page" : undefined}
+                rel={internal ? undefined : "external"}
+              >
+                {item.label}
+              </a>
+            );
+          })}
         </nav>
       </div>
     </header>
 
-    <main>
+    <main id="main" tabindex="-1">
       <slot />
     </main>
 
@@ -97,8 +105,7 @@ const nav = [
           Every rule on this site is one markdown file in{" "}
           <a href={`${REPO}/tree/main/content/rules`}>
             <code>content/rules/</code>
-          </a>
-          . A rule with no documentation is not a rule.
+          </a>. A rule with no documentation is not a rule.
         </p>
         <p>
           MIT licensed. <a href={REPO}>Source on GitHub</a>.

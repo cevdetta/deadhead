@@ -97,6 +97,21 @@ a:hover {
   border-radius: 2px;
 }
 
+.skip-link {
+  position: absolute;
+  inset-inline-start: 1rem;
+  top: -10rem;
+  z-index: 10;
+  background: var(--bg-sunk);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+}
+
+.skip-link:focus-visible {
+  top: 0.5rem;
+}
+
 code,
 kbd,
 samp {
@@ -137,13 +152,57 @@ pre samp {
 blockquote {
   border-inline-start: 3px solid var(--accent);
   padding-inline-start: 1rem;
-  color: var(--muted);
   font-style: italic;
 }
 
 ul,
 ol {
   padding-inline-start: 1.4em;
+}
+
+/* Shared values. One source for each repeated token. */
+.masthead b,
+.badges,
+.tags,
+.badge,
+.namespace h2,
+.rule-list b,
+.rule-head a,
+.callout h2,
+.runtimes h3 {
+  font-family: var(--mono);
+}
+
+.lede,
+blockquote,
+.colophon,
+.source-note,
+.namespace p,
+.rule-list p,
+.rule-head a,
+.facts dt,
+.facts small,
+.runtimes p,
+.tags li {
+  color: var(--muted);
+}
+
+.masthead nav,
+.namespace p,
+.rule-list b,
+.rule-list p,
+.facts,
+.runtimes h3,
+.runtimes p {
+  font-size: 0.9375rem;
+}
+
+.badges,
+.tags,
+.rule-list,
+.runtimes {
+  list-style: none;
+  padding: 0;
 }
 
 /* --- layout --------------------------------------------------------------- */
@@ -174,7 +233,6 @@ ol {
 
 .lede {
   font-size: 1.125rem;
-  color: var(--muted);
   text-wrap: pretty;
 }
 
@@ -192,7 +250,6 @@ ol {
 }
 
 .masthead b {
-  font-family: var(--mono);
   margin-inline-end: auto;
 }
 
@@ -204,10 +261,9 @@ ol {
 .masthead nav {
   display: flex;
   gap: 1.1rem;
-  font-size: 0.9375rem;
 }
 
-.masthead [aria-current="page"] {
+.masthead nav [aria-current="page"] {
   color: var(--accent);
   text-decoration-color: currentColor;
 }
@@ -216,7 +272,6 @@ ol {
   border-top: 1px solid var(--rule);
   margin-block-start: 4rem;
   padding-block: 1.5rem 3rem;
-  color: var(--muted);
   font-size: 0.875rem;
 }
 
@@ -227,9 +282,6 @@ ol {
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
-  list-style: none;
-  padding: 0;
-  font-family: var(--mono);
   font-size: 0.75rem;
   line-height: 1.5;
 }
@@ -245,13 +297,11 @@ ol {
 
 .badge {
   display: inline-block;
-  font-family: var(--mono);
   font-size: 0.75rem;
   line-height: 1.5;
 }
 
 .tags li {
-  color: var(--muted);
   border-color: var(--rule);
 }
 
@@ -279,19 +329,14 @@ ol {
 }
 
 .namespace h2 {
-  font-family: var(--mono);
   font-size: 1.05rem;
 }
 
 .namespace p {
-  color: var(--muted);
-  font-size: 0.9375rem;
   margin-block-start: 0.15rem;
 }
 
 .rule-list {
-  list-style: none;
-  padding: 0;
   margin-block-start: 1rem;
   border-top: 1px solid var(--rule);
 }
@@ -309,10 +354,13 @@ ol {
   text-decoration: none;
 }
 
+.rule-list a > * {
+  min-width: 0;
+}
+
 .rule-list b {
-  font-family: var(--mono);
-  font-size: 0.9375rem;
   font-weight: inherit;
+  overflow-wrap: anywhere;
 }
 
 .rule-list a:hover b {
@@ -321,8 +369,6 @@ ol {
 
 .rule-list p {
   grid-column: 1 / -1;
-  color: var(--muted);
-  font-size: 0.9375rem;
   line-height: 1.5;
 }
 
@@ -333,9 +379,7 @@ ol {
 }
 
 .rule-head a {
-  font-family: var(--mono);
   font-size: 0.875rem;
-  color: var(--muted);
 }
 
 .rule-head h1 {
@@ -359,17 +403,30 @@ article > .tags {
   border-radius: 6px;
   padding: 0.4rem 1rem;
   margin-block: 2rem;
-  font-size: 0.9375rem;
+}
+
+.facts > * {
+  min-width: 0;
+}
+
+.facts dd {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 30rem) {
+  .facts {
+    grid-template-columns: 1fr;
+  }
+
+  .facts > :nth-child(2) {
+    border-block-start: 1px solid var(--rule);
+  }
 }
 
 .facts dt,
 .facts dd {
   padding-block: 0.45rem;
   border-block-start: 1px solid var(--rule);
-}
-
-.facts dt {
-  color: var(--muted);
 }
 
 .facts > :nth-child(-n + 2) {
@@ -383,7 +440,6 @@ article > .tags {
 
 .facts small {
   display: block;
-  color: var(--muted);
   font-size: 0.8125rem;
   line-height: 1.4;
 }
@@ -396,7 +452,6 @@ article > .tags {
 }
 
 .callout h2 {
-  font-family: var(--mono);
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -408,7 +463,6 @@ article > .tags {
   margin-block-start: 3rem;
   padding-block-start: 1.25rem;
   border-top: 1px solid var(--rule);
-  color: var(--muted);
   font-size: 0.875rem;
 }
 
@@ -418,8 +472,6 @@ article > .tags {
   display: grid;
   gap: 1rem;
   grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-  list-style: none;
-  padding: 0;
 }
 
 .runtimes li {
@@ -428,13 +480,6 @@ article > .tags {
   padding: 1rem;
 }
 
-.runtimes h3 {
-  font-family: var(--mono);
-  font-size: 0.9375rem;
-}
-
 .runtimes p {
-  color: var(--muted);
-  font-size: 0.9375rem;
   margin-block-start: 0.3rem;
 }
