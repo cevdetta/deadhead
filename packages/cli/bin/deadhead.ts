@@ -202,16 +202,28 @@ try {
     );
   }
 
-  if (threshold === "none" || total(reported) === 0) process.exit(0);
+  if (threshold === "none" || total(reported) === 0) process.exitCode = 0;
+  else {
+    // A threshold fails on itself and on everything worse: --fail-on=deprecated
+    // also fails on harmful.
+    const counts = tally(reported);
+    const floor = SEVERITY_RANK[threshold];
+    const breached = SEVERITY.some(
+      (severity) => counts[severity] > 0 && SEVERITY_RANK[severity] >= floor,
+    );
+    process.exitCode = breached ? 1 : 0;
+  }
 
-  // A threshold fails on itself and on everything worse: --fail-on=deprecated
-  // also fails on harmful.
-  const counts = tally(reported);
-  const floor = SEVERITY_RANK[threshold];
-  const breached = SEVERITY.some(
-    (severity) => counts[severity] > 0 && SEVERITY_RANK[severity] >= floor,
-  );
-  process.exit(breached ? 1 : 0);
+  // process.exit() drops whatever stdout still holds when the destination is a
+  // pipe, so a large report lost its tail here (a SARIF run over the fixtures
+  // corpus ended mid-object). Park the code above and let the stream drain;
+  // falling off the end exits with that code.
+  if (process.stdout.writableLength > 0) {
+    await new Promise<void>((resolve) => {
+      process.stdout.once("drain", () => resolve());
+      process.stdout.once("error", () => resolve());
+    });
+  }
 } catch (err) {
   if (err instanceof UsageError || err instanceof RulesNotBuiltError) fail(err.message);
   if (err instanceof ConfigError || err instanceof BaselineError) fail(err.message);
