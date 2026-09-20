@@ -59,6 +59,7 @@ export const TAGS = [
   "seo",
   "social",
   "style",
+  "svg",
   "title",
   "viewport",
 ] as const;
