@@ -71,9 +71,16 @@ function makePorts(
 
   return withPortCache<P5Element>((node, portFor) => {
     // parse5 lowercases HTML tag names and attribute names during parsing, so
-    // the port's "lowercase" guarantee costs nothing here.
+    // the port's "lowercase" guarantee costs nothing here. Foreign attributes
+    // keep their prefix apart from their name (`xlink:href` arrives as prefix
+    // `xlink`, name `href`), so the map key rejoins them: the DOM and ESLint
+    // adapters both report the qualified name, and the three must agree.
     const attrs = new Map<string, string>();
-    for (const attr of node.attrs) attrs.set(attr.name.toLowerCase(), attr.value);
+    for (const attr of node.attrs) {
+      const prefix = attr.prefix ?? "";
+      const qualified = prefix === "" ? attr.name : `${prefix}:${attr.name}`;
+      attrs.set(qualified.toLowerCase(), attr.value);
+    }
 
     const port: ElementPort = {
       tag: node.tagName.toLowerCase(),
@@ -82,7 +89,8 @@ function makePorts(
       attrNames: () => [...attrs.keys()],
       attrRange: (name): Range | null => {
         // parse5 keys attribute locations by the lowercased name, the same way
-        // it lowercases the attributes themselves.
+        // it lowercases the attributes themselves — qualified where the
+        // attribute carries a prefix (`xlink:href`, never bare `href`).
         const at = node.sourceCodeLocation?.attrs?.[name.toLowerCase()];
         return at ? [at.startOffset, at.endOffset] : null;
       },
