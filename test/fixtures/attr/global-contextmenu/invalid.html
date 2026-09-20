@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Elements with dead menu hooks</title>
+  </head>
+  <body>
+    <div contextmenu="tools">Tools</div>
+    <p onshow="greet()">Hi</p>
+    <span contextmenu="tools" onshow="greet()">Both</span>
+    <p>Each hook above names a menu nothing builds.</p>
+  </body>
+</html>
