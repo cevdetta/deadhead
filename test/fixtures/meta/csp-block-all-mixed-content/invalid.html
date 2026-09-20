@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CSP with obsolete mixed content guard</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; block-all-mixed-content">
+    <meta http-equiv="content-security-policy" content="default-src 'self'; BLOCK-ALL-MIXED-CONTENT">
+  </head>
+  <body>
+    <p>Both policies list an obsolete mixed content directive.</p>
+  </body>
+</html>
