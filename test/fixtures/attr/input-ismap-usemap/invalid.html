@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Image buttons with map hints</title>
+  </head>
+  <body>
+    <form method="post" action="/go">
+      <input type="image" src="go.png" alt="Go" ismap>
+      <input type="image" src="pick.png" alt="Pick" usemap="#pickmap">
+      <input type="image" src="both.png" alt="Both" ismap usemap="#bothmap">
+    </form>
+    <p>Each button above submits the same without its hints.</p>
+  </body>
+</html>
