@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Map with spare attributes</title>
+  </head>
+  <body>
+    <img src="shapes.png" usemap="#shapes" alt="Shapes">
+    <map name="shapes">
+      <area shape="rect" coords="25,25,125,125" href="red.html" alt="Red box" hreflang="en">
+      <area shape="circle" coords="200,75,50" href="green.html" alt="Green circle" type="text/html">
+      <area shape="rect" coords="50,50,100,100" nohref>
+    </map>
+    <p>Each region above maps the same without its spare attribute.</p>
+  </body>
+</html>
