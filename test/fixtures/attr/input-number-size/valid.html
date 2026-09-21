@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Number inputs without sizing hints</title>
+    <style>input[name="qty"] { width: 4em; }</style>
+  </head>
+  <body>
+    <form action="/order">
+      <input type="number" name="qty" min="0" max="100">
+    </form>
+  </body>
+</html>
