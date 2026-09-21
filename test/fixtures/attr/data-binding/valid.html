@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Page without data hooks</title>
+  </head>
+  <body>
+    <span id="name"></span>
+    <table>
+      <tbody>
+        <tr><td>Order 7</td></tr>
+      </tbody>
+    </table>
+    <input type="text" value="Ada">
+    <script>fetch("/user.json").then(r => r.json()).then(u => { document.getElementById("name").textContent = u.name; });</script>
+  </body>
+</html>
