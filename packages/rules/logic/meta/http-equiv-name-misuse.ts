@@ -1,4 +1,5 @@
 import type { MatchFn } from "../../types.ts";
+import { stripAsciiWhitespace } from "../../lib/text.ts";
 
 /**
  * `http-equiv` values that are metadata names wearing a pragma's clothes.
@@ -39,10 +40,6 @@ const MISUSED_NAMES: ReadonlySet<string> = new Set([
   "resource-type",
   "title",
 ]);
-
-/** ASCII whitespace, as the HTML Standard defines it — not `String#trim`. */
-const stripAsciiWhitespace = (value: string): string =>
-  value.replace(/^[\t\n\f\r ]+/, "").replace(/[\t\n\f\r ]+$/, "");
 
 /**
  * The `meta[http-equiv]` selector is only a pre-filter. A pragma is misused

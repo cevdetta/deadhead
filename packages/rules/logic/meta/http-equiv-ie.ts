@@ -1,4 +1,5 @@
 import type { MatchFn } from "../../types.ts";
+import { stripAsciiWhitespace } from "../../lib/text.ts";
 
 /**
  * Internet Explorer-only http-equiv values. Documented in Microsoft's
@@ -18,10 +19,6 @@ const IE_ONLY: ReadonlySet<string> = new Set([
   "site-enter",
   "site-exit",
 ]);
-
-/** ASCII whitespace, as the HTML Standard defines it — not `String#trim`. */
-const stripAsciiWhitespace = (value: string): string =>
-  value.replace(/^[\t\n\f\r ]+/, "").replace(/[\t\n\f\r ]+$/, "");
 
 /**
  * The `meta[http-equiv]` selector is only a pre-filter. A tag is claimed

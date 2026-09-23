@@ -9,7 +9,7 @@
  */
 
 import { readdir, readFile } from "node:fs/promises";
-import { relative, resolve, sep } from "node:path";
+import { join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { styleText } from "node:util";
 import { type Document, isMap, isScalar, parseDocument } from "yaml";
@@ -27,6 +27,7 @@ import {
 export const ROOT = fileURLToPath(new URL("../", import.meta.url));
 export const RULES_DIR = resolve(ROOT, "content/rules");
 export const LOGIC_DIR = resolve(ROOT, "packages/rules/logic");
+export const LIB_DIR = resolve(ROOT, "packages/rules/lib");
 
 export type Diagnostic = { file: string; line: number; col: number; message: string };
 
@@ -271,6 +272,61 @@ export async function checkLogicModules(
   }
 
   return diagnostics.sort((a, b) => a.file.localeCompare(b.file));
+}
+
+/**
+ * `packages/rules/lib/` holds helpers shared by logic modules. It sits beside
+ * `logic/` so the one-module-per-rule check never sees it. Two things are
+ * checked instead: no dead exports, and no import that would break the
+ * package's zero-dependency promise.
+ */
+export async function checkLibModules(libDir: string = LIB_DIR, logicDir: string = LOGIC_DIR): Promise<Diagnostic[]> {
+  const diagnostics: Diagnostic[] = [];
+  let libFiles: string[];
+  try {
+    libFiles = (await readdir(libDir)).filter((f) => f.endsWith(".ts")).sort();
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code === "ENOENT") return [];
+    throw err;
+  }
+  const logicText = (
+    await Promise.all(
+      (await readdir(logicDir, { recursive: true }))
+        .filter((f) => f.endsWith(".ts"))
+        .map((f) => readFile(join(logicDir, f), "utf8")),
+    )
+  ).join("\n");
+
+  for (const file of libFiles) {
+    const path = join(libDir, file);
+    const text = await readFile(path, "utf8");
+    for (const m of text.matchAll(/(?:from|import)\s*["']([^"']+)["']/g)) {
+      const spec = m[1]!;
+      if (!spec.startsWith("./") && spec !== "../types.ts") {
+        diagnostics.push({
+          file: rel(path),
+          line: 1,
+          col: 1,
+          message: `lib may import only ./*.ts or ../types.ts, found ${spec}`,
+        });
+      }
+    }
+    for (const m of text.matchAll(/export\s+(?:const|function)\s+([A-Za-z_$][\w$]*)/g)) {
+      const name = m[1]!;
+      const used = new RegExp(
+        `import\\s*\\{[^}]*\\b${name}\\b[^}]*\\}\\s*from\\s*["']\\.\\./\\.\\./lib/${file}["']`,
+      ).test(logicText);
+      if (!used) {
+        diagnostics.push({
+          file: rel(path),
+          line: 1,
+          col: 1,
+          message: `\`${name}\` is exported but no logic module imports it`,
+        });
+      }
+    }
+  }
+  return diagnostics;
 }
 
 /** `path:line:col  message`, the shape every editor can jump to. */

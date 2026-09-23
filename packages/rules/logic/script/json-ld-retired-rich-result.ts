@@ -1,40 +1,12 @@
 import type { MatchFn } from "../../types.ts";
+import { hasType, isLdJson, parseLdJson, schemaTerm, someNode } from "../../lib/json-ld.ts";
 
-/**
- * The schema.org types behind rich results Google Search retired: HowTo
- * (2023), SpecialAnnouncement (2025) and FAQPage (2026). Matched as whole
- * names, bare, `schema:`-prefixed or as a full IRI, so `HowToStep` and
- * `HowToSection` inside a Recipe stay quiet.
- */
-const RETIRED = /^(?:schema:|https?:\/\/schema\.org\/)?(?:HowTo|FAQPage|SpecialAnnouncement)$/;
+/** HowTo (2023), SpecialAnnouncement (2025), FAQPage (2026): whole names, so HowToStep stays quiet. */
+const RETIRED = schemaTerm(["HowTo", "FAQPage", "SpecialAnnouncement"]);
 
-const isRetired = (node: Record<string, unknown>): boolean => {
-  const type = node["@type"];
-  const types = Array.isArray(type) ? type : [type];
-  return types.some((t) => typeof t === "string" && RETIRED.test(t));
-};
-
-/** Walks every object and array, `@graph` included, for a retired type. */
-const holdsRetired = (value: unknown): boolean => {
-  if (Array.isArray(value)) return value.some(holdsRetired);
-  if (value === null || typeof value !== "object") return false;
-  const node = value as Record<string, unknown>;
-  return isRetired(node) || Object.values(node).some(holdsRetired);
-};
-
-/**
- * Four selector alternatives reach this function. The three Microdata
- * `itemtype` branches are decided by the selector. A JSON-LD block is parsed
- * and walked; a block that fails `JSON.parse` is `script/json-ld-syntax`'s
- * finding, never this one's.
- */
+/** Microdata alternatives are decided by the selector; a JSON-LD block is parsed and walked. */
 export const match: MatchFn = (element) => {
-  if (element.tag !== "script" || element.attr("type")?.toLowerCase() !== "application/ld+json") {
-    return true;
-  }
-  try {
-    return holdsRetired(JSON.parse(element.text()));
-  } catch {
-    return false;
-  }
+  if (!isLdJson(element)) return true;
+  const parsed = parseLdJson(element);
+  return parsed.ok && someNode(parsed.value, (node) => hasType(node, RETIRED));
 };

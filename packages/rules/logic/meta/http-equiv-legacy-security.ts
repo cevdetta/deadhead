@@ -1,4 +1,5 @@
 import type { MatchFn } from "../../types.ts";
+import { stripAsciiWhitespace } from "../../lib/text.ts";
 
 /**
  * Retired security mechanisms: nothing enforces them anymore, not even as
@@ -16,10 +17,6 @@ const RETIRED_SECURITY: ReadonlySet<string> = new Set([
   "x-webkit-csp",
   "x-content-security-policy",
 ]);
-
-/** ASCII whitespace, as the HTML Standard defines it — not `String#trim`. */
-const stripAsciiWhitespace = (value: string): string =>
-  value.replace(/^[\t\n\f\r ]+/, "").replace(/[\t\n\f\r ]+$/, "");
 
 /**
  * The `meta[http-equiv]` selector is only a pre-filter. A tag is claimed

@@ -11,10 +11,11 @@
 
 import { styleText } from "node:util";
 
-import { checkLogicModules, checkTagUsage, loadRules, printDiagnostics } from "./rules-source.ts";
+import { checkLibModules, checkLogicModules, checkTagUsage, loadRules, printDiagnostics } from "./rules-source.ts";
 
 const { rules, diagnostics } = await loadRules();
 diagnostics.push(...(await checkLogicModules(rules)));
+diagnostics.push(...(await checkLibModules()));
 diagnostics.push(...checkTagUsage(rules));
 diagnostics.sort((a, b) => a.file.localeCompare(b.file) || a.line - b.line || a.col - b.col);
 

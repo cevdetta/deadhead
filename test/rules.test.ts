@@ -224,3 +224,17 @@ test("a matched pair is silent", async () => {
     assert.equal(format(await checkLogicModules([ruleDeclaringLogic], dir)), "");
   });
 });
+
+test("every packages/rules/lib export is used by a logic module", async () => {
+  const { checkLibModules } = await import("../scripts/rules-source.ts");
+  assert.deepEqual(await checkLibModules(), []);
+});
+
+test("lib/csp directiveNames reads the first token of each directive, lowercased", async () => {
+  const { directiveNames } = await import("../packages/rules/lib/csp.ts");
+  assert.deepEqual(directiveNames(" default-src 'self' ;REPORT-URI /r; ; img-src https://x/navigate-to/"), [
+    "default-src",
+    "report-uri",
+    "img-src",
+  ]);
+});
