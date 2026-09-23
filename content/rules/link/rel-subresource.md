@@ -10,8 +10,8 @@ detectability: "yes"
 kind: "element"
 scope: "head"
 selector: 'link[rel~="subresource" i]'
-fix: { op: "remove-element" }
-replacement: "Drop the tag. Preload through the standard relation instead: <link rel=\"preload\" href=\"/app.js\" as=\"script\">."
+fix: { op: "remove-tokens", attr: "rel" }
+replacement: "Drop the tag, or only the keyword when rel also holds live ones. Preload through the standard relation instead: <link rel=\"preload\" href=\"/app.js\" as=\"script\">."
 tags: ["head", "link", "performance"]
 impacts: ["performance"]
 related: ["link/preload-as"]

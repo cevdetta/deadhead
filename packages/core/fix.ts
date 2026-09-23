@@ -10,6 +10,7 @@
  * ESLint fixer is exactly a range and a replacement string.
  */
 
+import { parseSelector, type TokenTest, tokenTests } from "./selector.ts";
 import type { ElementPort, Range } from "./types.ts";
 import type { RuleMeta } from "./vocabulary.ts";
 
@@ -75,6 +76,20 @@ function withLeadingSpace(source: string, [start, end]: Range): Range {
   return [from, end];
 }
 
+/** Parsed once per rule and attribute: computeFix runs once per finding. */
+const TOKEN_TESTS = new Map<string, TokenTest[]>();
+
+function deadTokens(selector: string, attr: string): TokenTest[] {
+  const key = `${attr}\u0000${selector}`;
+  let tests = TOKEN_TESTS.get(key);
+  if (tests === undefined) {
+    const parsed = parseSelector(selector);
+    tests = parsed.ok ? tokenTests(parsed.ast, attr) : [];
+    TOKEN_TESTS.set(key, tests);
+  }
+  return tests;
+}
+
 /**
  * The fix for one finding, or `null` when there is not one.
  *
@@ -83,9 +98,11 @@ function withLeadingSpace(source: string, [start, end]: Range): Range {
  * - `detectability: "partial"`, so the rule is not certain and must never edit
  *   somebody's file on a guess;
  * - the adapter has no source text (the live DOM), so there is no range;
- * - the attribute the rule names is not actually on this element;
+ * - the attribute the rule names is not on this element;
  * - `remove-token` would empty the attribute, which says something different
  *   from what the author wrote.
+ * - `remove-tokens` found none of its keywords in the attribute (a
+ *   `match: "logic"` rule matched on something else).
  */
 export function computeFix(
   meta: RuleMeta,
@@ -107,6 +124,33 @@ export function computeFix(
   if (attr === null) return null;
   const range = element.attrRange(attr);
   if (range === null) return null;
+
+  if (meta.fix.op === "remove-tokens") {
+    // Delete the keywords the selector matched and keep the rest as written.
+    // When none survive, the element does nothing, so it goes, the same way
+    // remove-element takes it. When none of the tested keywords is in the
+    // attribute (an empty value, a `match: "logic"` rule, or another
+    // alternative matched), nothing is dead and there is nothing to fix.
+    if (meta.selector === null) return null;
+    const tests = deadTokens(meta.selector, attr);
+    const isDead = (part: string): boolean =>
+      tests.some((t) => (t.insensitive ? asciiLower(part) === asciiLower(t.value) : part === t.value));
+    const valueRange = quotedValueRange(source, range);
+    // No quotes to slice: read the decoded value from the port; character
+    // references can still make it several keywords.
+    const parts = (valueRange === null ? (element.attr(attr) ?? "") : source.slice(valueRange[0], valueRange[1]))
+      .split(SPACE)
+      .filter((p) => p !== "");
+    const kept = parts.filter((part) => !isDead(part));
+    if (kept.length === parts.length) return null; // nothing dead here
+    if (kept.length === 0) {
+      const whole = element.range();
+      return whole === null ? null : { ruleId: meta.ruleId, range: wholeLineIfAlone(source, whole), text: "" };
+    }
+    // Some survive, but an unquoted value cannot be rewritten without quoting it.
+    if (valueRange === null) return null;
+    return { ruleId: meta.ruleId, range: valueRange, text: kept.join(" ") };
+  }
 
   if (meta.fix.op === "remove-attribute") {
     return { ruleId: meta.ruleId, range: withLeadingSpace(source, range), text: "" };

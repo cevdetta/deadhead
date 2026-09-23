@@ -9,6 +9,10 @@ import test from "node:test";
 import { loadRules } from "../packages/rules/load.ts";
 import { collectFiles, lintFiles } from "../packages/cli/lint.ts";
 import { ROOT, loadRules as loadMarkdown } from "../scripts/rules-source.ts";
+import { parseSelector, tokenTests } from "../packages/core/selector.ts";
+import { run } from "../packages/core/engine.ts";
+import { applyFixes } from "../packages/core/fix.ts";
+import { parseHtml } from "../packages/cli/adapter.ts";
 
 const BIN = fileURLToPath(new URL("../packages/cli/bin/deadhead.ts", import.meta.url));
 const BUILD = fileURLToPath(new URL("../scripts/build-rules.ts", import.meta.url));
@@ -298,5 +302,42 @@ test("config and baseline errors exit 2, like every other usage error", async ()
     assert.equal(deadhead("--baseline", join(dir, "missing.json"), file).status, 2);
     assert.equal(deadhead("--config", join(dir, "missing.config.ts"), file).status, 2);
     assert.equal(deadhead("--update-baseline", file).status, 2, "--update-baseline needs a path");
+  });
+});
+
+// --- rel keyword rules never delete a live link ------------------------------
+
+const relPage = (link: string): string =>
+  `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>t</title>\n${link}\n</head><body></body></html>`;
+
+const relRules = rules.filter((rule) => rule.meta.selector?.includes("[rel~=") && rule.meta.fix.op !== "none");
+
+test("no rel keyword rule removes the whole element", () => {
+  // remove-element on `link[rel~=…]` deletes `rel="alternate index"` with its
+  // live feed. remove-tokens (dead keywords) or remove-token / remove-attribute
+  // (one named thing) are the safe ops.
+  const wrong = relRules.filter((rule) => rule.meta.fix.op === "remove-element");
+  assert.deepEqual(wrong.map((rule) => rule.meta.ruleId), []);
+});
+
+test("a dead keyword next to a live one loses the keyword, never the link", () => {
+  for (const rule of relRules.filter((r) => r.meta.fix.op === "remove-tokens")) {
+    const parsed = parseSelector(rule.meta.selector!);
+    assert.ok(parsed.ok);
+    const [dead] = tokenTests(parsed.ast, "rel");
+    assert.ok(dead, `${rule.meta.ruleId} has a rel keyword`);
+    const html = relPage(`<link rel="alternate ${dead.value}" href="/feed.xml">`);
+    const out = applyFixes(html, run([rule], parseHtml(html), { fix: true }).flatMap((f) => (f.fix ? [f.fix] : []))).output;
+    assert.match(out, /<link rel="alternate" href="\/feed\.xml">/, rule.meta.ruleId);
+  }
+});
+
+test("--fix converges when two rules strip keywords from the same link", async () => {
+  await sandbox(async (dir) => {
+    const file = join(dir, "page.html");
+    // index (link/obsolete-rel) and pavatar (link/rel-dead-vendor) share one rel.
+    await writeFile(file, relPage('<link rel="alternate index pavatar" href="/feed.xml">'));
+    deadhead("--fix", "--fail-on=none", file);
+    assert.match(await readFile(file, "utf8"), /<link rel="alternate" href="\/feed\.xml">/);
   });
 });

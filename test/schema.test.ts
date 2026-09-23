@@ -204,6 +204,62 @@ test("only remove-token takes a token", () => {
   }
 });
 
+test("remove-tokens needs an attr, takes no token, and needs a ~= test on that attr", () => {
+  const rel = { selector: 'link[rel~="index" i]' };
+  assert.deepEqual(messages({ ...rel, fix: { op: "remove-tokens", attr: "rel" } }), []);
+  assert.match(messages({ ...rel, fix: { op: "remove-tokens" } }).join("\n"), /required for `remove-tokens`/);
+  assert.match(
+    messages({ ...rel, fix: { op: "remove-tokens", attr: "rel", token: "index" } }).join("\n"),
+    /only `remove-token` takes a `token`/,
+  );
+  assert.match(
+    messages({ selector: "link[rel]", fix: { op: "remove-tokens", attr: "rel" } }).join("\n"),
+    /tests no keyword on `rel`/,
+  );
+});
+
+test("remove-tokens rejects match: logic, since logic can decide on a live keyword", () => {
+  assert.match(
+    messages({
+      selector: 'link[rel~="index" i]',
+      match: "logic",
+      fix: { op: "remove-tokens", attr: "rel" },
+    }).join("\n"),
+    /cannot pair with `match: "logic"`/,
+  );
+});
+
+test("remove-tokens rejects a missing selector", () => {
+  const withoutSelector = base();
+  delete withoutSelector["selector"];
+  assert.match(
+    messages({
+      ...withoutSelector,
+      selector: undefined,
+      fix: { op: "remove-tokens", attr: "rel" },
+    }).join("\n"),
+    /needs a selector/,
+  );
+});
+
+test("remove-tokens rejects a compound testing the same attribute twice", () => {
+  assert.match(
+    messages({
+      selector: 'link[rel~="index" i][rel~="last" i]',
+      fix: { op: "remove-tokens", attr: "rel" },
+    }).join("\n"),
+    /at most one `\[rel~="…"\]` test per comma alternative/,
+  );
+  // Two separate alternatives, one test each, are fine: each fires on its own.
+  assert.deepEqual(
+    messages({
+      selector: 'link[rel~="index" i], link[rel~="last" i]',
+      fix: { op: "remove-tokens", attr: "rel" },
+    }),
+    [],
+  );
+});
+
 test("match only accepts \"logic\"", () => {
   assert.match(messages({ match: "regex" }).join("\n"), /only supported value is "logic"/);
 });

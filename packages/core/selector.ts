@@ -310,3 +310,24 @@ export function leadingTag(list: Compound[]): string | null {
   }
   return tag;
 }
+
+export type TokenTest = { value: string; insensitive: boolean };
+
+/**
+ * The keywords a selector matches on one whitespace-separated attribute: every
+ * positive `[attr~="value"]` test, in source order. This is what a
+ * `remove-tokens` fix deletes, read from the selector so the fix can never
+ * disagree with the match. Tests inside `:not(...)` exclude rather than
+ * match, so they are skipped.
+ */
+export function tokenTests(list: Compound[], attr: string): TokenTest[] {
+  const out: TokenTest[] = [];
+  for (const compound of list) {
+    for (const simple of compound) {
+      if (simple.type !== "attr" || simple.op !== "~=" || simple.value === null) continue;
+      if (simple.name.toLowerCase() !== attr) continue;
+      out.push({ value: simple.value, insensitive: simple.insensitive });
+    }
+  }
+  return out;
+}

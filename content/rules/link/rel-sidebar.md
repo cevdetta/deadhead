@@ -10,8 +10,8 @@ detectability: "yes"
 kind: "element"
 scope: "head"
 selector: 'link[rel~="sidebar" i]'
-fix: { op: "remove-element" }
-replacement: "Delete the tag. Link the destination as a plain link instead: <a href=\"/help\">Help</a>."
+fix: { op: "remove-tokens", attr: "rel" }
+replacement: "Delete the tag, or only the keyword when rel also holds live ones. Link the destination as a plain link instead: <a href=\"/help\">Help</a>."
 tags: ["head", "link"]
 impacts: ["maintainability"]
 related: ["link/rel-subresource"]

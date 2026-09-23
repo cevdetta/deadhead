@@ -26,9 +26,11 @@ const { data } = Astro.props.rule;
 const fixDetail =
   data.fix.op === "remove-token" && data.fix.attr && data.fix.token
     ? ` ${data.fix.token} from ${data.fix.attr}`
-    : data.fix.op === "remove-attribute" && data.fix.attr
-      ? ` ${data.fix.attr}`
-      : "";
+    : data.fix.op === "remove-tokens" && data.fix.attr
+      ? ` from ${data.fix.attr}, and the element once none are left`
+      : data.fix.op === "remove-attribute" && data.fix.attr
+        ? ` ${data.fix.attr}`
+        : "";
 
 const matcher =
   data.match === "logic" && data.selector

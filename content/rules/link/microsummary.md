@@ -10,8 +10,8 @@ detectability: "yes"
 kind: "element"
 scope: "head"
 selector: 'link[rel~="microsummary" i]'
-fix: { op: "remove-element" }
-replacement: "Delete the tag. Live bookmark titles no longer exist anywhere to point at."
+fix: { op: "remove-tokens", attr: "rel" }
+replacement: "Delete the tag, or only the keyword when rel also holds live ones. Live bookmark titles no longer exist anywhere to point at."
 tags: ["head", "link"]
 impacts: ["maintainability"]
 related: ["link/rel-subresource"]

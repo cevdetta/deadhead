@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { leadingTag, matches, parseSelector } from "../packages/core/selector.ts";
+import { leadingTag, matches, parseSelector, tokenTests } from "../packages/core/selector.ts";
 import type { Compound } from "../packages/core/selector.ts";
 import type { ElementPort } from "../packages/core/types.ts";
 
@@ -181,4 +181,14 @@ test("leadingTag picks the dispatch bucket, or null for the wildcard one", () =>
   assert.equal(leadingTag(ast("link[rel], meta[name]")), null);
   assert.equal(leadingTag(ast("[charset]")), null);
   assert.equal(leadingTag(ast(":not([charset])")), null);
+});
+
+test("tokenTests lists the positive ~= tests on one attribute", () => {
+  const parsed = parseSelector('link[rel~="index" i], link[rel~="Logo"]:not([rel~="icon" i]), link[href~="x"]');
+  assert.ok(parsed.ok);
+  assert.deepEqual(tokenTests(parsed.ast, "rel"), [
+    { value: "index", insensitive: true },
+    { value: "Logo", insensitive: false },
+  ]);
+  assert.deepEqual(tokenTests(parsed.ast, "type"), []);
 });

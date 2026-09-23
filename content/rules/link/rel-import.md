@@ -10,8 +10,8 @@ detectability: "yes"
 kind: "element"
 scope: "head"
 selector: 'link[rel~="import" i]'
-fix: { op: "remove-element" }
-replacement: "Delete the tag. Ship the component through ES modules and v1 custom elements instead."
+fix: { op: "remove-tokens", attr: "rel" }
+replacement: "Delete the tag, or only the keyword when rel also holds live ones. Ship the component through ES modules and v1 custom elements instead."
 tags: ["head", "link"]
 impacts: ["maintainability"]
 related: ["link/rel-subresource"]

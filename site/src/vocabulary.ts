@@ -81,6 +81,7 @@ export const fixLabels: Record<FixOp, string> = {
   "remove-element": "Removes the element",
   "remove-attribute": "Removes the attribute",
   "remove-token": "Removes the keyword",
+  "remove-tokens": "Removes the dead keywords",
   none: "None — reports only",
 };
 

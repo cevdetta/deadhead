@@ -10,7 +10,7 @@ detectability: "yes"
 kind: "element"
 scope: "head"
 selector: 'link[rel~="image_src" i]'
-fix: { op: "remove-element" }
+fix: { op: "remove-tokens", attr: "rel" }
 replacement: "Declare the preview image with Open Graph: <meta property=\"og:image\" content=\"https://example.com/cover.jpg\">."
 tags: ["head", "link", "social", "seo"]
 impacts: ["seo", "maintainability"]
