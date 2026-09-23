@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Example Books</title>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://example.com/#website",
+      "name": "Example Books",
+      "url": "https://example.com/",
+      "potentialAction": [
+        {
+          "@type": "SearchAction",
+          "target": { "@type": "EntryPoint", "urlTemplate": "https://example.com/?s={search_term_string}" },
+          "query-input": { "@type": "PropertyValueSpecification", "valueRequired": true, "valueName": "search_term_string" }
+        }
+      ]
+    }
+  ]
+}
+    </script>
+  </head>
+  <body>
+    <div itemscope itemtype="https://schema.org/WebSite">
+      <a itemprop="url" href="https://example.com/">Example Books</a>
+      <form itemprop="potentialAction" itemscope itemtype="https://schema.org/SearchAction" action="/search">
+        <meta itemprop="target" content="https://example.com/search?q={q}">
+        <label>Search <input itemprop="query-input" type="search" name="q" required></label>
+      </form>
+    </div>
+  </body>
+</html>
