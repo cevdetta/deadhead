@@ -32,7 +32,7 @@ jobs:
       # --frozen-lockfile fails on a missing or out-of-date lockfile.
       # No store cache: a cold install is ~2.5s for 368 packages, cheaper
       # than restoring + uploading a ~94MB cache on every run.
-      - uses: pnpm/setup@84cb39b217b10273981911c288cd62326dc7c6d2 # v2
+      - uses: pnpm/setup@fbda4c85fc2e1e08721cd8763afea8f48d60f024 # v3.0.0
         with:
           # Single version: 24 is the floor declared in engines. If it passes
           # on the floor it passes above; a second runner doubles minutes
