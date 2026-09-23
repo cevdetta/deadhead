@@ -109,3 +109,12 @@ test("every rule in rules.json assembles with the right entry", async () => {
     }
   }
 });
+
+test("bundleBookmarklet builds in memory and never touches .git", async () => {
+  const { bundleBookmarklet } = await import("../scripts/build-bookmarklet.ts");
+  const { readFile, stat } = await import("node:fs/promises");
+  const json = JSON.parse(await readFile(new URL("../packages/rules/rules.json", import.meta.url), "utf8"));
+  const bundle = await bundleBookmarklet(json.rules);
+  assert.match(bundle, /__deadhead\.boot\(\[/);
+  await assert.rejects(stat(new URL("../.git/deadhead/bundle-entry/entry.ts", import.meta.url)));
+});

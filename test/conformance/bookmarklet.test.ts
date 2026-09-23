@@ -20,8 +20,12 @@ import { collectFiles } from "../../packages/cli/lint.ts";
 import { loadRules } from "../../packages/rules/load.ts";
 import { run } from "../../packages/core/index.ts";
 import type { Finding } from "../../packages/core/types.ts";
+import { bundleBookmarklet } from "../../scripts/build-bookmarklet.ts";
 
-const bundle = await readFile(new URL("../../packages/browser/bookmarklet.js", import.meta.url), "utf8");
+const rulesJson = JSON.parse(
+  await readFile(new URL("../../packages/rules/rules.json", import.meta.url), "utf8"),
+);
+const bundle = await bundleBookmarklet(rulesJson.rules);
 const rules = await loadRules();
 
 /** Run the built artifact against a document, the way a bookmarklet would. */
