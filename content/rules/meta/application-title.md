@@ -47,6 +47,8 @@ Delete the element. Name the app once in the manifest and link the manifest from
 
 Detectable with one selector. The rule matches `meta` elements whose `name` is `application-title`, with the `i` flag for case variants. `=` fits because `name` holds a single value, not a token set; `rel` uses `~=` for the opposite reason, as `link/image-src` records.
 
+The fix removes the element. Where a browser above renders the title-bar text, deleting the element reverts that title bar to the document title.
+
 ## Resources
 
 - [caniuse: meta name="application-title"](https://caniuse.com/wf-meta-application-title): support from Chrome 134, Edge 134, Opera 119, and Samsung Internet 29; Firefox, Safari, and Safari on iOS unsupported.

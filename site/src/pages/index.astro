@@ -13,11 +13,11 @@ const rules = (await getCollection("rules")).sort(
 const sample = `$ npx deadhead dist
 
 dist/index.html
-  5:5  unnecessary  meta/http-equiv-x-ua-compatible
-       X-UA-Compatible only ever controlled Internet Explorer document modes,
-       and no shipping browser reads it.
-       → Delete it. Internet Explorer and legacy Edge modes no longer exist.
-       https://deadhead.cevdet.ch/rules/meta/http-equiv-x-ua-compatible
+  5:5  unnecessary  meta/revisit-after
+       A crawl-schedule hint that search engines ignore;
+       recrawl timing comes from sitemaps, not markup.
+       → Delete the element and publish change timing in an XML sitemap.
+       https://deadhead.cevdet.ch/rules/meta/revisit-after
 
 ✖ 1 finding (1 unnecessary)`;
 ---

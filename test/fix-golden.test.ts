@@ -20,14 +20,39 @@ const KNOWN_PARTIAL: ReadonlySet<string> = new Set([
   "attr/global-contextmenu",
   "attr/input-ismap-usemap",
   "attr/input-number-size",
-  "attr/longdesc-lowsrc",
   "attr/menu-obsolete",
   "attr/object-obsolete",
   "attr/rev-urn",
 ]);
 
+/**
+ * Rules whose removal changes behaviour; see the fix-safety review. An entry
+ * leaves only with new evidence.
+ */
+const MUST_NOT_FIX: ReadonlySet<string> = new Set([
+  "attr/longdesc-lowsrc",
+  "attr/name-obsolete",
+  "attr/script-charset",
+  "attr/script-event-for",
+  "attr/script-language",
+  "link/obsolete-rel",
+  "link/rel-prerender",
+  "meta/apple-mobile-web-app-status-bar-style",
+  "meta/http-equiv-x-ua-compatible",
+  "meta/msapplication",
+  "meta/obsolete-name",
+]);
+
 const rules = await loadRules();
 const fixable = rules.filter((r) => r.meta.fix.op !== "none" && r.meta.detectability !== "partial");
+
+for (const id of MUST_NOT_FIX) {
+  test(`${id}: fix op is none`, () => {
+    const rule = rules.find((r) => r.meta.ruleId === id);
+    assert.ok(rule, `${id} not found`);
+    assert.equal(rule.meta.fix.op, "none");
+  });
+}
 
 for (const rule of fixable) {
   const id = rule.meta.ruleId;

@@ -331,8 +331,8 @@ test("a dead keyword next to a live one loses the keyword, never the link", () =
 test("--fix converges when two rules strip keywords from the same link", async () => {
   await sandbox(async (dir) => {
     const file = join(dir, "page.html");
-    // index (link/obsolete-rel) and pavatar (link/rel-dead-vendor) share one rel.
-    await writeFile(file, relPage('<link rel="alternate index pavatar" href="/feed.xml">'));
+    // sitemap (link/sitemap) and pavatar (link/rel-dead-vendor) share one rel.
+    await writeFile(file, relPage('<link rel="alternate sitemap pavatar" href="/feed.xml">'));
     deadhead("--fix", "--fail-on=none", file);
     assert.match(await readFile(file, "utf8"), /<link rel="alternate" href="\/feed\.xml">/);
   });

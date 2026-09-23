@@ -10,20 +10,20 @@ detectability: "yes"
 kind: "element"
 scope: "any"
 selector: "script[language]"
-fix: { op: "remove-attribute", attr: "language" }
+fix: { op: "none" }
 replacement: "Delete the attribute: <script src=\"app.js\"></script>. For data blocks use type: <script type=\"application/json\">."
 tags: ["scripting"]
 impacts: ["maintainability"]
 related: ["attr/script-event-for"]
 ---
 
-`language` on `script` selects nothing. WHATWG lists the attribute as obsolete with a split replacement, omission for JavaScript and `type` for data blocks, since its values were never standardized and no engine honored them alike.
+`language` on `script` still decides whether a script with no `type` attribute runs. WHATWG lists the attribute as obsolete with a split replacement, omission for JavaScript and `type` for data blocks, but the "prepare the script element" algorithm still reads it when `type` is absent, and a non-JavaScript value keeps the block from executing.
 
 ## Why avoid
 
-WHATWG lists it as obsolete with a split replacement. Section 16.2 names `language` on `script` as obsolete: omit the attribute for JavaScript, and use `type` for data blocks. The attribute named the scripting language in an era of competing languages; with one language left, the label restates the default, and its values were never standardized, so no engine honored them alike.
+WHATWG lists it as obsolete with a split replacement. Section 16.2 names `language` on `script` as obsolete: omit the attribute for JavaScript, and use `type` for data blocks. The "prepare the script element" algorithm still builds a type string from it when `type` is absent: "if el has a non-empty language attribute, let the script block's type string be the concatenation of `text/` and the value of el's language attribute." Chromium's `IsValidClassicScriptTypeAndLanguage` checks that string against the JavaScript MIME list. `language="vbscript"` produces `text/vbscript`, not a JavaScript MIME essence, so the block stays inert only while the attribute is there; deleting it with no `type` present defaults the type string to `text/javascript` and starts the block running.
 
-MDN says the same from the attribute side. Its `script` page files `language` under deprecated attributes: it identifies the scripting language as `type` does; its values were never standardized, so `type` should be used instead. A `language="javascript"` that restates the default and a `language="vbscript"` that names a dead engine both ask the browser for selection it never performs.
+MDN says the same from the attribute side. Its `script` page files `language` under deprecated attributes: it identifies the scripting language as `type` does; its values were never standardized, so `type` should be used instead. `language="javascript"` restates the default and changes nothing if deleted; a non-JavaScript value such as `language="vbscript"` is the only thing keeping that script block from running.
 
 ## Use instead
 
@@ -41,9 +41,10 @@ Use `type` for data blocks:
 
 ## Detectability
 
-Complete detection. The rule matches `script[language]`: presence of the attribute is the whole verdict, so no logic module exists. The selector names the fix attribute itself, so the single `remove-attribute` fix covers every finding with no remainder.
+Complete detection. The rule matches `script[language]`: presence of the attribute is the whole verdict, so no logic module exists. There is no autofix. With no `type` attribute present, deleting a non-JavaScript `language` value starts a previously inert script block running, the same bug class as `attr/script-event-for`; a person has to check for `type` and the attribute's value before removing it.
 
 ## Resources
 
 - [WHATWG: Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html): `language` on `script` is obsolete: omit for JavaScript, `type` for data blocks.
 - [MDN: `<script>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/script): `language` values were never standardized, so `type` should be used instead.
+- [HTML Standard: prepare the script element](https://html.spec.whatwg.org/multipage/scripting.html#prepare-the-script-element): builds the type string from `language` when `type` is absent, using `text/` plus the value.

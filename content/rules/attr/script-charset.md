@@ -10,20 +10,20 @@ detectability: "yes"
 kind: "element"
 scope: "any"
 selector: "script[charset]"
-fix: { op: "remove-attribute", attr: "charset" }
+fix: { op: "none" }
 replacement: "Delete the attribute: <script src=\"app.js\"></script>. Scripts inherit UTF-8 from the document."
 tags: ["charset", "scripting"]
 impacts: ["maintainability"]
 related: ["attr/script-language"]
 ---
 
-`charset` on `script` selects nothing. WHATWG lists the attribute as obsolete with one replacement, omission, since documents and scripts require UTF-8 and the script inherits its encoding from the document.
+`charset` on `script` still selects the decode encoding for an external classic script. WHATWG lists the attribute as obsolete with one replacement, omission, since documents and scripts should use UTF-8, but the "prepare the script element" algorithm still reads `charset` first when it is present.
 
 ## Why avoid
 
-WHATWG lists it as obsolete with one replacement. Section 16.2 names `charset` on `script` as obsolete: omit the attribute, since both documents and scripts are required to use UTF-8 and the script inherits its encoding from the document. The attribute named the encoding of an external file in an era of competing encodings; with UTF-8 required on both sides, the label restates the default, and no fetch consults it.
+WHATWG lists it as obsolete with one replacement. Section 16.2 names `charset` on `script` as obsolete: omit the attribute, since both documents and scripts are required to use UTF-8 and the script inherits its encoding from the document. The attribute named the encoding of an external file in an era of competing encodings, and the "prepare the script element" algorithm still consults it first: "If el has a charset attribute, then let encoding be the result of getting an encoding from the value of the charset attribute" before falling back to the document's own encoding. Chromium's `ScriptLoader` implements that step. A `charset` naming a superseded encoding, such as `iso-8859-1`, still changes which bytes decode to which characters in the fetched file.
 
-MDN says the same from the attribute side. Its `script` page files `charset` under deprecated attributes: where present its value must be an ASCII case-insensitive match for `utf-8`, and the attribute is unnecessary since documents must use UTF-8 and the element inherits its encoding from the document. A `charset="utf-8"` that restates the default and a `charset="iso-8859-1"` that names a superseded encoding both ask the browser for selection it never performs.
+MDN says the same from the attribute side. Its `script` page files `charset` under deprecated attributes: where present its value must be an ASCII case-insensitive match for `utf-8`, and the attribute is unnecessary since documents must use UTF-8 and the element inherits its encoding from the document. That holds only while `charset` matches the document's encoding. A `charset="utf-8"` restates the default and changes nothing; a `charset` naming any other encoding still picks the decode encoding the fetch uses.
 
 ## Use instead
 
@@ -36,10 +36,11 @@ Drop the hint and let the document declare the encoding once:
 
 ## Detectability
 
-Complete detection. The rule matches `script[charset]`: presence of the attribute is the whole verdict, so no logic module exists. The selector names the fix attribute itself, so the single `remove-attribute` fix covers every finding with no remainder.
+Complete detection. The rule matches `script[charset]`: presence of the attribute is the whole verdict, so no logic module exists. There is no autofix. Deleting `charset` from an external classic script whose value differs from the document's encoding changes which bytes decode to which characters in the fetched file; a person has to confirm the two encodings already match before removing the attribute.
 
 ## Resources
 
 - [WHATWG: Obsolete but conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#obsolete-but-conforming-features): authors should not specify `charset` on `script`; where present it must be an ASCII case-insensitive match for `utf-8`.
 - [WHATWG: Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#non-conforming-features): `charset` on `script` is obsolete: omit it, since both sides require UTF-8 and the script inherits from the document.
 - [MDN: `<script>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/script): `charset` sits under deprecated attributes as unnecessary, since documents must use UTF-8 and the element inherits from the document.
+- [HTML Standard: prepare the script element](https://html.spec.whatwg.org/multipage/scripting.html#prepare-the-script-element): reads `charset` to pick the decode encoding for an external classic script before falling back to the document's encoding.
