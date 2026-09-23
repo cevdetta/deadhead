@@ -12,7 +12,7 @@ scope: "head"
 selector: 'link[rel~="sidebar" i]'
 fix: { op: "remove-tokens", attr: "rel" }
 replacement: "Delete the tag, or only the keyword when rel also holds live ones. Link the destination as a plain link instead: <a href=\"/help\">Help</a>."
-tags: ["head", "link"]
+tags: ["mozilla"]
 impacts: ["maintainability"]
 related: ["link/rel-subresource"]
 ---

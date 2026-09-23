@@ -12,7 +12,7 @@ scope: "body"
 selector: 'input[type="number" i][maxlength], input[type="number" i][size]'
 fix: { op: "remove-attribute", attr: "maxlength" }
 replacement: "Delete the hints and bound the control with min and max: <input type=\"number\" name=\"qty\" min=\"0\" max=\"100\">. Size it with CSS width where the layout needs it."
-tags: ["attr", "legacy"]
+tags: ["forms"]
 impacts: ["maintainability"]
 related: ["attr/input-ismap-usemap"]
 ---

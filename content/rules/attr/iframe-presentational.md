@@ -12,7 +12,7 @@ scope: "body"
 selector: "iframe[align], iframe[allowtransparency], iframe[frameborder], iframe[framespacing], iframe[hspace], iframe[marginheight], iframe[marginwidth], iframe[scrolling], iframe[vspace]"
 fix: { op: "none" }
 replacement: "Style the frame in CSS (border, margin, overflow, dimensions) and delete the attributes."
-tags: ["attr", "legacy", "style"]
+tags: ["embedding", "presentational"]
 impacts: ["maintainability"]
 related: ["attr/table-presentational"]
 ---

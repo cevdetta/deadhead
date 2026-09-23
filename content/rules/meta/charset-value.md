@@ -12,7 +12,7 @@ scope: "head"
 selector: 'meta[charset]:not([charset="utf-8" i])'
 fix: { op: "none" }
 replacement: "Convert the file bytes to UTF-8 first, then declare <meta charset=\"utf-8\">. Never relabel alone."
-tags: ["head", "charset", "meta"]
+tags: ["charset"]
 impacts: ["interop", "security"]
 related: ["head/charset-position", "head/charset-duplicate", "meta/http-equiv-content-type"]
 ---

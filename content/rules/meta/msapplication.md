@@ -12,7 +12,7 @@ scope: "head"
 selector: 'meta[name^="msapplication-" i]'
 fix: { op: "remove-element" }
 replacement: "Delete every msapplication-* tag, and any browserconfig.xml it points to. Put app name, colours and icons in the web app manifest."
-tags: ["head", "meta", "legacy", "ie"]
+tags: ["icons", "microsoft", "web-app"]
 impacts: ["maintainability"]
 related: ["meta/http-equiv-x-ua-compatible", "meta/application-name"]
 ---

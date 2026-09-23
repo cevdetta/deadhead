@@ -12,7 +12,7 @@ scope: "body"
 selector: "td[abbr], td[axis], td[scope], th[axis]"
 fix: { op: "none" }
 replacement: "Mark heading cells with th and scope: <th scope=\"col\">Plan</th>. Write terse cell text with detail in title where a longer label matters."
-tags: ["attr", "legacy"]
+tags: ["tables"]
 impacts: ["maintainability", "a11y"]
 related: ["attr/table-presentational"]
 ---

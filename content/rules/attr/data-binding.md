@@ -12,7 +12,7 @@ scope: "any"
 selector: "[datasrc], [datafld], [dataformatas]"
 fix: { op: "remove-attribute", attr: "datasrc" }
 replacement: "Populate the page with script and XHR, then delete the hooks: <span id=\"name\"></span>."
-tags: ["attr", "legacy"]
+tags: ["microsoft", "scripting"]
 impacts: ["maintainability"]
 related: []
 ---

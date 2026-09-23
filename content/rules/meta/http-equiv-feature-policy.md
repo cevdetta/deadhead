@@ -12,7 +12,7 @@ scope: "head"
 selector: 'meta[http-equiv="feature-policy" i]'
 fix: { op: "remove-element" }
 replacement: "Delete the tag. Send Permissions-Policy as a response header and use the allow attribute on iframes for per-frame control."
-tags: ["head", "meta", "legacy", "security"]
+tags: ["http-equiv"]
 impacts: ["maintainability"]
 related: ["meta/http-equiv-header-only"]
 ---

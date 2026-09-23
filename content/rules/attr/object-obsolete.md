@@ -12,7 +12,7 @@ scope: "body"
 selector: "object[archive], object[classid], object[code], object[codebase], object[codetype], object[declare], object[standby], object[typemustmatch]"
 fix: { op: "remove-attribute", attr: "archive" }
 replacement: "Delete the attributes. Invoke resources with data and type: <object data=\"clip.mp4\" type=\"video/mp4\">."
-tags: ["attr", "legacy"]
+tags: ["embedding"]
 impacts: ["maintainability"]
 related: ["attr/global-contextmenu"]
 ---

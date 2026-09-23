@@ -12,7 +12,7 @@ scope: "head"
 selector: 'link[rel~="microsummary" i]'
 fix: { op: "remove-tokens", attr: "rel" }
 replacement: "Delete the tag, or only the keyword when rel also holds live ones. Live bookmark titles no longer exist anywhere to point at."
-tags: ["head", "link"]
+tags: ["mozilla"]
 impacts: ["maintainability"]
 related: ["link/rel-subresource"]
 ---

@@ -12,7 +12,7 @@ scope: "head"
 selector: 'link[rel~="wlwmanifest" i]'
 fix: { op: "remove-tokens", attr: "rel" }
 replacement: "Delete the tag, or only the keyword when rel also holds live ones."
-tags: ["head", "link"]
+tags: ["microsoft"]
 impacts: ["maintainability"]
 related: ["link/rel-subresource"]
 ---

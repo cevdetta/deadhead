@@ -12,7 +12,7 @@ scope: "body"
 selector: "tt"
 fix: { op: "none" }
 replacement: "Use <code> for code, <kbd> for keyboard input, <samp> for program output or <var> for a variable. If you only want a monospace font, set font-family: monospace in CSS."
-tags: ["legacy", "style"]
+tags: ["text"]
 impacts: ["a11y", "maintainability"]
 related: ["element/big", "element/font"]
 ---

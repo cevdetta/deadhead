@@ -13,7 +13,7 @@ selector: 'meta[http-equiv="content-security-policy" i]'
 match: "logic"
 fix: { op: "none" }
 replacement: "Drop the report-uri directive from the meta content. Send reporting with report-to plus Reporting-Endpoints response headers."
-tags: ["head", "meta", "security"]
+tags: ["csp", "http-equiv"]
 impacts: ["security", "maintainability"]
 related: ["meta/http-equiv-content-security-policy", "meta/http-equiv-header-only", "meta/csp-block-all-mixed-content"]
 ---

@@ -12,7 +12,7 @@ scope: "any"
 match: "logic"
 fix: { op: "none" }
 replacement: "Give the document a single descriptive title: <title>How to deadhead roses - Garden Notes</title>. Put the page purpose first, then the site name."
-tags: ["head", "title", "seo"]
+tags: ["one-per-page"]
 impacts: ["a11y", "seo"]
 related: ["document/html-lang"]
 ---

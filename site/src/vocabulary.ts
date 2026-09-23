@@ -7,6 +7,7 @@ import type {
   Severity,
   StandardsBasis,
   Status,
+  Tag,
 } from "../../packages/core/vocabulary.ts";
 
 /**
@@ -104,13 +105,78 @@ export const severityOrder: Record<Severity, number> = {
 export const namespaceBlurbs: Record<string, string> = {
   attr: "Attributes that outlived what they configured.",
   document: "The document element and what the whole page declares about itself.",
-  element: "Elements the HTML Standard lists as obsolete.",
+  element: "Elements the HTML Standard lists as obsolete, or that never became standard.",
   head: "The shape of the head itself — order, position, what must come first.",
   link: "<link> relations that no longer have a reader.",
   meta: "<meta> names and pragmas.",
-  script: "<script> attributes and their defaults.",
+  script: "<script> attributes, their defaults, and the data blocks it carries.",
 };
 
-/** "a, b and c" — the facts table reads as prose, not as a CSV. */
-export const toSentence = (parts: string[]): string =>
-  parts.length < 2 ? (parts[0] ?? "") : `${parts.slice(0, -1).join(", ")} and ${parts.at(-1)}`;
+export const tagLabels: Record<Tag, string> = {
+  apple: "Apple",
+  caching: "Caching",
+  charset: "Character encoding",
+  csp: "Content Security Policy",
+  defaults: "Default values",
+  doctype: "Doctype",
+  embedding: "Embedded content",
+  forms: "Forms",
+  "http-equiv": "http-equiv pragmas",
+  hyperlinks: "Hyperlinks",
+  i18n: "Language",
+  icons: "Icons",
+  media: "Media",
+  microsoft: "Microsoft",
+  mobile: "Mobile",
+  mozilla: "Mozilla",
+  "one-per-page": "One per page",
+  presentational: "Presentational markup",
+  "resource-hints": "Resource hints",
+  scripting: "Scripting",
+  search: "Search",
+  social: "Social previews",
+  "structured-data": "Structured data",
+  tables: "Tables",
+  text: "Text and lists",
+  "web-app": "Web apps",
+  "web-components": "Web Components",
+};
+
+export const tagBlurbs: Record<Tag, string> = {
+  apple: "Apple-only names that the web app manifest or a standard icon now covers.",
+  caching: "Caching instructions in markup: pragmas HTTP caches ignore, and the removed AppCache.",
+  charset: "Character-encoding declarations: where they sit, how many, and which.",
+  csp: "Content Security Policy delivered through <meta>, and the directives it loses there.",
+  defaults: "Attributes and pragmas that restate what the browser already assumes.",
+  doctype: "Document-type declarations and version stamps.",
+  embedding: "Plugins, frames and embeds that <iframe> and <video> outlived.",
+  forms: "Form controls and form attributes the standard dropped.",
+  "http-equiv": "HTTP headers written as <meta http-equiv>, where most of them do nothing.",
+  hyperlinks: "Attributes on a, area and link that no longer shape a link.",
+  i18n: "Language declarations, for people and for assistive technology.",
+  icons: "Icon links that one favicon and a manifest replace.",
+  media: "Images, image maps, sound and SVG references in their pre-HTML5 spellings.",
+  microsoft: "Internet Explorer, Windows and Live Writer hooks.",
+  mobile: "Small-screen hints from before the viewport meta, and viewport settings that hurt.",
+  mozilla: "Firefox features that were removed.",
+  "one-per-page": "Declarations a page gets one of: base, canonical, charset, main, title.",
+  presentational: "Styling written as HTML, which CSS replaced.",
+  "resource-hints": "Preload, prefetch and prerender hints: the dead ones and the malformed ones.",
+  scripting: "Script attributes, menus and data binding that browsers dropped.",
+  search: "What crawlers read, and what they stopped reading long ago.",
+  social: "Open Graph and card tags for link previews.",
+  "structured-data": "Machine-readable metadata: JSON-LD, Dublin Core and profiles.",
+  tables: "Table attributes that CSS and scope/headers replaced.",
+  text: "Text, list and preformatted elements with a semantic or CSS replacement.",
+  "web-app": "Install and home-screen metadata that the web app manifest replaced.",
+  "web-components": "The first, abandoned Web Components drafts.",
+};
+
+export const impactBlurbs: Record<Impact, string> = {
+  performance: "Costs bytes, requests or render time.",
+  interop: "Browsers disagree on it, or none act on it.",
+  a11y: "Gets in the way of assistive technology, or of the reader.",
+  seo: "Changes what search engines index or show.",
+  security: "Weakens a protection, or only looks like one.",
+  maintainability: "Dead weight a reader has to understand before deleting.",
+};

@@ -12,7 +12,7 @@ scope: "body"
 selector: "blink"
 fix: { op: "none" }
 replacement: "Nothing: drop the tag and keep its text. If something needs attention, use a static cue like <strong>, never motion."
-tags: ["legacy", "a11y"]
+tags: ["presentational"]
 impacts: ["a11y", "maintainability"]
 related: ["element/marquee", "element/bgsound"]
 ---

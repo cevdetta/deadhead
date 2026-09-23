@@ -12,7 +12,7 @@ scope: "body"
 selector: "table[datapagesize]"
 fix: { op: "remove-attribute", attr: "datapagesize" }
 replacement: "Delete the attribute: <table><tr><td>Cell</td></tr></table>."
-tags: ["attr", "legacy"]
+tags: ["tables"]
 impacts: ["maintainability"]
 related: ["attr/table-presentational"]
 ---

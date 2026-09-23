@@ -13,7 +13,6 @@ selector: 'meta[name="referrer" i]'
 match: "logic"
 fix: { op: "none" }
 replacement: "Spell the policy from the table: <meta name=\"referrer\" content=\"strict-origin-when-cross-origin\">. Match the token to the leak level the page tolerates."
-tags: ["head", "meta", "security"]
 impacts: ["security"]
 related: ["meta/robots-directives"]
 ---

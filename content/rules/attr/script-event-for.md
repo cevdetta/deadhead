@@ -12,7 +12,7 @@ scope: "any"
 selector: "script[event], script[for]"
 fix: { op: "remove-attribute", attr: "event" }
 replacement: "Delete the attributes. Register the handler in script: target.addEventListener(\"click\", run)."
-tags: ["attr", "script", "legacy"]
+tags: ["microsoft", "scripting"]
 impacts: ["maintainability"]
 related: ["attr/global-contextmenu"]
 ---

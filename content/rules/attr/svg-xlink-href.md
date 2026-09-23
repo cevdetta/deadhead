@@ -13,7 +13,7 @@ selector: "a, animate, animatemotion, animatetransform, feimage, filter, image, 
 match: "logic"
 fix: { op: "none" }
 replacement: "Write plain href: <use href=\"#icon\"></use>. Keep xlink:href beside it while old viewers matter; then drop the namespaced spelling."
-tags: ["attr", "svg", "legacy"]
+tags: ["media"]
 impacts: ["maintainability"]
 related: ["element/plugin-embed"]
 ---

@@ -13,7 +13,7 @@ selector: 'meta[http-equiv]'
 match: "logic"
 fix: { op: "remove-element" }
 replacement: "Send Cache-Control, Expires, ETag, and Last-Modified as response headers; then delete the tag."
-tags: ["head", "meta"]
+tags: ["caching", "http-equiv"]
 impacts: ["performance", "maintainability"]
 related: ["meta/http-equiv-set-cookie"]
 ---

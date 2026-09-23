@@ -12,7 +12,7 @@ scope: "body"
 selector: "div[align], p[align], h1[align], h2[align], h3[align], h4[align], h5[align], h6[align], legend[align], pre[width], hr[align], hr[color], hr[noshade], hr[size], hr[width], br[clear]"
 fix: { op: "none" }
 replacement: "Style the text in CSS (text-align, color, border, width, height, margin, clear) and delete the attributes."
-tags: ["attr", "legacy", "style"]
+tags: ["presentational"]
 impacts: ["maintainability"]
 related: ["attr/table-presentational"]
 ---

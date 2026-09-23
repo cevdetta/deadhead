@@ -12,7 +12,7 @@ scope: "any"
 selector: "script[language]"
 fix: { op: "remove-attribute", attr: "language" }
 replacement: "Delete the attribute: <script src=\"app.js\"></script>. For data blocks use type: <script type=\"application/json\">."
-tags: ["attr", "script", "legacy"]
+tags: ["scripting"]
 impacts: ["maintainability"]
 related: ["attr/script-event-for"]
 ---

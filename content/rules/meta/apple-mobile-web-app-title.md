@@ -12,7 +12,7 @@ scope: "head"
 selector: 'meta[name="apple-mobile-web-app-title" i]'
 fix: { op: "remove-element" }
 replacement: "Delete it. Name an installable app with name and short_name in a web app manifest; a plain page needs no label past <title>."
-tags: ["head", "meta", "mobile"]
+tags: ["apple", "web-app"]
 impacts: ["maintainability"]
 related: ["meta/apple-mobile-web-app-capable", "meta/application-name", "meta/mobile-web-app-capable"]
 ---

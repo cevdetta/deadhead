@@ -12,7 +12,7 @@ scope: "body"
 selector: "caption[align], col[align], col[char], col[charoff], col[valign], col[width], thead[align], thead[char], thead[charoff], thead[height], thead[valign], tbody[align], tbody[char], tbody[charoff], tbody[height], tbody[valign], tfoot[align], tfoot[char], tfoot[charoff], tfoot[height], tfoot[valign], tr[align], tr[bgcolor], tr[char], tr[charoff], tr[height], tr[valign], td[align], td[bgcolor], td[char], td[charoff], td[height], td[nowrap], td[valign], td[width], th[align], th[bgcolor], th[char], th[charoff], th[height], th[nowrap], th[valign], th[width]"
 fix: { op: "none" }
 replacement: "Style the table parts in CSS (text-align, vertical-align, background-color, width, height, white-space) and delete the attributes."
-tags: ["attr", "legacy", "style"]
+tags: ["presentational", "tables"]
 impacts: ["maintainability"]
 related: ["attr/table-presentational"]
 ---

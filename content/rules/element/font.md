@@ -12,7 +12,7 @@ scope: "body"
 selector: "font"
 fix: { op: "none" }
 replacement: "Style in CSS: color, font-family and font-size on a class, or use strong, em or mark if the styling carried meaning."
-tags: ["legacy", "style"]
+tags: ["presentational"]
 impacts: ["maintainability", "a11y"]
 related: ["element/basefont", "element/big"]
 ---

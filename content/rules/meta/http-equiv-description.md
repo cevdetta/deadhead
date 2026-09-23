@@ -12,7 +12,7 @@ scope: "head"
 selector: 'meta[http-equiv="description" i]'
 fix: { op: "none" }
 replacement: "Move the text to <meta name=\"description\" content=\"…\">."
-tags: ["head", "meta", "seo"]
+tags: ["http-equiv", "search"]
 impacts: ["seo"]
 related: ["meta/http-equiv-robots"]
 ---

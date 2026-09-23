@@ -12,7 +12,7 @@ scope: "any"
 match: "logic"
 fix: { op: "none" }
 replacement: "Declare the namespace, then keep the names: <link rel=\"schema.DC\" href=\"http://purl.org/dc/elements/1.1/\"> beside <meta name=\"DC.title\" content=\"The title\">. Use schema.DCTERMS for DCTERMS names."
-tags: ["head", "meta"]
+tags: ["structured-data"]
 impacts: ["maintainability"]
 related: ["meta/scheme"]
 ---

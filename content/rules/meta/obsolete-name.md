@@ -12,7 +12,7 @@ scope: "head"
 selector: 'meta[name="subject" i], meta[name="copyright" i], meta[name="language" i], meta[name="revised" i], meta[name="topic" i], meta[name="summary" i], meta[name="classification" i], meta[name="designer" i], meta[name="reply-to" i], meta[name="owner" i], meta[name="url" i], meta[name="identifier-url" i], meta[name="directory" i], meta[name="pagename" i], meta[name="category" i], meta[name="subtitle" i], meta[name="target" i], meta[name="date" i], meta[name="search_date" i], meta[name="medium" i], meta[name="syndication-source" i], meta[name="original-source" i], meta[name="verify-v1" i], meta[name="y_key" i], meta[name="pagekey" i], meta[name="microid" i], meta[name="readability-verification" i], meta[name="icbm" i], meta[name="norton-safeweb" i], meta[name="tweetmeme-title" i], meta[name="blogcatalog" i], meta[name="apple-touch-fullscreen" i]'
 fix: { op: "remove-element" }
 replacement: "Delete the element. Describe the page with real content instead: <meta name=\"description\" content=\"A short, accurate, human-written summary of the page.\">."
-tags: ["head", "meta", "seo"]
+tags: ["search"]
 impacts: ["seo", "maintainability"]
 related: ["meta/keywords"]
 ---

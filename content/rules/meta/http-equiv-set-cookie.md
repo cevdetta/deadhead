@@ -12,7 +12,7 @@ scope: "head"
 selector: 'meta[http-equiv="set-cookie" i]'
 fix: { op: "remove-element" }
 replacement: "Send a Set-Cookie response header (or set document.cookie from script); then delete the tag."
-tags: ["head", "meta"]
+tags: ["http-equiv"]
 impacts: ["maintainability"]
 related: ["meta/http-equiv-x-ua-compatible"]
 ---

@@ -12,7 +12,7 @@ scope: "head"
 selector: 'meta[name="mobile-web-app-capable" i]'
 fix: { op: "remove-element" }
 replacement: "Delete it and declare \"display\": \"standalone\" in a web app manifest linked with <link rel=\"manifest\">."
-tags: ["head", "meta", "mobile"]
+tags: ["web-app"]
 impacts: ["maintainability"]
 related: ["meta/apple-mobile-web-app-capable", "meta/application-name"]
 ---

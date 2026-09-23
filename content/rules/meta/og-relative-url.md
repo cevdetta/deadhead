@@ -13,7 +13,7 @@ selector: 'meta[property="og:url" i]:not([content^="http://" i]):not([content^="
 match: "logic"
 fix: { op: "none" }
 replacement: "Write the full URL: <meta property=\"og:image\" content=\"https://example.com/cover.jpg\">, not /cover.jpg or //cdn.example.com/cover.jpg."
-tags: ["head", "meta", "social", "seo"]
+tags: ["social"]
 impacts: ["seo"]
 related: ["head/canonical-multiple", "meta/twitter"]
 ---

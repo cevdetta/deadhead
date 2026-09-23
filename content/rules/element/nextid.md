@@ -12,7 +12,7 @@ scope: "any"
 selector: 'nextid'
 fix: { op: "none" }
 replacement: "Identify elements with unique `id` attributes."
-tags: ["legacy"]
+tags: ["hyperlinks"]
 impacts: ["maintainability"]
 related: ["element/isindex"]
 ---

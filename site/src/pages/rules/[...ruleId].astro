@@ -2,7 +2,7 @@
 import { getCollection, render } from "astro:content";
 import Layout, { REPO } from "../../layouts/Layout.astro";
 import RuleFacts from "../../components/RuleFacts.astro";
-import { severityLabels, statusLabels } from "../../vocabulary.ts";
+import { severityLabels, statusLabels, tagLabels } from "../../vocabulary.ts";
 
 // The route is `[...ruleId]` rather than `[ruleId]` because a ruleId contains a
 // slash: `meta/keywords` is one id, not two segments. This URL is the contract
@@ -54,9 +54,11 @@ const sourceUrl = `${REPO}/blob/main/content/rules/${data.ruleId}.md`;
 
     {
       data.tags.length > 0 && (
-        <ul class="tags">
+        <ul class="tags" aria-label="Topics">
           {data.tags.map((tag) => (
-            <li>{tag}</li>
+            <li>
+              <a href={`/topics/${tag}`}>{tagLabels[tag]}</a>
+            </li>
           ))}
         </ul>
       )

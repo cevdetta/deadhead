@@ -1,0 +1,20 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+import RuleGroup from "../../components/RuleGroup.astro";
+import { groupRules } from "../../lib/group.ts";
+import { impactBlurbs, impactLabels } from "../../vocabulary.ts";
+import type { Impact } from "../../../../packages/core/vocabulary.ts";
+
+export async function getStaticPaths() {
+  const byImpact = groupRules(await getCollection("rules"), (rule) => rule.data.impacts);
+  return [...byImpact].map(([impact, rules]) => ({ params: { impact }, props: { impact, rules } }));
+}
+
+const { impact, rules } = Astro.props as { impact: Impact; rules: CollectionEntry<"rules">[] };
+---
+
+<Layout title={`Impact: ${impactLabels[impact]}`} description={impactBlurbs[impact]}>
+  <RuleGroup back={{ href: "/impacts", label: "impacts" }} heading={impactLabels[impact]} blurb={impactBlurbs[impact]} rules={rules} />
+</Layout>

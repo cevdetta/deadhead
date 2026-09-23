@@ -12,7 +12,7 @@ scope: "head"
 selector: 'link[rel~="canonical" i][hreflang], link[rel~="canonical" i][lang], link[rel~="canonical" i][media], link[rel~="canonical" i][type]'
 fix: { op: "remove-attribute", attr: "hreflang" }
 replacement: "Strip the qualifier and keep a plain canonical: <link rel=\"canonical\" href=\"https://example.com/post\">. For a genuine alternate version use <link rel=\"alternate\" hreflang=\"fr\" href=\"https://example.com/fr/post\">."
-tags: ["head", "link", "seo"]
+tags: ["search"]
 impacts: ["seo"]
 related: ["link/canonical-relative", "link/canonical-http"]
 ---

@@ -12,7 +12,7 @@ scope: "body"
 selector: "body[alink], body[background], body[bgcolor], body[bottommargin], body[leftmargin], body[link], body[marginheight], body[marginwidth], body[rightmargin], body[text], body[topmargin], body[vlink]"
 fix: { op: "none" }
 replacement: "Style the page in CSS (background-color, background-image, color with link pseudo-classes, margin) and delete the attributes."
-tags: ["attr", "legacy", "style"]
+tags: ["presentational"]
 impacts: ["maintainability"]
 related: ["attr/table-presentational"]
 ---

@@ -12,7 +12,7 @@ scope: "head"
 selector: 'meta[name="apple-mobile-web-app-status-bar-style" i]'
 fix: { op: "remove-element" }
 replacement: "Delete it. Style browser UI with <meta name=\"theme-color\" content=\"#226DAA\">."
-tags: ["head", "meta", "mobile"]
+tags: ["apple", "web-app"]
 impacts: ["maintainability"]
 related: ["meta/apple-mobile-web-app-capable", "meta/apple-mobile-web-app-title"]
 ---

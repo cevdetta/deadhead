@@ -12,7 +12,7 @@ scope: "body"
 selector: "table[bordercolor], table[height]"
 fix: { op: "none" }
 replacement: "Style the table in CSS (border-color, min-height) and delete the attributes."
-tags: ["attr", "legacy", "style"]
+tags: ["presentational", "tables"]
 impacts: ["maintainability"]
 related: ["attr/table-presentational"]
 ---

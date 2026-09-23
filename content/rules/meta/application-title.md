@@ -12,7 +12,7 @@ scope: "head"
 selector: 'meta[name="application-title" i]'
 fix: { op: "remove-element" }
 replacement: "Delete the element and name the installed app in the web app manifest."
-tags: ["head", "meta", "mobile"]
+tags: ["web-app"]
 impacts: ["interop", "maintainability"]
 related: ["meta/apple-mobile-web-app-capable", "meta/application-name"]
 ---

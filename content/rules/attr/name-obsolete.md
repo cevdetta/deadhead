@@ -12,7 +12,7 @@ scope: "any"
 selector: "a[name], embed[name], img[name], option[name]"
 fix: { op: "remove-attribute", attr: "name" }
 replacement: "Delete the attribute and put id on the target: <h2 id=\"part\">Part</h2>. Link to it with <a href=\"#part\">Part</a>."
-tags: ["attr", "legacy"]
+tags: ["hyperlinks"]
 impacts: ["maintainability"]
 related: ["attr/charset-obsolete"]
 ---

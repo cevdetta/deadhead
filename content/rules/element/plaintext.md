@@ -12,7 +12,7 @@ scope: "any"
 selector: "plaintext"
 fix: { op: "none" }
 replacement: "Serve plain text as a text/plain file. To show it inside a page, use <pre><code> and escape < and & as &lt; and &amp;."
-tags: ["legacy", "style"]
+tags: ["text"]
 impacts: ["maintainability"]
 related: ["element/xmp", "element/listing"]
 ---

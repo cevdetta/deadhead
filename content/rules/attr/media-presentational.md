@@ -12,7 +12,7 @@ scope: "body"
 selector: "img[align], img[border], img[hspace], img[vspace], object[align], object[border], object[hspace], object[vspace], embed[align], embed[hspace], embed[vspace]"
 fix: { op: "none" }
 replacement: "Style the media in CSS (float, vertical-align, border, margin) and delete the attributes."
-tags: ["attr", "legacy", "style"]
+tags: ["media", "presentational"]
 impacts: ["maintainability"]
 related: ["attr/table-presentational"]
 ---

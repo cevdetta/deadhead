@@ -12,7 +12,7 @@ scope: "body"
 match: "logic"
 fix: { op: "none" }
 replacement: "Keep one visible <main> for the page's dominant content. Give inactive views the hidden attribute, and use <section> or <article> for everything else."
-tags: ["a11y", "body"]
+tags: ["one-per-page"]
 impacts: ["a11y"]
 related: ["document/html-lang"]
 ---

@@ -12,7 +12,7 @@ scope: "body"
 selector: "form[accept]"
 fix: { op: "remove-attribute", attr: "accept" }
 replacement: "Delete the attribute and put accept on each file input: <input type=\"file\" accept=\"image/*\">."
-tags: ["attr", "legacy"]
+tags: ["forms"]
 impacts: ["maintainability"]
 related: ["attr/rev-urn"]
 ---

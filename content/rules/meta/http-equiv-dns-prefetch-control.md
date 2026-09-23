@@ -13,7 +13,7 @@ selector: 'meta[http-equiv="x-dns-prefetch-control" i]'
 match: "logic"
 fix: { op: "none" }
 replacement: "Delete the tag; where a behavior was intended, send the X-DNS-Prefetch-Control response header instead."
-tags: ["head", "meta"]
+tags: ["http-equiv", "resource-hints"]
 impacts: ["maintainability"]
 related: ["meta/http-equiv-name-misuse", "meta/http-equiv-cache"]
 ---

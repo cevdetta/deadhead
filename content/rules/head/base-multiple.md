@@ -12,7 +12,7 @@ scope: "any"
 match: "logic"
 fix: { op: "none" }
 replacement: "Fold the first href and the first target onto a single base: <base target=\"_top\" href=\"https://example.com/\">. Delete the rest."
-tags: ["head", "link"]
+tags: ["one-per-page"]
 impacts: ["maintainability"]
 related: ["document/html-lang"]
 ---

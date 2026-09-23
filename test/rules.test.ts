@@ -8,6 +8,7 @@ import {
   type LoadedRule,
   ROOT,
   checkLogicModules,
+  checkTagUsage,
   loadRules,
   parseRuleFile,
 } from "../scripts/rules-source.ts";
@@ -24,6 +25,20 @@ test("every rule in content/rules validates", () => {
 
 test("every declared logic module exists, and none is an orphan", async () => {
   assert.equal(format(await checkLogicModules(rules)), "");
+});
+
+test("every tag groups at least two rules", () => {
+  assert.equal(format(checkTagUsage(rules)), "");
+});
+
+test("a tag carried by a single rule is reported at that rule", () => {
+  const base = rules[0]!;
+  const one: LoadedRule = { file: "content/rules/meta/a.md", meta: { ...base.meta, ruleId: "meta/a", tags: ["forms", "mozilla"] } };
+  const two: LoadedRule = { file: "content/rules/meta/b.md", meta: { ...base.meta, ruleId: "meta/b", tags: ["forms"] } };
+  const found = checkTagUsage([one, two]);
+  assert.equal(found.length, 1);
+  assert.equal(found[0]!.file, "content/rules/meta/a.md");
+  assert.match(found[0]!.message, /`mozilla`/);
 });
 
 test("the corpus covers all three rule shapes", () => {

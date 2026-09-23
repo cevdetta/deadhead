@@ -12,7 +12,7 @@ scope: "any"
 selector: "[dropzone]"
 fix: { op: "remove-attribute", attr: "dropzone" }
 replacement: "Handle dragenter and dragover in script, then delete the hook: <div id=\"target\"></div>."
-tags: ["attr", "legacy"]
+tags: ["scripting"]
 impacts: ["maintainability"]
 related: []
 ---

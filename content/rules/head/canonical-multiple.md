@@ -12,7 +12,7 @@ scope: "any"
 match: "logic"
 fix: { op: "none" }
 replacement: "Keep exactly one <link rel=\"canonical\"> with an absolute URL in <head>; describe other versions of the page with <link rel=\"alternate\">."
-tags: ["head", "link", "seo"]
+tags: ["one-per-page", "search"]
 impacts: ["seo"]
 related: ["link/sitemap"]
 ---

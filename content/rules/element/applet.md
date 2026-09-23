@@ -12,7 +12,7 @@ scope: "body"
 selector: "applet"
 fix: { op: "none" }
 replacement: "Nothing will run the applet. Rebuild the feature with web platform features (canvas, video, audio, form controls, JavaScript), or link to the program as a download."
-tags: ["legacy"]
+tags: ["embedding"]
 impacts: ["interop", "maintainability"]
 related: ["element/bgsound", "element/isindex"]
 ---

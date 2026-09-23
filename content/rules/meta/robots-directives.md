@@ -13,7 +13,7 @@ selector: 'meta[name="robots" i], meta[name="googlebot" i]'
 match: "logic"
 fix: { op: "none" }
 replacement: "Spell the directive from the valid table: <meta name=\"robots\" content=\"noindex, nofollow\">. Re-check every token against the table when the intent is exclusion."
-tags: ["head", "meta", "seo"]
+tags: ["search"]
 impacts: ["seo"]
 related: ["meta/http-equiv-robots"]
 ---

@@ -12,7 +12,7 @@ scope: "head"
 selector: 'meta[scheme]'
 fix: { op: "remove-attribute", attr: "scheme" }
 replacement: "Drop the scheme qualifier and keep the name/content pair."
-tags: ["head", "meta", "legacy"]
+tags: ["structured-data"]
 impacts: ["maintainability"]
 related: []
 ---

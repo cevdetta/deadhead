@@ -11,7 +11,6 @@ import {
   scopeLabels,
   severityBlurbs,
   severityLabels,
-  toSentence,
 } from "../vocabulary.ts";
 
 interface Props {
@@ -65,7 +64,14 @@ const matcher =
     data.impacts.length > 0 && (
       <>
         <dt>Impacts</dt>
-        <dd>{toSentence(data.impacts.map((i) => impactLabels[i]))}</dd>
+        <dd>
+          {data.impacts.map((impact, index) => (
+            <>
+              {index > 0 && (index === data.impacts.length - 1 ? " and " : ", ")}
+              <a href={`/impacts/${impact}`}>{impactLabels[impact]}</a>
+            </>
+          ))}
+        </dd>
       </>
     )
   }

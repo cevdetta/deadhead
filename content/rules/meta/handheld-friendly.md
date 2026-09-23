@@ -12,7 +12,7 @@ scope: "head"
 selector: 'meta[name="HandheldFriendly" i]'
 fix: { op: "remove-element" }
 replacement: "Delete it. Control small-screen layout with <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">."
-tags: ["head", "meta", "mobile"]
+tags: ["mobile"]
 impacts: ["maintainability"]
 related: ["meta/mobile-optimized", "meta/viewport-user-scalable"]
 ---

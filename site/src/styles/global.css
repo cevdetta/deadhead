@@ -305,6 +305,15 @@ blockquote,
   border-color: var(--rule);
 }
 
+.tags a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.tags a:hover {
+  color: var(--accent);
+}
+
 [data-severity="harmful"] {
   color: var(--harmful);
 }

@@ -12,7 +12,7 @@ scope: "body"
 selector: "xmp"
 fix: { op: "none" }
 replacement: "Use <pre><code> and escape the content: < as &lt; and & as &amp;."
-tags: ["legacy", "style"]
+tags: ["text"]
 impacts: ["maintainability"]
 related: ["element/listing", "element/plaintext"]
 ---

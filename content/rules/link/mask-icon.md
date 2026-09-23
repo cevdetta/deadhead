@@ -12,7 +12,7 @@ scope: "head"
 selector: 'link[rel~="mask-icon" i]'
 fix: { op: "none" }
 replacement: "Serve a regular favicon instead: <link rel=\"icon\" href=\"/icon.svg\" type=\"image/svg+xml\">, then delete the mask icon and its SVG."
-tags: ["head", "link", "favicon"]
+tags: ["apple", "icons"]
 impacts: ["maintainability"]
 related: ["link/shortcut-icon", "link/apple-touch-icon"]
 ---

@@ -12,7 +12,7 @@ scope: "body"
 selector: "dl[compact], ol[compact], ul[compact], li[type], ol[type], ul[type]"
 fix: { op: "none" }
 replacement: "Style the lists in CSS (list-style-type, line-height, margin) and delete the attributes."
-tags: ["attr", "legacy", "style"]
+tags: ["presentational"]
 impacts: ["maintainability"]
 related: ["attr/table-presentational"]
 ---

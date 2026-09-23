@@ -12,7 +12,7 @@ scope: "body"
 selector: "noembed"
 fix: { op: "none" }
 replacement: "Use <object data=\"…\" type=\"…\"> and put the fallback content between its tags; embed has no fallback at all."
-tags: ["legacy"]
+tags: ["embedding"]
 impacts: ["a11y", "maintainability"]
 related: ["element/plugin-embed", "element/applet"]
 ---

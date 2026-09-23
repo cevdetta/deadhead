@@ -192,6 +192,34 @@ export async function loadRules(): Promise<{ rules: LoadedRule[]; diagnostics: D
 }
 
 /**
+ * A tag is for browsing, so one that names a single rule is a title, not a
+ * tag (see TAGS in packages/core/vocabulary.ts). Cross-rule, so it runs over
+ * the loaded corpus rather than per file, and it points at the lone rule:
+ * either that rule is mis-tagged or the topic is not one yet.
+ */
+export function checkTagUsage(rules: LoadedRule[]): Diagnostic[] {
+  const carriers = new Map<string, LoadedRule[]>();
+  for (const rule of rules) {
+    for (const tag of rule.meta.tags) {
+      const list = carriers.get(tag) ?? [];
+      list.push(rule);
+      carriers.set(tag, list);
+    }
+  }
+  const diagnostics: Diagnostic[] = [];
+  for (const [tag, list] of carriers) {
+    if (list.length !== 1) continue;
+    diagnostics.push({
+      file: list[0]!.file,
+      line: 1,
+      col: 1,
+      message: `tag \`${tag}\` is carried by this rule alone; a tag must group at least two rules`,
+    });
+  }
+  return diagnostics;
+}
+
+/**
  * A rule declaring `match: "logic"` must have a module, and a module must have
  * a rule. The orphan half matters most: a logic file with no markdown is a rule
  * with no documentation, which the project defines as not a rule.

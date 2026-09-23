@@ -466,7 +466,20 @@ export function validateFrontmatter(data: unknown): FrontmatterResult {
   if (tagsRaw) {
     for (let n = 0; n < tagsRaw.length; n++) {
       const t = oneOf(tagsRaw[n], TAGS, ["tags", n], issues);
-      if (t !== null) tags.push(t);
+      if (t === null) continue;
+      if (tags.includes(t)) {
+        issues.push(field(["tags", n], `duplicate tag \`${t}\``));
+        continue;
+      }
+      // Alphabetical, like TAGS itself, so a retag is a one-line diff and two
+      // authors never reorder each other's lists.
+      const previous = tags.at(-1);
+      if (previous !== undefined && previous > t) {
+        issues.push(
+          field(["tags", n], `tags must be in alphabetical order: \`${t}\` goes before \`${previous}\``),
+        );
+      }
+      tags.push(t);
     }
   }
 

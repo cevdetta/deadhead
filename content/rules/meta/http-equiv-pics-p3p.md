@@ -12,7 +12,7 @@ scope: "head"
 selector: 'meta[http-equiv="pics-label" i], meta[http-equiv="p3p" i]'
 fix: { op: "remove-element" }
 replacement: "Delete the tag. Publish a human-readable privacy policy instead; content descriptions belong in linked Description Resources, not markup."
-tags: ["head", "meta", "legacy"]
+tags: ["http-equiv"]
 impacts: ["maintainability"]
 related: ["meta/http-equiv-x-ua-compatible"]
 ---

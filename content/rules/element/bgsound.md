@@ -12,7 +12,7 @@ scope: "any"
 selector: "bgsound"
 fix: { op: "none" }
 replacement: "Offer sound the user starts: <audio controls src=\"/theme.mp3\"></audio>. Never autoplay."
-tags: ["legacy", "a11y"]
+tags: ["media"]
 impacts: ["a11y", "maintainability"]
 related: ["element/basefont", "element/marquee"]
 ---

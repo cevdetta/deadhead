@@ -12,7 +12,7 @@ scope: "body"
 selector: "iframe[longdesc], img[longdesc], img[lowsrc]"
 fix: { op: "remove-attribute", attr: "longdesc" }
 replacement: "Delete the attributes. Link to descriptions with a, and serve a progressive JPEG in src."
-tags: ["attr", "legacy"]
+tags: ["media"]
 impacts: ["maintainability"]
 related: ["attr/object-usemap"]
 ---

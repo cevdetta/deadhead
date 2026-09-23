@@ -12,7 +12,7 @@ scope: "any"
 match: "logic"
 fix: { op: "none" }
 replacement: "Make the block valid JSON: double-quoted keys and strings, no trailing commas, no comments. Serialise it with JSON.stringify instead of a string template."
-tags: ["script", "seo"]
+tags: ["structured-data"]
 impacts: ["seo"]
 related: ["script/type-javascript-mime"]
 ---

@@ -13,7 +13,7 @@ selector: "style[type]"
 match: "logic"
 fix: { op: "remove-attribute", attr: "type" }
 replacement: "Delete the attribute: <style>p { color: red; }</style>. For data blocks use script: <script type=\"application/json\">."
-tags: ["attr", "style", "legacy"]
+tags: ["defaults"]
 impacts: ["maintainability"]
 related: ["script/type-javascript-mime"]
 ---

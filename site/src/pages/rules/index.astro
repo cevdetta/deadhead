@@ -2,32 +2,17 @@
 import { getCollection } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
 import RuleList from "../../components/RuleList.astro";
-import { namespaceBlurbs, severityOrder } from "../../vocabulary.ts";
+import { groupRules } from "../../lib/group.ts";
+import { namespaceBlurbs } from "../../vocabulary.ts";
 
 const rules = await getCollection("rules");
 
 // Group by the namespace half of the ruleId. Namespaces say where the thing
 // lives, never whether it is bad, so this grouping is stable across a rule
 // changing severity: which is the whole reason ids are namespaced that way.
-const byNamespace = new Map<string, typeof rules>();
-for (const rule of rules) {
-  const namespace = rule.data.ruleId.split("/")[0]!;
-  const bucket = byNamespace.get(namespace) ?? [];
-  bucket.push(rule);
-  byNamespace.set(namespace, bucket);
-}
-
-const namespaces = [...byNamespace.entries()]
-  .sort(([a], [b]) => a.localeCompare(b))
-  .map(([namespace, list]) => ({
-    namespace,
-    blurb: namespaceBlurbs[namespace],
-    rules: list.sort(
-      (a, b) =>
-        severityOrder[a.data.severity] - severityOrder[b.data.severity] ||
-        a.data.ruleId.localeCompare(b.data.ruleId),
-    ),
-  }));
+const namespaces = [...groupRules(rules, (rule) => [rule.data.ruleId.split("/")[0]!])].map(
+  ([namespace, list]) => ({ namespace, blurb: namespaceBlurbs[namespace], rules: list }),
+);
 
 const count = rules.length;
 ---
@@ -45,6 +30,7 @@ const count = rules.length;
         permanent, because suppression comments and CI baselines are written
         against it.
       </p>
+      <p>Browse the same rules <a href="/topics">by topic</a> or <a href="/impacts">by impact</a>.</p>
     </header>
 
     {namespaces.map(({ namespace, blurb, rules: list }) => (
