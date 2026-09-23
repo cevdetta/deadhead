@@ -37,16 +37,20 @@ const childrenOf = (node: P5Node | P5Parent): P5Node[] => {
 /** Concatenated text of every descendant, in document order. */
 function textOf(node: P5Element): string {
   let out = "";
-  const visit = (current: P5Node): void => {
+  // An explicit stack: markup nested thousands deep is legal HTML, and a
+  // recursive walk dies on it. Children are pushed in reverse so they pop in
+  // document order.
+  const stack: P5Node[] = [...node.childNodes].reverse();
+  while (stack.length > 0) {
+    const current = stack.pop()!;
     if (isElement(current)) {
-      for (const child of current.childNodes) visit(child);
-      return;
+      for (let i = current.childNodes.length - 1; i >= 0; i--) stack.push(current.childNodes[i]!);
+    } else if (current.nodeName === "#text") {
+      // `Element.nodeName` is typed as `string`, so it cannot discriminate the
+      // union on its own — the element case has to be ruled out first.
+      out += (current as DefaultTreeAdapterTypes.TextNode).value;
     }
-    // `Element.nodeName` is typed as `string`, so it cannot discriminate the
-    // union on its own — the element case has to be ruled out first.
-    if (current.nodeName === "#text") out += current.value;
-  };
-  for (const child of node.childNodes) visit(child);
+  }
   return out;
 }
 
@@ -173,7 +177,12 @@ export function parseHtml(source: string): Parsed {
   // is walked once per query; bucketing reuses the engine's dispatch idea and
   // each query scans only its leading-tag bucket, in document order.
   const byTag = new Map<string, P5Element[]>();
-  const collect = (node: P5Node | P5Parent, parent: P5Element | null): void => {
+  // An explicit stack: markup nested thousands deep is legal HTML, and a
+  // recursive walk dies on it. Children are pushed in reverse so they pop in
+  // document order.
+  const stack: [P5Node | P5Parent, P5Element | null][] = [[document, null]];
+  while (stack.length > 0) {
+    const [node, parent] = stack.pop()!;
     const element = isElement(node) ? node : null;
     if (element !== null) {
       elements.push(element);
@@ -188,9 +197,9 @@ export function parseHtml(source: string): Parsed {
         else siblings.push(element);
       }
     }
-    for (const child of childrenOf(node)) collect(child, element ?? parent);
-  };
-  collect(document, null);
+    const children = childrenOf(node);
+    for (let i = children.length - 1; i >= 0; i--) stack.push([children[i]!, element ?? parent]);
+  }
 
   const portFor = makePorts(parents, elementChildren);
 

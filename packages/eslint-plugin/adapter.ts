@@ -57,9 +57,21 @@ const childrenOf = (node: Node): Node[] => node.children ?? node.body ?? [];
 function textOf(node: Node): string {
   if (typeof node.value === "object") return typeof node.value.value === "string" ? node.value.value : "";
   let out = "";
-  for (const child of childrenOf(node)) {
-    if (child.type === "Text") out += typeof child.value === "string" ? child.value : "";
-    else out += textOf(child);
+  // An explicit stack: markup nested thousands deep is legal HTML, and a
+  // recursive walk dies on it. Children are pushed in reverse so they pop in
+  // document order.
+  const stack: Node[] = [...childrenOf(node)].reverse();
+  while (stack.length > 0) {
+    const current = stack.pop()!;
+    if (current.type === "Text") {
+      out += typeof current.value === "string" ? current.value : "";
+    } else if (typeof current.value === "object") {
+      // A nested script/style's content, same as the early return above.
+      out += typeof current.value.value === "string" ? current.value.value : "";
+    } else {
+      const children = childrenOf(current);
+      for (let i = children.length - 1; i >= 0; i--) stack.push(children[i]!);
+    }
   }
   return out;
 }
@@ -191,15 +203,20 @@ export function fromProgram(program: unknown, source: string): Parsed {
   const elements: Node[] = [];
   const parents = new WeakMap<Node, Node>();
 
-  const collect = (node: Node, parent: Node | null): void => {
+  // An explicit stack: markup nested thousands deep is legal HTML, and a
+  // recursive walk dies on it. Children are pushed in reverse so they pop in
+  // document order.
+  const stack: [Node, Node | null][] = [[program, null]];
+  while (stack.length > 0) {
+    const [node, parent] = stack.pop()!;
     const isElement = ELEMENT_TAG(node) !== null;
     if (isElement) {
       elements.push(node);
       if (parent !== null) parents.set(node, parent);
     }
-    for (const child of childrenOf(node)) collect(child, isElement ? node : parent);
-  };
-  collect(program, null);
+    const children = childrenOf(node);
+    for (let i = children.length - 1; i >= 0; i--) stack.push([children[i]!, isElement ? node : parent]);
+  }
 
   const portFor = makePorts(parents);
   const root = elements.find((node) => ELEMENT_TAG(node) === "html") ?? elements[0];
