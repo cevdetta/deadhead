@@ -10,8 +10,8 @@ detectability: "yes"
 kind: "element"
 scope: "head"
 selector: 'link[rel~="apple-touch-startup-image" i], link[rel~="component" i], link[rel~="entry-content" i], link[rel~="openid.delegate" i], link[rel~="openid.server" i], link[rel~="openid2.provider" i], link[rel~="openid2.local_id" i], link[rel~="pavatar" i]'
-fix: { op: "remove-element" }
-replacement: "Delete the tag. Ship splash screens through the Web App Manifest, components through ES modules, and sign-in through OpenID Connect Discovery."
+fix: { op: "remove-tokens", attr: "rel" }
+replacement: "Delete the tag, or only the keyword when rel also holds live ones. Ship splash screens through the Web App Manifest, components through ES modules, and sign-in through OpenID Connect Discovery."
 tags: ["head", "link"]
 impacts: ["maintainability"]
 related: ["link/obsolete-rel", "link/rel-import", "link/rel-sidebar", "meta/apple-mobile-web-app-capable"]

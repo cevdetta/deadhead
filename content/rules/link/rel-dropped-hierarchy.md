@@ -10,8 +10,8 @@ detectability: "yes"
 kind: "element"
 scope: "head"
 selector: 'link[rel~="banner" i], link[rel~="begin" i], link[rel~="end" i], link[rel~="top" i], link[rel~="origin" i], link[rel~="biblioentry" i], link[rel~="bibliography" i], link[rel~="citation" i], link[rel~="collection" i], link[rel~="definition" i], link[rel~="disclaimer" i], link[rel~="editor" i], link[rel~="footnote" i], link[rel~="navigate" i], link[rel~="pointer" i], link[rel~="trademark" i], link[rel~="translation" i], link[rel~="urc" i], link[rel~="up" i], link[rel~="child" i], link[rel~="parent" i], link[rel~="sibling" i]'
-fix: { op: "remove-element" }
-replacement: "Delete the tag. Where sequence navigation was the intent, link the living pair instead: <link rel=\"prev\" href=\"/page/1\">."
+fix: { op: "remove-tokens", attr: "rel" }
+replacement: "Delete the tag, or only the keyword when rel also holds live ones. Where sequence navigation was the intent, link the living pair instead: <link rel=\"prev\" href=\"/page/1\">."
 tags: ["head", "link"]
 impacts: ["maintainability"]
 related: ["link/obsolete-rel", "link/rel-dead-vendor"]

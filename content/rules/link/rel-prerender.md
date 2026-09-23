@@ -10,7 +10,7 @@ detectability: "yes"
 kind: "element"
 scope: "head"
 selector: 'link[rel~="prerender" i]'
-fix: { op: "remove-element" }
+fix: { op: "remove-tokens", attr: "rel" }
 replacement: "Prerender with a Speculation Rules rule instead of the link hint."
 tags: ["head", "link", "legacy", "performance"]
 impacts: ["interop", "performance"]

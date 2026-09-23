@@ -24,6 +24,7 @@ export const FIX_OP = [
   "remove-element",
   "remove-attribute",
   "remove-token",
+  "remove-tokens",
   "none",
 ] as const;
 export const IMPACTS = [
@@ -106,11 +107,12 @@ export type RuleMeta = {
   selector: string | null;
   match: "logic" | null;
   /**
-   * `attr` names the attribute a `remove-attribute` or `remove-token` fix acts
-   * on, and `token` the whitespace-separated keyword `remove-token` deletes
-   * from it. Both are `null` for the ops that do not take them. Without them
-   * the op is not actionable: knowing a rule removes *an* attribute says
-   * nothing about which one.
+   * `attr` names the attribute a `remove-attribute`, `remove-token` or
+   * `remove-tokens` fix acts on (`remove-tokens` reads its keywords from the
+   * selector), and `token` the whitespace-separated keyword `remove-token`
+   * deletes from it. Both are `null` for the ops that do not take them.
+   * Without them the op is not actionable: knowing a rule removes *an*
+   * attribute says nothing about which one.
    */
   fix: { op: FixOp; attr: string | null; token: string | null };
   replacement: string;

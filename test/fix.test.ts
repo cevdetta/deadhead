@@ -206,3 +206,108 @@ test("remove-token without a token in frontmatter produces no fix", () => {
   const html = page('<link rel="shortcut icon" href="/f.ico">');
   assert.equal(run([broken], parseHtml(html))[0]?.fix, null);
 });
+
+// --- remove-tokens ----------------------------------------------------------
+
+const dropDead: Rule = {
+  meta: meta({
+    ruleId: "link/d",
+    selector: 'link[rel~="index" i], link[rel~="previous" i]',
+    fix: { op: "remove-tokens", attr: "rel", token: null },
+  }),
+};
+
+const pruned = (link: string): string => {
+  const html = page(link);
+  return applyFixes(html, fixesFor(html, [dropDead])).output;
+};
+
+test("remove-tokens keeps the live keywords and the element", () => {
+  // The bug this op exists for: remove-element deleted a live feed link.
+  const out = pruned('<link rel="alternate index" type="application/rss+xml" href="/feed.xml">');
+  assert.match(out, /<link rel="alternate" type="application\/rss\+xml" href="\/feed\.xml">/);
+});
+
+test("remove-tokens removes every matched keyword in any case, keeping survivors as written", () => {
+  assert.match(pruned('<link rel="Index stylesheet PREVIOUS" href="/a.css">'), /rel="stylesheet"/);
+});
+
+test("remove-tokens removes the element, with its line, once no keyword survives", () => {
+  const out = pruned('<link rel="index previous" href="/">');
+  assert.ok(!out.includes("<link"), out);
+  assert.ok(!out.includes("\n\n"), "no blank line left behind");
+});
+
+test("remove-tokens treats an unquoted value as its one matched keyword", () => {
+  assert.ok(!pruned("<link rel=index href=/>").includes("<link"));
+});
+
+test("remove-tokens never touches the quote style", () => {
+  assert.match(pruned("<link rel='alternate index' href='/feed.xml'>"), /rel='alternate'/);
+});
+
+// A rule whose selector has an alternative on another attribute: it can fire
+// without any of its `rel` keywords present: an empty attribute, a
+// `match: "logic"` refinement, or the other alternative.
+const dropDeadOrTitle: Rule = {
+  meta: meta({
+    ruleId: "link/e",
+    selector: 'link[rel~="index" i], link[title]',
+    fix: { op: "remove-tokens", attr: "rel", token: null },
+  }),
+};
+
+const prunedOrTitle = (link: string): string => {
+  const html = page(link);
+  return applyFixes(html, fixesFor(html, [dropDeadOrTitle])).output;
+};
+
+test("remove-tokens declines, without touching the element, when none of its keywords are in the attribute", () => {
+  // Matched via `link[title]`, not a dead `rel` keyword: nothing is dead, so
+  // there is nothing to fix. Guessing here would violate "never change
+  // behaviour" the same way deleting the element would.
+  const link = '<link rel="stylesheet" title="x" href="/a.css">';
+  assert.equal(prunedOrTitle(link), page(link));
+  const findings = run([dropDeadOrTitle], parseHtml(page(link)));
+  assert.equal(findings.length, 1, "still reported");
+  assert.equal(findings[0]?.fix, null);
+});
+
+test("remove-tokens declines on an empty attribute", () => {
+  const html = page('<link rel="" title="x" href="/a.css">');
+  assert.equal(run([dropDeadOrTitle], parseHtml(html))[0]?.fix, null);
+});
+
+test("remove-tokens declines on an unquoted value holding none of its keywords", () => {
+  const html = page("<link rel=stylesheet title=x href=/a.css>");
+  assert.equal(run([dropDeadOrTitle], parseHtml(html))[0]?.fix, null);
+});
+
+// Two separate rules, each after one keyword. Their fixes both rewrite the
+// same `rel` value, so they overlap and only one applies per pass: the
+// element is gone once both keywords are cleared, not in one.
+const dropIndex: Rule = {
+  meta: meta({
+    ruleId: "link/index",
+    selector: 'link[rel~="index" i]',
+    fix: { op: "remove-tokens", attr: "rel", token: null },
+  }),
+};
+const dropPavatar: Rule = {
+  meta: meta({
+    ruleId: "link/pavatar",
+    selector: 'link[rel~="pavatar" i]',
+    fix: { op: "remove-tokens", attr: "rel", token: null },
+  }),
+};
+
+test("remove-tokens fixes from two rules on the same attribute converge on removing the element", () => {
+  const rules = [dropIndex, dropPavatar];
+  let output = page('<link rel="index pavatar" href="/">');
+  for (let pass = 0; pass < 5; pass++) {
+    const fixes = fixesFor(output, rules);
+    if (fixes.length === 0) break;
+    output = applyFixes(output, fixes).output;
+  }
+  assert.ok(!output.includes("<link"), output);
+});

@@ -36,7 +36,7 @@ import {
   type Status,
   type Tag,
 } from "../packages/core/vocabulary.ts";
-import { parseSelector } from "../packages/core/selector.ts";
+import { parseSelector, tokenTests } from "../packages/core/selector.ts";
 
 // The vocabulary and the selector grammar live in core because the engine
 // needs them too, and a validator that disagrees with the engine is worse
@@ -370,9 +370,9 @@ export function validateFrontmatter(data: unknown): FrontmatterResult {
     // An op is not actionable without the thing it acts on, and naming one for
     // an op that does not take it is a contradiction the fixer would silently
     // ignore.
-    const NEEDS_ATTR = new Set(["remove-attribute", "remove-token"]);
+    const NEEDS_ATTR = ["remove-attribute", "remove-token", "remove-tokens"] as const;
     const attrRaw: unknown = fixRaw["attr"];
-    if (fixOp !== null && NEEDS_ATTR.has(fixOp)) {
+    if (fixOp !== null && (NEEDS_ATTR as readonly string[]).includes(fixOp)) {
       if (typeof attrRaw !== "string" || !/^[a-z][a-z0-9-]*$/.test(attrRaw)) {
         issues.push(
           field(
@@ -384,9 +384,9 @@ export function validateFrontmatter(data: unknown): FrontmatterResult {
         fixAttr = attrRaw;
       }
     } else if (attrRaw !== undefined) {
-      issues.push(
-        field(["fix", "attr"], `only ${[...NEEDS_ATTR].join(" and ")} take an \`attr\``),
-      );
+      const names = NEEDS_ATTR.map((op) => `\`${op}\``);
+      const list = `${names.slice(0, -1).join(", ")} and ${names.at(-1)}`;
+      issues.push(field(["fix", "attr"], `only ${list} take an \`attr\``));
     }
 
     const tokenRaw: unknown = fixRaw["token"];
@@ -403,6 +403,61 @@ export function validateFrontmatter(data: unknown): FrontmatterResult {
       }
     } else if (tokenRaw !== undefined) {
       issues.push(field(["fix", "token"], `only \`remove-token\` takes a \`token\``));
+    }
+  }
+
+  // remove-tokens deletes what the selector matches with `[attr~=…]`, and it
+  // has to own that match outright:
+  // - `match: "logic"` can decide a finding on a live keyword the selector
+  //   only pre-filters on, and the fixer would delete a keyword the rule
+  //   never tested;
+  // - with no selector, there is no `[attr~=…]` test to read the dead
+  //   keywords from;
+  // - a compound with two positive `[attr~=…]` tests on the same attribute
+  //   is a conjunction: it can match with only one of the two keywords
+  //   present, and the fixer would delete the live one too.
+  if (fixOp === "remove-tokens") {
+    if (match === "logic") {
+      issues.push(
+        field(
+          ["fix", "op"],
+          '`remove-tokens` cannot pair with `match: "logic"`: the logic may decide a finding on a live keyword the selector only pre-filters on',
+        ),
+      );
+    } else if (selector === null) {
+      issues.push(
+        field(
+          ["fix", "op"],
+          '`remove-tokens` needs a selector: it reads the dead keywords from the `[attr~="…"]` tests in it',
+        ),
+      );
+    } else if (fixAttr !== null) {
+      const parsed = parseSelector(selector);
+      if (parsed.ok) {
+        if (tokenTests(parsed.ast, fixAttr).length === 0) {
+          issues.push(
+            field(
+              ["fix", "op"],
+              `\`remove-tokens\` deletes the keywords the selector tests with \`[${fixAttr}~="…"]\`, but this selector tests no keyword on \`${fixAttr}\``,
+            ),
+          );
+        } else {
+          const conjunction = parsed.ast.some(
+            (compound) =>
+              compound.filter(
+                (part) => part.type === "attr" && part.op === "~=" && part.name.toLowerCase() === fixAttr,
+              ).length > 1,
+          );
+          if (conjunction) {
+            issues.push(
+              field(
+                ["fix", "op"],
+                `\`remove-tokens\` needs at most one \`[${fixAttr}~="…"]\` test per comma alternative; a compound testing two keywords on \`${fixAttr}\` can match with only one of them present`,
+              ),
+            );
+          }
+        }
+      }
     }
   }
 

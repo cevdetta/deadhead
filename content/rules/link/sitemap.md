@@ -10,7 +10,7 @@ detectability: "yes"
 kind: "element"
 scope: "head"
 selector: 'link[rel~="sitemap" i]'
-fix: { op: "remove-element" }
+fix: { op: "remove-tokens", attr: "rel" }
 replacement: "Delete it and declare the sitemap once, in /robots.txt at the server root: Sitemap: https://example.com/sitemap-index.xml"
 tags: ["head", "link", "seo"]
 impacts: ["seo", "maintainability"]
