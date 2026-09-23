@@ -41,6 +41,8 @@ Write one descriptive title per page, purpose first:
 
 Countable in one document pass, which is why this is a `kind: "document"` rule: no selector can count to two. The logic in `packages/rules/logic/head/title.ts` lists the `title` elements once: no titles reports the `head`, each title past the first reports itself, and a `whitespace-only` title reports itself. The check reads text, never source offsets, so it reports in all three adapters.
 
+A `title` inside `<svg>` is not counted. The HTML parser makes it SVG's own `title`, the accessible name of a drawing, and the rule tells the two apart by an `<svg>` ancestor.
+
 ## Resources
 
 - [WHATWG HTML: the head element](https://html.spec.whatwg.org/multipage/semantics.html#the-head-element): the head model wants a title in most documents, and no document holds more than one title.

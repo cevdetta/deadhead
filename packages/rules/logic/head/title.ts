@@ -1,8 +1,21 @@
-import type { CheckFn } from "../../types.ts";
+import type { CheckFn, ElementPort } from "../../types.ts";
 
 /** ASCII whitespace, as the HTML Standard defines it — not `String#trim`. */
 const stripAsciiWhitespace = (value: string): string =>
   value.replace(/^[\t\n\f\r ]+/, "").replace(/[\t\n\f\r ]+$/, "");
+
+/**
+ * A `title` inside `<svg>` is SVG's own element, the accessible name of a
+ * drawing, and not the document's title. The port carries no namespace, so
+ * the ancestor chain tells the two apart: the HTML parser creates an SVG
+ * `title` for any `title` start tag inside `<svg>`.
+ */
+const insideSvg = (element: ElementPort): boolean => {
+  for (let node = element.parent(); node !== null; node = node.parent()) {
+    if (node.tag === "svg") return true;
+  }
+  return false;
+};
 
 /**
  * No selector can count head titles, which is what makes this a
@@ -11,10 +24,10 @@ const stripAsciiWhitespace = (value: string): string =>
  * Three cases, one finding each: a head with no `title` reports the `head`
  * itself (there is no element to point at); each `title` past the first
  * reports itself; a `title` with `whitespace-only` text reports itself.
- * A document with no `head` at all reports nothing.
+ * A document with no `head` at all reports nothing. SVG titles never count.
  */
 export const check: CheckFn = (doc, ctx) => {
-  const titles = doc.querySelectorAll("title");
+  const titles = doc.querySelectorAll("title").filter((title) => !insideSvg(title));
   if (titles.length === 0) {
     const head = doc.querySelector("head");
     if (head === null) return [];
