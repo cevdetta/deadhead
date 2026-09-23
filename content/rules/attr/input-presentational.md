@@ -12,7 +12,7 @@ scope: "body"
 selector: "input[align], input[border], input[hspace], input[vspace]"
 fix: { op: "none" }
 replacement: "Style the controls in CSS (vertical-align, border, margin) and delete the attributes."
-tags: ["attr", "legacy", "style"]
+tags: ["forms", "presentational"]
 impacts: ["maintainability"]
 related: ["attr/table-presentational"]
 ---

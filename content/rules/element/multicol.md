@@ -12,7 +12,7 @@ scope: "body"
 selector: 'multicol'
 fix: { op: "none" }
 replacement: "Lay out columns with CSS: `columns: 2` on a normal container."
-tags: ["legacy", "style"]
+tags: ["presentational"]
 impacts: ["maintainability"]
 related: ["element/center", "element/spacer"]
 ---

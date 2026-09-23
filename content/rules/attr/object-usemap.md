@@ -12,7 +12,7 @@ scope: "body"
 selector: "object[usemap]"
 fix: { op: "remove-attribute", attr: "usemap" }
 replacement: "Delete the attribute and move the map to img: <img src=\"shapes.png\" usemap=\"#shapes\" alt=\"Shapes\">."
-tags: ["attr", "legacy"]
+tags: ["embedding", "media"]
 impacts: ["maintainability"]
 related: ["attr/input-ismap-usemap"]
 ---

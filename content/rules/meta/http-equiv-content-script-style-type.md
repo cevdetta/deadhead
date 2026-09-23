@@ -12,7 +12,7 @@ scope: "head"
 selector: 'meta[http-equiv="content-script-type" i], meta[http-equiv="content-style-type" i]'
 fix: { op: "remove-element" }
 replacement: "Delete the tag. JavaScript and CSS are the default languages; declare type per element only for non-default uses."
-tags: ["head", "meta"]
+tags: ["defaults", "http-equiv"]
 impacts: ["maintainability"]
 related: ["script/type-javascript-mime"]
 ---

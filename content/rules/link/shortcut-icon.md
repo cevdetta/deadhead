@@ -12,7 +12,7 @@ scope: "head"
 selector: 'link[rel~="shortcut" i]'
 fix: { op: "remove-token", attr: "rel", token: "shortcut" }
 replacement: "Drop the shortcut token: <link rel=\"icon\" href=\"/favicon.ico\" sizes=\"32x32\">."
-tags: ["head", "link", "favicon"]
+tags: ["icons"]
 impacts: ["maintainability"]
 related: ["meta/http-equiv-x-ua-compatible"]
 ---

@@ -12,7 +12,7 @@ scope: "head"
 match: "logic"
 fix: { op: "none" }
 replacement: "Add <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"> inside <head>, right after <meta charset>."
-tags: ["head", "meta", "viewport", "mobile", "a11y"]
+tags: ["mobile"]
 impacts: ["a11y", "interop"]
 related: ["meta/viewport-user-scalable"]
 ---

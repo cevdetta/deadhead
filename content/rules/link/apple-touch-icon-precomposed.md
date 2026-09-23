@@ -12,7 +12,7 @@ scope: "head"
 match: "logic"
 fix: { op: "remove-element" }
 replacement: "Keep <link rel=\"apple-touch-icon\" href=\"/apple-touch-icon.png\"> and delete the precomposed link."
-tags: ["head", "link", "favicon", "mobile"]
+tags: ["apple", "icons"]
 impacts: ["maintainability"]
 related: ["link/mask-icon", "meta/apple-mobile-web-app-capable"]
 ---

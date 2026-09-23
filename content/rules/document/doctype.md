@@ -12,7 +12,7 @@ scope: "any"
 match: "logic"
 fix: { op: "none" }
 replacement: "Start the file with <!doctype html>, before <html>; only comments and whitespace may come before it."
-tags: ["legacy", "style"]
+tags: ["doctype"]
 impacts: ["interop"]
 related: ["head/charset-position", "document/html-lang"]
 ---

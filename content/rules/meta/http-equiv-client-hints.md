@@ -13,7 +13,7 @@ selector: "meta[http-equiv]"
 match: "logic"
 fix: { op: "none" }
 replacement: "Persist the opt-in in the Accept-CH/Delegate-CH response headers, which apply pre-parse and stick across navigations; then delete the tag."
-tags: ["head", "meta"]
+tags: ["http-equiv"]
 impacts: ["performance", "interop"]
 related: ["meta/http-equiv-name-misuse", "meta/http-equiv-content-type"]
 ---

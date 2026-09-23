@@ -12,7 +12,7 @@ scope: "body"
 selector: "big"
 fix: { op: "none" }
 replacement: "Size text in CSS: .lead { font-size: 1.25rem; }. If the size meant something, use the element for that meaning: a heading, strong or mark."
-tags: ["legacy", "style"]
+tags: ["presentational"]
 impacts: ["maintainability", "a11y"]
 related: ["element/font", "element/basefont"]
 ---

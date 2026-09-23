@@ -12,7 +12,7 @@ scope: "head"
 selector: 'meta[http-equiv="robots" i]'
 fix: { op: "none" }
 replacement: "Move crawling rules to a robots.txt file in the server root; for page-level indexing use <meta name=\"robots\">. Never disallow the same URL in robots.txt."
-tags: ["head", "meta", "seo"]
+tags: ["http-equiv", "search"]
 impacts: ["seo"]
 related: ["meta/http-equiv-description"]
 ---

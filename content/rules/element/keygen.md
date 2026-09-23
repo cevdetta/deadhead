@@ -12,7 +12,7 @@ scope: "body"
 selector: 'keygen'
 fix: { op: "remove-element" }
 replacement: "For certificate enrollment, generate the keypair with the Web Cryptography API and let the user install the certificate manually; for enterprise device management, use native on-device capabilities."
-tags: ["legacy"]
+tags: ["forms"]
 impacts: ["interop", "maintainability"]
 related: []
 ---

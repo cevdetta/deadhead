@@ -12,7 +12,6 @@ scope: "head"
 selector: 'link[rel~="fluid-icon" i], link[rel~="archives" i], link[rel~="index" i], link[rel~="start" i], link[rel~="self" i], link[rel~="first" i], link[rel~="previous" i], link[rel~="last" i], link[rel~="edituri" i], link[rel~="logo" i], link[rel~="p3pv1" i], link[rel~="publisher" i], link[rel~="original-source" i], link[rel~="profile" i], link[rel~="chrome-webstore-item" i]'
 fix: { op: "remove-tokens", attr: "rel" }
 replacement: "Delete the keyword, and the tag once nothing live is left. Write previous as prev: <link rel=\"prev\" href=\"/page/1\">, though Google no longer reads the pair."
-tags: ["head", "link"]
 impacts: ["maintainability"]
 related: ["link/rel-subresource"]
 ---

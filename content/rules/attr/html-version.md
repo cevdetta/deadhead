@@ -12,7 +12,7 @@ scope: "any"
 selector: "html[version]"
 fix: { op: "remove-attribute", attr: "version" }
 replacement: "Delete the attribute: <html lang=\"en\">. The doctype already declares HTML."
-tags: ["attr", "legacy"]
+tags: ["doctype"]
 impacts: ["maintainability"]
 related: ["attr/html-manifest"]
 ---

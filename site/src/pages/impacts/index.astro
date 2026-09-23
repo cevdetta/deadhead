@@ -1,0 +1,28 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+import { groupRules } from "../../lib/group.ts";
+import { impactBlurbs, impactLabels } from "../../vocabulary.ts";
+
+const impacts = [...groupRules(await getCollection("rules"), (rule) => rule.data.impacts)];
+---
+
+<Layout title="Impacts" description="Every deadhead rule, grouped by what the markup costs: performance, interop, accessibility, SEO, security or upkeep.">
+  <article class="shell flow">
+    <header class="flow">
+      <h1>Impacts</h1>
+      <p class="lede">What leaving the markup in place costs. A rule can have more than one impact.</p>
+    </header>
+    <ul class="rule-list">
+      {impacts.map(([impact, list]) => (
+        <li>
+          <a href={`/impacts/${impact}`}>
+            <b>{impactLabels[impact]}</b>
+            <span class="badge">{list.length} rules</span>
+            <p>{impactBlurbs[impact]}</p>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </article>
+</Layout>

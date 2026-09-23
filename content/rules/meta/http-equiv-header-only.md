@@ -13,7 +13,7 @@ selector: 'meta[http-equiv]'
 match: "logic"
 fix: { op: "remove-element" }
 replacement: "Send each value as a real response header: X-Frame-Options as CSP frame-ancestors, the rest under their own header names, referrer via meta name. Then delete the tag."
-tags: ["head", "meta", "security"]
+tags: ["http-equiv"]
 impacts: ["security"]
 related: ["meta/http-equiv-legacy-security"]
 ---

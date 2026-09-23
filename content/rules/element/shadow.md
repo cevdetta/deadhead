@@ -12,7 +12,7 @@ scope: "any"
 selector: 'shadow'
 fix: { op: "none" }
 replacement: "Attach a single v1 shadow root per host and compose it with `slot` elements and `slot` attributes. There is no nesting of shadow trees to port."
-tags: ["legacy"]
+tags: ["web-components"]
 impacts: ["interop", "maintainability"]
 related: ["element/content"]
 ---

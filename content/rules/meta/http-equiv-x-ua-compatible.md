@@ -12,7 +12,7 @@ scope: "head"
 selector: 'meta[http-equiv="X-UA-Compatible" i]'
 fix: { op: "remove-element" }
 replacement: "Delete it. Internet Explorer and legacy Edge modes no longer exist."
-tags: ["head", "meta", "legacy", "ie"]
+tags: ["http-equiv", "microsoft"]
 impacts: ["maintainability"]
 related: ["script/type-javascript-mime"]
 ---

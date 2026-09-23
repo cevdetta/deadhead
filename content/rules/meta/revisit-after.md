@@ -12,7 +12,7 @@ scope: "head"
 selector: 'meta[name="revisit-after" i]'
 fix: { op: "remove-element" }
 replacement: "Delete the element and publish change timing in an XML sitemap."
-tags: ["head", "meta", "seo"]
+tags: ["search"]
 impacts: ["seo", "maintainability"]
 related: ["meta/keywords"]
 ---

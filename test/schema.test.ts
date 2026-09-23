@@ -7,6 +7,7 @@ import {
   validateFrontmatter,
   validateProse,
 } from "../scripts/schema.ts";
+import { TAGS } from "../packages/core/vocabulary.ts";
 
 // --- frontmatter fence ------------------------------------------------------
 
@@ -89,7 +90,7 @@ const ENUM_CASES: [string, Record<string, unknown>, string][] = [
   ["kind", { kind: "attribute" }, "kind"],
   ["scope", { scope: "footer" }, "scope"],
   ["fix.op", { fix: { op: "rewrite" } }, "fix.op"],
-  ["tags", { tags: ["head", "nonsense"] }, "tags.1"],
+  ["tags", { tags: ["forms", "nonsense"] }, "tags.1"],
   ["impacts", { impacts: ["vibes"] }, "impacts.0"],
 ];
 
@@ -99,6 +100,26 @@ for (const [name, patch, path] of ENUM_CASES) {
     assert.ok(paths(patch).includes(path), `expected an issue at ${path}`);
   });
 }
+
+test("TAGS is alphabetical and free of duplicates", () => {
+  assert.deepEqual([...TAGS], [...new Set(TAGS)].sort());
+});
+
+test("tags are topics: namespace, scope and impact names are not tags", () => {
+  for (const repeat of ["meta", "link", "attr", "script", "head", "body", "seo", "security", "a11y", "performance", "legacy"]) {
+    assert.match(messages({ tags: [repeat] }).join("\n"), /unknown value/, repeat);
+  }
+});
+
+test("a repeated tag is rejected at its second occurrence", () => {
+  assert.ok(paths({ tags: ["forms", "forms"] }).includes("tags.1"));
+  assert.match(messages({ tags: ["forms", "forms"] }).join("\n"), /duplicate tag `forms`/);
+});
+
+test("tags must be in alphabetical order", () => {
+  assert.match(messages({ tags: ["tables", "forms"] }).join("\n"), /alphabetical/);
+  assert.deepEqual(messages({ tags: ["forms", "tables"] }), []);
+});
 
 test("every required field is reported exactly once when absent", () => {
   const result = validateFrontmatter({});

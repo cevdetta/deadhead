@@ -12,7 +12,7 @@ scope: "head"
 selector: 'meta[http-equiv="content-type" i]'
 fix: { op: "none" }
 replacement: "Declare the encoding once, then delete the tag. Preferred: the Content-Type response header; otherwise <meta charset=\"utf-8\"> as the first element inside <head>."
-tags: ["head", "meta"]
+tags: ["charset", "http-equiv"]
 impacts: ["maintainability", "interop"]
 related: ["head/charset-position", "meta/http-equiv-content-language"]
 ---

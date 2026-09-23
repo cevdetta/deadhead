@@ -12,7 +12,7 @@ scope: "body"
 selector: "param"
 fix: { op: "none" }
 replacement: "Set the resource directly on <object> with its data attribute: <object data=\"clip.mp4\" type=\"video/mp4\">."
-tags: ["legacy"]
+tags: ["embedding"]
 impacts: ["interop", "maintainability"]
 related: ["element/applet", "element/plugin-embed"]
 ---

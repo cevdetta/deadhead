@@ -12,7 +12,7 @@ scope: "body"
 selector: "spacer"
 fix: { op: "none" }
 replacement: "Delete it and add the space in CSS: margin on the neighbouring element, or gap on a flex or grid container."
-tags: ["legacy", "style"]
+tags: ["presentational"]
 impacts: ["maintainability"]
 related: ["element/center", "element/nobr"]
 ---

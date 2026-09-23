@@ -13,7 +13,7 @@ selector: "meta[http-equiv]"
 match: "logic"
 fix: { op: "none" }
 replacement: "Move each value where it belongs: <meta name=\"…\"> for theme-color, generator, author and the rest; <meta charset=\"utf-8\"> for charset/encoding; <html lang> for language/lang; delete the rest."
-tags: ["head", "meta"]
+tags: ["http-equiv"]
 impacts: ["maintainability", "interop"]
 related: ["meta/http-equiv-robots", "meta/http-equiv-description", "meta/keywords", "head/charset-position", "meta/http-equiv-content-type", "meta/http-equiv-content-language"]
 ---

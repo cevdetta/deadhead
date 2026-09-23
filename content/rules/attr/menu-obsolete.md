@@ -12,7 +12,7 @@ scope: "body"
 selector: "menu[type], menu[label]"
 fix: { op: "remove-attribute", attr: "type" }
 replacement: "Delete the attributes. For custom menus handle contextmenu in script; for toolbars drop the attributes."
-tags: ["attr", "legacy"]
+tags: ["scripting"]
 impacts: ["maintainability"]
 related: ["attr/link-target"]
 ---

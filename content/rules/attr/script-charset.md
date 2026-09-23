@@ -12,7 +12,7 @@ scope: "any"
 selector: "script[charset]"
 fix: { op: "remove-attribute", attr: "charset" }
 replacement: "Delete the attribute: <script src=\"app.js\"></script>. Scripts inherit UTF-8 from the document."
-tags: ["attr", "script", "legacy"]
+tags: ["charset", "scripting"]
 impacts: ["maintainability"]
 related: ["attr/script-language"]
 ---

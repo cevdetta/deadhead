@@ -12,7 +12,7 @@ scope: "head"
 selector: 'meta[name="abstract" i]'
 fix: { op: "remove-element" }
 replacement: "Delete the element. The summary belongs in meta name=description, not in this duplicate."
-tags: ["head", "meta", "seo"]
+tags: ["search"]
 impacts: ["seo", "maintainability"]
 related: ["meta/coverage", "meta/distribution"]
 ---

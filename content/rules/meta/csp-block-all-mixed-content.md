@@ -13,7 +13,7 @@ selector: 'meta[http-equiv="content-security-policy" i]'
 match: "logic"
 fix: { op: "none" }
 replacement: "Drop the block-all-mixed-content directive from the meta content. List upgrade-insecure-requests in its place; it runs in meta and in headers."
-tags: ["head", "meta", "security"]
+tags: ["csp", "http-equiv"]
 impacts: ["security", "maintainability"]
 related: ["meta/csp-report-uri", "meta/http-equiv-content-security-policy"]
 ---

@@ -12,7 +12,7 @@ scope: "body"
 selector: "area[hreflang], area[type], area[nohref]"
 fix: { op: "remove-attribute", attr: "hreflang" }
 replacement: "Delete the attributes. Omit href where the region links nowhere: <area shape=\"rect\" coords=\"0,0,10,10\">."
-tags: ["attr", "legacy"]
+tags: ["hyperlinks", "media"]
 impacts: ["maintainability"]
 related: ["attr/form-accept"]
 ---

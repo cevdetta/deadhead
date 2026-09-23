@@ -12,7 +12,7 @@ scope: "head"
 selector: "link[target]"
 fix: { op: "remove-attribute", attr: "target" }
 replacement: "Delete the attribute: <link href=\"main.css\" rel=\"stylesheet\">."
-tags: ["attr", "legacy"]
+tags: ["hyperlinks"]
 impacts: ["maintainability"]
 related: ["attr/longdesc-lowsrc"]
 ---

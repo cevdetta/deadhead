@@ -37,32 +37,41 @@ export const IMPACTS = [
 ] as const;
 
 /**
- * Tags are for browsing the rule index, not for driving behaviour. Kept
- * deliberately coarse: a tag that applies to exactly one rule is a title, not
- * a tag.
+ * Tags are topics: the feature area or platform a rule is about. They exist
+ * for browsing the rule index, never for driving behaviour, and they must say
+ * something no other field says. Namespace, scope and impact names are
+ * therefore not tags. A tag that applies to one rule alone is a title, not a
+ * tag: `validate:rules` fails on it. Kept alphabetical; a rule lists its tags
+ * in the same order.
  */
 export const TAGS = [
-  "a11y",
-  "attr",
-  "body",
+  "apple",
+  "caching",
   "charset",
-  "favicon",
-  "head",
+  "csp",
+  "defaults",
+  "doctype",
+  "embedding",
+  "forms",
+  "http-equiv",
+  "hyperlinks",
   "i18n",
-  "ie",
-  "legacy",
-  "link",
-  "meta",
+  "icons",
+  "media",
+  "microsoft",
   "mobile",
-  "performance",
-  "script",
-  "security",
-  "seo",
+  "mozilla",
+  "one-per-page",
+  "presentational",
+  "resource-hints",
+  "scripting",
+  "search",
   "social",
-  "style",
-  "svg",
-  "title",
-  "viewport",
+  "structured-data",
+  "tables",
+  "text",
+  "web-app",
+  "web-components",
 ] as const;
 
 /** `namespace/name`, kebab-case. Shared by validate-rules and the docs site. */

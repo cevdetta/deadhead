@@ -12,7 +12,7 @@ scope: "head"
 selector: 'meta[http-equiv="content-language" i]'
 fix: { op: "none" }
 replacement: "Declare the language with <html lang> (and lang on embedded foreign-language passages)."
-tags: ["head", "meta", "i18n"]
+tags: ["http-equiv", "i18n"]
 impacts: ["a11y"]
 related: ["document/html-lang"]
 ---

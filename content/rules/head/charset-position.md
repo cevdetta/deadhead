@@ -12,7 +12,7 @@ scope: "head"
 match: "logic"
 fix: { op: "none" }
 replacement: "Move <meta charset=\"utf-8\"> to the first line inside <head>, before <title> and before any other meta or link."
-tags: ["head", "charset", "meta", "i18n", "security"]
+tags: ["charset"]
 impacts: ["interop", "security"]
 related: ["meta/http-equiv-x-ua-compatible"]
 ---

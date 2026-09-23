@@ -12,7 +12,7 @@ scope: "head"
 selector: 'meta[property="og:email" i], meta[property="og:phone_number" i], meta[property="og:fax_number" i], meta[property="og:latitude" i], meta[property="og:longitude" i], meta[property="og:street-address" i], meta[property="og:locality" i], meta[property="og:region" i], meta[property="og:postal-code" i], meta[property="og:country-name" i], meta[property="fb:page_id" i]'
 fix: { op: "remove-element" }
 replacement: "Delete the tag."
-tags: ["head", "meta", "social"]
+tags: ["social"]
 impacts: ["seo"]
 related: ["meta/og-name-misuse"]
 ---

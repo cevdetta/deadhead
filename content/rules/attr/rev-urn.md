@@ -12,7 +12,7 @@ scope: "any"
 selector: "a[rev], link[rev], a[urn], link[urn]"
 fix: { op: "remove-attribute", attr: "rev" }
 replacement: "Delete the attributes. State the relationship with rel and the identifier with href: <a href=\"doc.html\" rel=\"author\">doc</a>."
-tags: ["attr", "legacy"]
+tags: ["hyperlinks"]
 impacts: ["maintainability"]
 related: ["attr/methods-obsolete"]
 ---

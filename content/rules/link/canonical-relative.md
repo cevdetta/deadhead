@@ -12,7 +12,7 @@ scope: "head"
 selector: 'link[rel~="canonical" i]:not([href^="http://" i]):not([href^="https://" i])'
 fix: { op: "none" }
 replacement: "Resolve the href against the site's canonical host and emit an absolute https URL: <link rel=\"canonical\" href=\"https://example.com/post\">."
-tags: ["head", "link", "seo"]
+tags: ["search"]
 impacts: ["seo"]
 related: ["head/canonical-multiple", "link/canonical-http"]
 ---

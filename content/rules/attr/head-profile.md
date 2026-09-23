@@ -12,7 +12,7 @@ scope: "head"
 selector: "head[profile]"
 fix: { op: "remove-attribute", attr: "profile" }
 replacement: "Delete the attribute: <head>. Register metadata names instead, and use link elements to trigger behaviors."
-tags: ["attr", "legacy"]
+tags: ["structured-data"]
 impacts: ["maintainability"]
 related: ["attr/area-obsolete"]
 ---

@@ -12,7 +12,7 @@ scope: "body"
 selector: 'object[type="application/x-shockwave-flash" i], embed[type="application/x-shockwave-flash" i], object[type="application/futuresplash" i], embed[type="application/futuresplash" i], object[type^="application/x-java-applet" i], embed[type^="application/x-java-applet" i], object[type^="application/x-java-bean" i], embed[type^="application/x-java-bean" i], object[type^="application/x-silverlight" i], embed[type^="application/x-silverlight" i], object[data$=".swf" i], embed[src$=".swf" i], object[classid]'
 fix: { op: "none" }
 replacement: "Rebuild the content with web platform features: <video> or <audio> for media, <canvas> and JavaScript for interactive content. Keep object and embed only for documents such as PDFs."
-tags: ["legacy"]
+tags: ["embedding"]
 impacts: ["interop", "maintainability"]
 related: ["element/applet"]
 ---

@@ -12,7 +12,7 @@ scope: "any"
 selector: 'content'
 fix: { op: "none" }
 replacement: "Declare distribution points with `slot` in a v1 shadow root and assign nodes with the `slot` attribute."
-tags: ["legacy"]
+tags: ["web-components"]
 impacts: ["interop", "maintainability"]
 related: ["element/shadow"]
 ---

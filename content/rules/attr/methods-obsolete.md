@@ -12,7 +12,7 @@ scope: "any"
 selector: "a[methods], link[methods]"
 fix: { op: "remove-attribute", attr: "methods" }
 replacement: "Delete the attribute: <a href=\"page.html\">text</a>. A client that needs the communication options sends OPTIONS to the target resource."
-tags: ["attr", "legacy"]
+tags: ["hyperlinks"]
 impacts: ["maintainability"]
 related: ["attr/charset-obsolete"]
 ---

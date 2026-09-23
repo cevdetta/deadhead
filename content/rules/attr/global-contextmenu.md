@@ -12,7 +12,7 @@ scope: "any"
 selector: "[contextmenu], [onshow]"
 fix: { op: "remove-attribute", attr: "contextmenu" }
 replacement: "Delete the attributes. Handle the contextmenu event in script: target.addEventListener(\"contextmenu\", show)."
-tags: ["attr", "legacy"]
+tags: ["scripting"]
 impacts: ["maintainability"]
 related: ["attr/menu-obsolete"]
 ---

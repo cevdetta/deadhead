@@ -12,7 +12,7 @@ scope: "body"
 selector: "table[align], table[bgcolor], table[border], table[cellpadding], table[cellspacing], table[frame], table[rules], table[summary], table[width]"
 fix: { op: "none" }
 replacement: "Style the table in CSS (width, margin-inline: auto, background-color, border, border-spacing, padding on cells) and describe it with <caption> instead of summary."
-tags: ["attr", "legacy", "style"]
+tags: ["presentational", "tables"]
 impacts: ["maintainability"]
 related: ["element/center", "element/font"]
 ---

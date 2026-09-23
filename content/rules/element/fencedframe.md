@@ -12,7 +12,7 @@ scope: "body"
 selector: 'fencedframe'
 fix: { op: "none" }
 replacement: "Use `iframe`. Fenced frames were never a replacement for iframes: embedded content that does not need cross-site data isolation belongs in an `iframe`."
-tags: ["legacy"]
+tags: ["embedding"]
 impacts: ["interop", "maintainability"]
 related: []
 ---

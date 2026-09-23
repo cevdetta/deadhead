@@ -13,7 +13,7 @@ selector: "script[type]"
 match: "logic"
 fix: { op: "remove-attribute", attr: "type" }
 replacement: "Drop the attribute: <script src=\"app.js\"></script>. Keep type only for module, importmap, speculationrules or a data block."
-tags: ["script", "legacy", "attr"]
+tags: ["defaults", "scripting"]
 impacts: ["maintainability"]
 related: ["meta/http-equiv-x-ua-compatible"]
 ---

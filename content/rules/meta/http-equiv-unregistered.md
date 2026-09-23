@@ -13,7 +13,7 @@ selector: 'meta[http-equiv]'
 match: "logic"
 fix: { op: "none" }
 replacement: "Delete the tag. Send header work as a response header from the server; enroll in trials through the Origin-Trial response header instead of markup."
-tags: ["head", "meta", "legacy"]
+tags: ["http-equiv"]
 impacts: ["maintainability"]
 related: ["meta/http-equiv-header-only", "meta/http-equiv-cache"]
 ---

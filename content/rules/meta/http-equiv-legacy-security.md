@@ -13,7 +13,7 @@ selector: 'meta[http-equiv]'
 match: "logic"
 fix: { op: "remove-element" }
 replacement: "Delete the tag. If policy is wanted, send a Content-Security-Policy response header."
-tags: ["head", "meta", "security"]
+tags: ["csp", "http-equiv"]
 impacts: ["security"]
 related: ["meta/http-equiv-header-only"]
 ---

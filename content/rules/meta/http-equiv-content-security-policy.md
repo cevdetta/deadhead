@@ -12,7 +12,7 @@ scope: "head"
 selector: 'meta[http-equiv="content-security-policy" i]'
 fix: { op: "none" }
 replacement: "Send the policy as the Content-Security-Policy response header, which supports every directive and both dispositions; then delete the tag."
-tags: ["head", "meta", "security"]
+tags: ["csp", "http-equiv"]
 impacts: ["security", "performance"]
 related: ["meta/http-equiv-header-only", "meta/http-equiv-content-type", "meta/http-equiv-content-language"]
 ---

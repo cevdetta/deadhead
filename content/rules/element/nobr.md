@@ -12,7 +12,7 @@ scope: "body"
 selector: "nobr"
 fix: { op: "none" }
 replacement: "Wrap the text in a span and set white-space: nowrap on it in CSS. If it contained <wbr>, also give those wbr { white-space: normal }."
-tags: ["legacy", "style"]
+tags: ["presentational"]
 impacts: ["maintainability"]
 related: ["element/center", "element/big"]
 ---

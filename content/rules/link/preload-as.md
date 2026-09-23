@@ -12,7 +12,7 @@ scope: "any"
 selector: 'link[rel~="preload" i]:not([as])'
 fix: { op: "none" }
 replacement: "Say what the resource is: <link rel=\"preload\" href=\"/hero.avif\" as=\"image\">. Fonts also need type and crossorigin."
-tags: ["head", "link", "performance"]
+tags: ["resource-hints"]
 impacts: ["performance"]
 related: ["link/preload-font-crossorigin"]
 ---

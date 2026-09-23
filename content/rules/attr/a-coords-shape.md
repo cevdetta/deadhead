@@ -12,7 +12,7 @@ scope: "body"
 selector: "a[coords], a[shape]"
 fix: { op: "remove-attribute", attr: "coords" }
 replacement: "Delete the attributes: <a href=\"page.html\">text</a>. For image maps use area elements with shape and coords inside map."
-tags: ["attr", "legacy"]
+tags: ["hyperlinks"]
 impacts: ["maintainability"]
 related: ["attr/area-obsolete"]
 ---

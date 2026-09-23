@@ -12,7 +12,7 @@ scope: "body"
 selector: 'rb'
 fix: { op: "none" }
 replacement: "Put the base text directly inside `ruby` (with `rt`, plus `rp` for fallback), or nest `ruby` elements for complex cases."
-tags: ["legacy"]
+tags: ["text"]
 impacts: ["interop", "maintainability"]
 related: ["element/rtc"]
 ---

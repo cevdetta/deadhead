@@ -12,7 +12,7 @@ scope: "any"
 selector: "frameset, frame, noframes"
 fix: { op: "none" }
 replacement: "Build one document per page. Use iframe with CSS to embed a separate document, or server-side includes for shared parts like navigation."
-tags: ["legacy"]
+tags: ["embedding"]
 impacts: ["maintainability"]
 related: ["element/plugin-embed"]
 ---

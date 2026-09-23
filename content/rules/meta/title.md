@@ -12,7 +12,7 @@ scope: "head"
 selector: 'meta[name="title" i]'
 fix: { op: "remove-element" }
 replacement: "Delete the tag. The document title lives in <title>: <title>ExampleSocialSite: Sign up for a new account.</title>."
-tags: ["head", "meta", "seo"]
+tags: ["search"]
 impacts: ["seo", "maintainability"]
 related: ["meta/obsolete-name", "meta/keywords"]
 ---

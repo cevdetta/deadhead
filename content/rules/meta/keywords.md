@@ -12,7 +12,7 @@ scope: "head"
 selector: 'meta[name="keywords" i]'
 fix: { op: "remove-element" }
 replacement: "Delete it. Topical relevance comes from the page's own content, headings and structured data."
-tags: ["head", "meta", "seo", "legacy"]
+tags: ["search"]
 impacts: ["seo", "maintainability"]
 related: ["meta/http-equiv-x-ua-compatible"]
 ---

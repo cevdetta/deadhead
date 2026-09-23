@@ -12,7 +12,7 @@ scope: "body"
 selector: 'listing'
 fix: { op: "none" }
 replacement: "Mark up code listings with `<pre><code>`."
-tags: ["legacy", "style"]
+tags: ["text"]
 impacts: ["maintainability"]
 related: ["element/xmp", "element/plaintext"]
 ---

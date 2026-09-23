@@ -12,7 +12,7 @@ scope: "body"
 selector: 'rtc'
 fix: { op: "none" }
 replacement: "Nest `ruby` elements for double-sided annotations, with `ruby-position` CSS to place each side."
-tags: ["legacy"]
+tags: ["text"]
 impacts: ["interop", "maintainability"]
 related: ["element/rb"]
 ---

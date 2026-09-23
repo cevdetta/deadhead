@@ -12,7 +12,7 @@ scope: "any"
 match: "logic"
 fix: { op: "none" }
 replacement: "Keep a single declaration at the top of head: <meta charset=\"utf-8\">. Delete the rest after confirming the survivor matches the bytes on disk."
-tags: ["head", "charset", "meta"]
+tags: ["charset", "one-per-page"]
 impacts: ["maintainability"]
 related: ["head/charset-position", "meta/charset-value"]
 ---

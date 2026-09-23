@@ -12,7 +12,7 @@ scope: "body"
 selector: 'menuitem'
 fix: { op: "none" }
 replacement: "Handle the `contextmenu` event with script and build the menu from standard elements."
-tags: ["legacy"]
+tags: ["scripting"]
 impacts: ["interop", "maintainability"]
 related: []
 ---

@@ -12,7 +12,7 @@ scope: "body"
 selector: "dir"
 fix: { op: "none" }
 replacement: "Use ul: <ul><li>index.html</li></ul>. Make it compact with CSS, not the obsolete compact attribute."
-tags: ["legacy", "body"]
+tags: ["text"]
 impacts: ["maintainability"]
 related: ["element/acronym"]
 ---

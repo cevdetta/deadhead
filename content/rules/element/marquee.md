@@ -12,7 +12,7 @@ scope: "body"
 selector: "marquee"
 fix: { op: "none" }
 replacement: "Drop the tag and keep its content static. If it must move, use a CSS animation with a visible pause button and turn it off under prefers-reduced-motion."
-tags: ["legacy", "a11y"]
+tags: ["presentational"]
 impacts: ["a11y", "maintainability"]
 related: ["element/blink", "element/bgsound"]
 ---

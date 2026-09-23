@@ -12,7 +12,7 @@ scope: "head"
 selector: 'meta[name="news_keywords" i]'
 fix: { op: "remove-element" }
 replacement: "Delete the element. Topic relevance lives in the page content, not in a hidden list: <meta name=\"description\" content=\"A short, accurate, human-written summary of the page.\">."
-tags: ["head", "meta", "seo"]
+tags: ["search"]
 impacts: ["seo", "maintainability"]
 related: ["meta/keywords"]
 ---

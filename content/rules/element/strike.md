@@ -12,7 +12,7 @@ scope: "body"
 selector: "strike"
 fix: { op: "none" }
 replacement: "Use <del> if the text was removed from the document, or <s> if it is no longer accurate or relevant, such as an old price."
-tags: ["legacy", "a11y"]
+tags: ["text"]
 impacts: ["a11y", "maintainability"]
 related: ["element/font", "element/center"]
 ---

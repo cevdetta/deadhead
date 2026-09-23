@@ -12,7 +12,7 @@ scope: "head"
 selector: 'meta[name="distribution" i]'
 fix: { op: "remove-element" }
 replacement: "Delete the element. Reach comes from Search Console targeting and hreflang, not from markup."
-tags: ["head", "meta", "seo"]
+tags: ["search"]
 impacts: ["seo", "maintainability"]
 related: ["meta/keywords", "meta/revisit-after"]
 ---

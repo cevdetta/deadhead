@@ -12,7 +12,7 @@ scope: "any"
 selector: "html[manifest]"
 fix: { op: "remove-attribute", attr: "manifest" }
 replacement: "Delete the attribute: <html lang=\"en\">. Register a service worker to serve the page offline."
-tags: ["attr", "legacy"]
+tags: ["caching"]
 impacts: ["maintainability"]
 related: ["attr/head-profile"]
 ---

@@ -13,7 +13,7 @@ selector: 'meta[name="viewport" i][content*="user-scalable" i], meta[name="viewp
 match: "logic"
 fix: { op: "none" }
 replacement: "Allow zoom: <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">. Drop user-scalable=no and any maximum-scale below 2."
-tags: ["head", "meta", "viewport", "a11y", "mobile"]
+tags: ["mobile"]
 impacts: ["a11y"]
 related: ["head/viewport"]
 ---

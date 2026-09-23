@@ -12,7 +12,7 @@ scope: "any"
 selector: "a[charset], link[charset]"
 fix: { op: "remove-attribute", attr: "charset" }
 replacement: "Delete the attribute: <a href=\"page.html\">text</a>. The linked resource declares its encoding through its own HTTP Content-Type header."
-tags: ["attr", "legacy"]
+tags: ["charset", "hyperlinks"]
 impacts: ["maintainability"]
 related: ["attr/a-coords-shape"]
 ---

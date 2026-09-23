@@ -12,7 +12,7 @@ scope: "any"
 selector: "basefont"
 fix: { op: "none" }
 replacement: "Set the document font in CSS: body { font-family: system-ui, sans-serif; font-size: 1rem; color: #222; }."
-tags: ["legacy", "head", "style"]
+tags: ["presentational"]
 impacts: ["maintainability"]
 related: ["element/font", "element/acronym"]
 ---

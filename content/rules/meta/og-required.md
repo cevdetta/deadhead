@@ -12,7 +12,7 @@ scope: "any"
 match: "logic"
 fix: { op: "none" }
 replacement: "Complete the set with true page values: <meta property=\"og:title\" content=\"The title\">, <meta property=\"og:type\" content=\"article\">, <meta property=\"og:url\" content=\"https://example.com/post\">, <meta property=\"og:image\" content=\"https://example.com/cover.jpg\">."
-tags: ["head", "meta", "social"]
+tags: ["social"]
 impacts: ["seo"]
 related: ["meta/og-name-misuse"]
 ---

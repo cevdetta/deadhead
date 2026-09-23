@@ -12,7 +12,7 @@ scope: "head"
 selector: 'meta[name^="twitter:" i]:not([name="twitter:dnt" i]):not([name="twitter:widgets:autoload" i]):not([name="twitter:widgets:csp" i]):not([name="twitter:widgets:theme" i]), meta[property^="twitter:" i]:not([property="twitter:dnt" i]):not([property="twitter:widgets:autoload" i]):not([property="twitter:widgets:csp" i]):not([property="twitter:widgets:theme" i])'
 fix: { op: "remove-element" }
 replacement: "Delete every twitter:* card tag and describe the page once with Open Graph: og:title, og:description, og:image, og:url and og:type."
-tags: ["head", "meta", "social", "seo"]
+tags: ["social"]
 impacts: ["seo", "maintainability"]
 related: ["link/image-src"]
 ---

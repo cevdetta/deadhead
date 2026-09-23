@@ -12,7 +12,7 @@ scope: "body"
 selector: "center"
 fix: { op: "none" }
 replacement: "Center in CSS: text-align: center for text and inline content, margin-inline: auto for a block with a width."
-tags: ["legacy", "style"]
+tags: ["presentational"]
 impacts: ["maintainability"]
 related: ["element/big", "attr/table-presentational"]
 ---

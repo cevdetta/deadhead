@@ -12,7 +12,7 @@ scope: "head"
 selector: 'meta[name^="og:" i], meta[name^="fb:" i], meta[name^="article:" i], meta[name^="book:" i], meta[name^="music:" i], meta[name^="video:" i], meta[name^="profile:" i]'
 fix: { op: "none" }
 replacement: "Move the value to property: <meta property=\"og:title\" content=\"The title\">. Re-test the card in the preview debugger afterwards."
-tags: ["head", "meta", "social"]
+tags: ["social"]
 impacts: ["seo"]
 related: ["meta/http-equiv-name-misuse"]
 ---

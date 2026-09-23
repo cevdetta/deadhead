@@ -13,7 +13,7 @@ selector: "html"
 match: "logic"
 fix: { op: "none" }
 replacement: "Declare the page's language on the root element with a BCP 47 tag: <html lang=\"en\">."
-tags: ["a11y", "i18n", "seo"]
+tags: ["i18n"]
 impacts: ["a11y", "seo"]
 related: ["head/viewport"]
 ---

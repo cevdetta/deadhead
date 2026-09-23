@@ -12,7 +12,7 @@ scope: "body"
 selector: "acronym"
 fix: { op: "none" }
 replacement: "Use abbr: <abbr title=\"World Wide Web\">WWW</abbr>."
-tags: ["legacy", "body"]
+tags: ["text"]
 impacts: ["maintainability"]
 related: ["element/tt", "element/big"]
 ---

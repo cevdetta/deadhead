@@ -12,7 +12,7 @@ scope: "head"
 selector: 'link[rel~="prerender" i]'
 fix: { op: "remove-tokens", attr: "rel" }
 replacement: "Prerender with a Speculation Rules rule instead of the link hint."
-tags: ["head", "link", "legacy", "performance"]
+tags: ["resource-hints"]
 impacts: ["interop", "performance"]
 related: []
 ---

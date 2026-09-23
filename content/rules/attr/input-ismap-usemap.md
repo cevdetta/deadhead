@@ -12,7 +12,7 @@ scope: "body"
 selector: "input[ismap], input[usemap]"
 fix: { op: "remove-attribute", attr: "ismap" }
 replacement: "Delete the attributes. For a server-side map keep <input type=\"image\" src=\"go.png\" alt=\"Go\">; for a client-side map use img with usemap."
-tags: ["attr", "legacy"]
+tags: ["forms", "media"]
 impacts: ["maintainability"]
 related: ["attr/html-version"]
 ---

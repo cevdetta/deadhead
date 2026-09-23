@@ -1,0 +1,30 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+import { groupRules } from "../../lib/group.ts";
+import { tagBlurbs, tagLabels } from "../../vocabulary.ts";
+
+const topics = [...groupRules(await getCollection("rules"), (rule) => rule.data.tags)].sort(
+  ([a], [b]) => tagLabels[a].localeCompare(tagLabels[b]),
+);
+---
+
+<Layout title="Topics" description="Every deadhead rule, grouped by the feature area or platform it is about.">
+  <article class="shell flow">
+    <header class="flow">
+      <h1>Topics</h1>
+      <p class="lede">The feature area or platform each rule is about. A rule can sit in more than one topic.</p>
+    </header>
+    <ul class="rule-list">
+      {topics.map(([tag, list]) => (
+        <li>
+          <a href={`/topics/${tag}`}>
+            <b>{tagLabels[tag]}</b>
+            <span class="badge">{list.length} rules</span>
+            <p>{tagBlurbs[tag]}</p>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </article>
+</Layout>

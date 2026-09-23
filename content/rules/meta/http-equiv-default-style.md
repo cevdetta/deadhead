@@ -12,7 +12,7 @@ scope: "head"
 selector: 'meta[http-equiv="default-style" i]'
 fix: { op: "none" }
 replacement: "Style variants with modern CSS media features such as prefers-color-scheme instead of alternate stylesheet sets."
-tags: ["head", "meta", "style"]
+tags: ["http-equiv"]
 impacts: ["maintainability"]
 related: ["meta/http-equiv-content-type"]
 ---

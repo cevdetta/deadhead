@@ -12,7 +12,7 @@ scope: "body"
 selector: "isindex"
 fix: { op: "none" }
 replacement: "Write the search form explicitly: <form action=\"/search\"><label>Search <input type=\"search\" name=\"q\"></label></form>."
-tags: ["legacy", "security"]
+tags: ["forms"]
 impacts: ["maintainability", "security"]
 related: ["element/bgsound", "element/blink"]
 ---

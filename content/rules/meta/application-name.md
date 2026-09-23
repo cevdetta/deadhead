@@ -12,7 +12,7 @@ scope: "head"
 selector: 'meta[name="application-name" i]'
 fix: { op: "remove-element" }
 replacement: "Delete it. Name an installable app with name and short_name in the web app manifest; a page that isn't an app is already named by <title>."
-tags: ["head", "meta"]
+tags: ["web-app"]
 impacts: ["maintainability"]
 related: ["meta/msapplication", "link/apple-touch-icon-precomposed"]
 ---

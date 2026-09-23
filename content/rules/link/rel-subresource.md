@@ -12,7 +12,7 @@ scope: "head"
 selector: 'link[rel~="subresource" i]'
 fix: { op: "remove-tokens", attr: "rel" }
 replacement: "Drop the tag, or only the keyword when rel also holds live ones. Preload through the standard relation instead: <link rel=\"preload\" href=\"/app.js\" as=\"script\">."
-tags: ["head", "link", "performance"]
+tags: ["resource-hints"]
 impacts: ["performance"]
 related: ["link/preload-as"]
 ---

@@ -12,7 +12,7 @@ scope: "head"
 selector: 'link[rel~="canonical" i][href^="http://" i]'
 fix: { op: "none" }
 replacement: "Point the tag at the https address, serve it with a valid certificate, and redirect the http URL to it: <link rel=\"canonical\" href=\"https://example.com/post\">."
-tags: ["head", "link", "seo"]
+tags: ["search"]
 impacts: ["seo"]
 related: ["link/canonical-relative", "head/canonical-multiple"]
 ---
