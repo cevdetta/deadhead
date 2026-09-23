@@ -68,6 +68,7 @@ export const TAGS = [
   "search",
   "social",
   "structured-data",
+  "svg",
   "tables",
   "text",
   "web-app",
