@@ -12,13 +12,13 @@
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",
-    "astro": "^7.3.2",
+    "astro": "^7.3.3",
     "satori": "^0.33.4",
     "satori-html": "^0.3.2",
     "sharp": "^0.35.4"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
-    "typescript": "^6.0.3"
+    "typescript": "^7.0.2"
   }
 }
