@@ -10,7 +10,8 @@ detectability: "yes"
 kind: "element"
 scope: "any"
 selector: "script[language]"
-fix: { op: "none" }
+match: "logic"
+fix: { op: "remove-attribute", attr: "language" }
 replacement: "Where language names JavaScript, delete it: <script src=\"app.js\"></script>. Any other value keeps the block from running, so delete the block or mark data with type: <script type=\"application/json\">."
 tags: ["scripting"]
 impacts: ["maintainability"]
@@ -41,7 +42,7 @@ Use `type` for data blocks:
 
 ## Detectability
 
-Complete detection. The rule matches `script[language]`: presence of the attribute is the whole verdict, so no logic module exists. There is no autofix. With no `type` attribute present, deleting a non-JavaScript `language` value starts a previously inert script block running, the same bug class as `attr/script-event-for`; a person has to check for `type` and the attribute's value before removing it.
+Complete detection. The rule matches `script[language]`: presence of the attribute is the whole verdict. A logic module decides only whether the autofix runs. It deletes `language` where the script runs the same without it: the element has a `type` attribute, which overrides it; the value is empty; or `text/` plus the value is a JavaScript MIME type essence match, as with `javascript` or `JavaScript1.2`. Any other value with no `type` present, such as `vbscript`, keeps the block from running, and deleting it would start the block, the same bug class as `attr/script-event-for`. That finding carries no fix; a person has to delete the block or mark it with `type`.
 
 ## Resources
 

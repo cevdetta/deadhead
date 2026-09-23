@@ -32,7 +32,10 @@ test("every rule in content/rules is loaded, with its logic module attached", ()
     if (rule.meta.kind === "document") {
       assert.equal(typeof rule.check, "function", `${rule.meta.ruleId} needs check()`);
     } else if (rule.meta.match === "logic") {
-      assert.equal(typeof rule.match, "function", `${rule.meta.ruleId} needs match()`);
+      assert.ok(
+        typeof rule.match === "function" || typeof rule.fixable === "function",
+        `${rule.meta.ruleId} needs match() or fixable()`,
+      );
     }
   }
 });

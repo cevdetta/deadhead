@@ -10,7 +10,8 @@ detectability: "yes"
 kind: "element"
 scope: "any"
 selector: "a[name], embed[name], img[name], option[name]"
-fix: { op: "none" }
+match: "logic"
+fix: { op: "remove-attribute", attr: "name" }
 replacement: "Put id on the target and move links and scripts over to it, then delete name: <h2 id=\"part\">Part</h2> and <a href=\"#part\">Part</a>."
 tags: ["hyperlinks"]
 impacts: ["maintainability"]
@@ -38,7 +39,7 @@ MDN states the same job description: the purpose of `id` is to identify a single
 
 ## Detectability
 
-Complete detection. The rule matches `a[name]`, `embed[name]`, `img[name]` or `option[name]`: presence of the attribute is the whole verdict, so no logic module exists. There is no autofix. Deleting `name` from `a` can break a live fragment link; deleting it from `embed` or `img` can break a `window.<name>`/`document.<name>` lookup, and on `img` it also ends `document.<id>`. A matching `id` covers the fragment case alone; a person has to add the `id`, move script lookups to `getElementById`, and only then remove the attribute.
+Complete detection. The rule matches `a[name]`, `embed[name]`, `img[name]` or `option[name]`: presence of the attribute is the whole verdict. A logic module decides only whether the autofix runs. It runs on `option`, whose `name` no navigation or named-access algorithm reads, and on an `a` whose `id` is identical to its `name`, since the fragment lookup finds the `id` before it tries `name`. Every other finding carries no fix. Deleting `name` from any other `a` can break a live fragment link; deleting it from `embed` or `img` can break a `window.<name>`/`document.<name>` lookup, and on `img` it also ends `document.<id>`. A matching `id` covers the fragment case alone; a person has to add the `id`, move script lookups to `getElementById`, and only then remove the attribute.
 
 ## Resources
 

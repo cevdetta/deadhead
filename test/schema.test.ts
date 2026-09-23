@@ -239,14 +239,14 @@ test("remove-tokens needs an attr, takes no token, and needs a ~= test on that a
   );
 });
 
-test("remove-tokens rejects match: logic, since logic can decide on a live keyword", () => {
-  assert.match(
+test("remove-tokens allows match: logic; checkLogicModules rejects a match() export there", () => {
+  assert.deepEqual(
     messages({
       selector: 'link[rel~="index" i]',
       match: "logic",
       fix: { op: "remove-tokens", attr: "rel" },
-    }).join("\n"),
-    /cannot pair with `match: "logic"`/,
+    }),
+    [],
   );
 });
 

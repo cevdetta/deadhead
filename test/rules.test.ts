@@ -60,12 +60,20 @@ test("logic modules export the entry point their kind requires", async () => {
     const module: Record<string, unknown> = await import(
       resolve(ROOT, "packages/rules/logic", `${rule.meta.ruleId}.ts`)
     );
-    const entry = rule.meta.kind === "document" ? "check" : "match";
-    assert.equal(
-      typeof module[entry],
-      "function",
-      `${rule.meta.ruleId} must export ${entry}()`,
+    if (rule.meta.kind === "document") {
+      assert.equal(typeof module["check"], "function", `${rule.meta.ruleId} must export check()`);
+      assert.equal(module["fixable"], undefined, `${rule.meta.ruleId}: fixable is for element rules`);
+      continue;
+    }
+    // An element module exports match(), fixable() or both.
+    assert.ok(
+      typeof module["match"] === "function" || typeof module["fixable"] === "function",
+      `${rule.meta.ruleId} must export match() or fixable()`,
     );
+    if (module["fixable"] !== undefined) {
+      assert.equal(typeof module["fixable"], "function", rule.meta.ruleId);
+      assert.notEqual(rule.meta.fix.op, "none", `${rule.meta.ruleId}: fixable with no fix to veto`);
+    }
   }
 });
 
@@ -179,14 +187,17 @@ test("prose problems are reported even when the frontmatter is also wrong", () =
 // --- logic modules and markdown must account for each other -----------------
 
 const withLogicDir = async (
-  files: string[],
+  files: string[] | Record<string, string>,
   run: (dir: string) => Promise<void>,
 ): Promise<void> => {
   const dir = await mkdtemp(join(tmpdir(), "deadhead-logic-"));
+  const contents = Array.isArray(files)
+    ? Object.fromEntries(files.map((file) => [file, "export const match = () => false;\n"]))
+    : files;
   try {
-    for (const file of files) {
+    for (const [file, text] of Object.entries(contents)) {
       await mkdir(dirname(join(dir, file)), { recursive: true });
-      await writeFile(join(dir, file), "export const match = () => false;\n");
+      await writeFile(join(dir, file), text);
     }
     await run(dir);
   } finally {
@@ -222,6 +233,65 @@ test("a logic module with no markdown behind it is reported as an orphan", async
 test("a matched pair is silent", async () => {
   await withLogicDir(["meta/example.ts"], async (dir) => {
     assert.equal(format(await checkLogicModules([ruleDeclaringLogic], dir)), "");
+  });
+});
+
+/** A synthetic `meta/example` rule declaring logic, with frontmatter lines swapped in. */
+const logicRule = (...swaps: [string, string][]): LoadedRule => {
+  let frontmatter = VALID_FRONTMATTER.replace("selector:", 'match: "logic"\nselector:');
+  for (const [from, to] of swaps) frontmatter = frontmatter.replace(from, to);
+  const { rule, diagnostics: found } = parseRuleFile(FILE, doc(frontmatter));
+  if (!rule) throw new Error(`test fixture should parse:\n${format(found)}`);
+  return rule;
+};
+
+test("an element module may export fixable() alone", async () => {
+  await withLogicDir({ "meta/example.ts": "export const fixable = () => true;\n" }, async (dir) => {
+    assert.equal(format(await checkLogicModules([ruleDeclaringLogic], dir)), "");
+  });
+});
+
+test("a module with neither match() nor fixable() is reported", async () => {
+  await withLogicDir({ "meta/example.ts": "export const helper = 1;\n" }, async (dir) => {
+    assert.equal(
+      format(await checkLogicModules([ruleDeclaringLogic], dir)),
+      "packages/rules/logic/meta/example.ts:1:1  an element rule's module must export match(), fixable() or both",
+    );
+  });
+});
+
+test("fixable() on a rule whose fix op is none is reported at the export", async () => {
+  const rule = logicRule(['fix: { op: "remove-element" }', 'fix: { op: "none" }']);
+  const text = 'import x from "y";\n\nexport const match = () => true;\nexport const fixable = () => true;\n';
+  await withLogicDir({ "meta/example.ts": text }, async (dir) => {
+    assert.equal(
+      format(await checkLogicModules([rule], dir)),
+      "packages/rules/logic/meta/example.ts:4:14  exports `fixable` but the rule's fix op is `none`: there is no fix to veto",
+    );
+  });
+});
+
+test("fixable() on a document rule is reported at the export", async () => {
+  const rule = logicRule(['kind: "element"', 'kind: "document"']);
+  const text = "export const check = () => [];\nexport function fixable() { return true; }\n";
+  await withLogicDir({ "meta/example.ts": text }, async (dir) => {
+    assert.equal(
+      format(await checkLogicModules([rule], dir)),
+      "packages/rules/logic/meta/example.ts:2:17  `fixable` is for element rules: a document rule decides its findings, and their fixes, in check()",
+    );
+  });
+});
+
+test("a remove-tokens rule's module may veto fixes but not decide findings", async () => {
+  const rule = logicRule(
+    ["selector: 'meta[name=example]'", "selector: 'link[rel~=\"index\" i]'"],
+    ['fix: { op: "remove-element" }', 'fix: { op: "remove-tokens", attr: "rel" }'],
+  );
+  await withLogicDir({ "meta/example.ts": "export const fixable = () => true;\n" }, async (dir) => {
+    assert.equal(format(await checkLogicModules([rule], dir)), "");
+  });
+  await withLogicDir({ "meta/example.ts": "export const match = () => true;\n" }, async (dir) => {
+    assert.match(format(await checkLogicModules([rule], dir)), /^packages\/rules\/logic\/meta\/example\.ts:1:14 {2}`remove-tokens` cannot pair with match\(\)/);
   });
 });
 
@@ -278,4 +348,40 @@ test("lib/csp directiveNames reads the first token of each directive, lowercased
     "report-uri",
     "img-src",
   ]);
+});
+
+/** The `script` element of `<script attrs></script>`, through the CLI adapter. */
+const scriptPort = async (attrs: string) => {
+  const { parseHtml } = await import("../packages/cli/adapter.ts");
+  const port = parseHtml(`<script ${attrs}></script>`).doc.querySelector("script");
+  assert.ok(port);
+  return port;
+};
+
+test("lib/script scriptTypeString follows prepare the script element", async () => {
+  const { scriptTypeString } = await import("../packages/rules/lib/script.ts");
+  const type = async (attrs: string) => scriptTypeString(await scriptPort(attrs));
+  assert.equal(await type(""), "text/javascript");
+  assert.equal(await type('type=""'), "text/javascript");
+  assert.equal(await type('language=""'), "text/javascript");
+  assert.equal(await type('type="" language="vbscript"'), "text/javascript");
+  assert.equal(await type('type=" module\t"'), "module");
+  assert.equal(await type('type=" " language="javascript"'), "");
+  assert.equal(await type('language="vbscript"'), "text/vbscript");
+  assert.equal(await type('language=" javascript"'), "text/ javascript");
+});
+
+test("lib/script isClassicScript is a JavaScript MIME type essence match", async () => {
+  const { isClassicScript, isJavaScriptMimeEssence } = await import("../packages/rules/lib/script.ts");
+  const classic = async (attrs: string) => isClassicScript(await scriptPort(attrs));
+  assert.equal(await classic(""), true);
+  assert.equal(await classic('type="TEXT/JavaScript"'), true);
+  assert.equal(await classic('language="JScript"'), true);
+  assert.equal(await classic('type="module"'), false);
+  assert.equal(await classic('type="importmap"'), false);
+  assert.equal(await classic('type="text/javascript; charset=utf-8"'), false);
+  assert.equal(await classic('language="vbscript"'), false);
+  assert.equal(isJavaScriptMimeEssence("application/x-javascript"), true);
+  // ASCII case-insensitive only: U+0130 does not fold to "i".
+  assert.equal(isJavaScriptMimeEssence("text/javascrİpt"), false);
 });

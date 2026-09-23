@@ -101,6 +101,41 @@ test("a remove-attribute rule whose attribute is absent produces no fix", () => 
   assert.equal(findings[0]?.fix, null);
 });
 
+test("fixable() vetoes a fix per finding and leaves the finding reported", () => {
+  const vetoed: Rule = {
+    meta: meta({
+      ruleId: "meta/veto",
+      selector: "meta[name]",
+      match: "logic",
+      fix: { op: "remove-element", attr: null, token: null },
+    }),
+    // No match(): the selector alone decides, and fixable() only vetoes.
+    fixable: (element) => element.attr("name") !== "keep",
+  };
+  const html = '<html><head><meta name="drop"><meta name="keep"></head><body></body></html>';
+  const findings = run([vetoed], parseHtml(html), { fix: true });
+  assert.deepEqual(
+    findings.map((f) => [f.node.snippet, f.fix === null ? null : html.slice(...f.fix.range)]),
+    [
+      ['<meta name="drop">', '<meta name="drop">'],
+      ['<meta name="keep">', null],
+    ],
+  );
+});
+
+test("fixable() runs only on the --fix path", () => {
+  let calls = 0;
+  const counted: Rule = {
+    meta: meta({ ruleId: "meta/count", selector: "meta[name]", fix: { op: "remove-element", attr: null, token: null } }),
+    fixable: () => {
+      calls++;
+      return true;
+    },
+  };
+  run([counted], parseHtml('<html><head><meta name="a"></head><body></body></html>'));
+  assert.equal(calls, 0);
+});
+
 // --- applying ---------------------------------------------------------------
 
 const fix = (start: number, end: number, text = ""): Fix => ({ ruleId: "t/x", range: [start, end], text });
@@ -312,11 +347,18 @@ test("remove-tokens fixes from two rules on the same attribute converge on remov
   assert.ok(!output.includes("<link"), output);
 });
 
-test("attr/script-event-for never offers a fix: deleting event would run a script the browser skips", async () => {
+test("attr/script-event-for never fixes a pair the browser skips: deleting event would run it", async () => {
   const { loadRules } = await import("../packages/rules/load.ts");
   const rule = (await loadRules()).find((r) => r.meta.ruleId === "attr/script-event-for");
   assert.ok(rule, "rule exists");
-  assert.equal(rule.meta.fix.op, "none");
+  const html =
+    '<html><head><script for="button" event="onclick">a();</script>' +
+    '<script for="window" event="onload">b();</script></head><body></body></html>';
+  const findings = run([rule], parseHtml(html), { fix: true });
+  assert.equal(findings.length, 2);
+  assert.equal(findings[0]?.fix, null);
+  assert.ok(findings[1]?.fix);
+  assert.equal(html.slice(...findings[1].fix.range), ' event="onload"');
 });
 
 // --- performance --------------------------------------------------------

@@ -189,5 +189,13 @@ test("an unsupported selector is a build failure, not a silent no-match", () => 
 
 test("a rule that declares logic but ships none fails loudly", () => {
   const rule: Rule = { meta: meta({ ruleId: "meta/x", selector: "meta[name]", match: "logic" }) };
-  assert.throws(() => lint(doc('<meta name="a">'), [rule]), /requires a match\(\) logic module/);
+  assert.throws(() => lint(doc('<meta name="a">'), [rule]), /requires a match\(\) or fixable\(\) logic module/);
+});
+
+test("a logic rule shipping only fixable() matches on its selector alone", () => {
+  const rule: Rule = {
+    meta: meta({ ruleId: "meta/x", selector: "meta[name]", match: "logic" }),
+    fixable: () => false,
+  };
+  assert.equal(lint(doc('<meta name="a"><meta charset="utf-8">'), [rule]).length, 1);
 });

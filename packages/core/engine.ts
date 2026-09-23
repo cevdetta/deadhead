@@ -17,6 +17,7 @@ import type {
   DoctypePort,
   ElementPort,
   Finding,
+  FixableFn,
   MatchFn,
   Parsed,
   RuleContext,
@@ -26,10 +27,18 @@ import { type RuleMeta, ruleUrl } from "./vocabulary.ts";
 /** A rule as the engine consumes it: metadata plus whatever code it needs. */
 export type Rule = {
   meta: RuleMeta;
-  /** Required when `meta.kind === "element"` and `meta.match === "logic"`. */
+  /**
+   * When `meta.kind === "element"` and `meta.match === "logic"`, the module
+   * exports this, `fixable` or both.
+   */
   match?: MatchFn;
   /** Required when `meta.kind === "document"`. */
   check?: CheckFn;
+  /**
+   * Per-finding autofix veto for an element rule. A `match: "logic"` rule may
+   * carry this alone, with no `match`: the selector then decides.
+   */
+  fixable?: FixableFn;
 };
 
 type Compiled = Rule & { parsed: Compound[] | null };
@@ -118,8 +127,12 @@ function contextFor(rule: Rule, source: string | null, fix: boolean): RuleContex
         node: { tag: target.tag, snippet: snippet(target, source) },
         // Fixes are computed only when asked: without them there are no
         // `attrRange` lookups. No fix op edits a doctype without changing
-        // the rendering mode.
-        fix: fix && !isDoctype(target) ? computeFix(meta, target, source) : null,
+        // the rendering mode, and `fixable` vetoes an element whose removal
+        // would change what the page does.
+        fix:
+          fix && !isDoctype(target) && (rule.fixable === undefined || rule.fixable(target))
+            ? computeFix(meta, target, source)
+            : null,
       };
       // exactOptionalPropertyTypes: assign `detail` only when there is one.
       if (extra?.detail !== undefined) finding.detail = extra.detail;
@@ -245,10 +258,12 @@ export function runCompiled(compiled: CompiledRules, parsed: Parsed, options: Ru
 
         const ctx = contextOf(entry.rule);
         if (entry.rule.meta.match === "logic") {
-          if (!entry.rule.match) {
-            throw new Error(`${entry.rule.meta.ruleId}: match "logic" requires a match() logic module`);
+          if (entry.rule.match) {
+            if (!entry.rule.match(element, ctx)) return;
+          } else if (!entry.rule.fixable) {
+            // A module exporting only `fixable` leaves matching to the selector.
+            throw new Error(`${entry.rule.meta.ruleId}: match "logic" requires a match() or fixable() logic module`);
           }
-          if (!entry.rule.match(element, ctx)) return;
         }
         findings.push(ctx.report(element));
       };

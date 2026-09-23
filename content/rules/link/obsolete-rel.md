@@ -10,8 +10,9 @@ detectability: "yes"
 kind: "element"
 scope: "head"
 selector: 'link[rel~="fluid-icon" i], link[rel~="archives" i], link[rel~="index" i], link[rel~="start" i], link[rel~="self" i], link[rel~="first" i], link[rel~="previous" i], link[rel~="last" i], link[rel~="edituri" i], link[rel~="logo" i], link[rel~="p3pv1" i], link[rel~="publisher" i], link[rel~="original-source" i], link[rel~="profile" i], link[rel~="chrome-webstore-item" i]'
-fix: { op: "none" }
-replacement: "Keep self and edituri where WebSub or WordPress's XML-RPC discovery still applies, and delete the other dead keywords by hand. Write previous as prev: <link rel=\"prev\" href=\"/page/1\">, though Google no longer reads the pair."
+match: "logic"
+fix: { op: "remove-tokens", attr: "rel" }
+replacement: "Keep self and edituri where WebSub or WordPress's XML-RPC discovery still applies, and delete the other dead keywords. Write previous as prev: <link rel=\"prev\" href=\"/page/1\">, though Google no longer reads the pair."
 impacts: ["maintainability"]
 related: ["link/rel-subresource"]
 ---
@@ -34,7 +35,7 @@ Dead relations cost bytes and review time, and sequence fossils cost direction t
 
 ## Use instead
 
-Delete the dead keyword by hand; there is no autofix. Keep `self` if the page publishes to WebSub, and `hub` alongside it. Keep `edituri` if the site still serves the XML-RPC endpoint WordPress apps discover through it; once XML-RPC is off, the `EditURI` link points at a dead endpoint and can go. Rewrite `previous` as `prev` where the sequence matters. Where the intent was sequence navigation, the living pair covers it:
+On a link with none of `self`, `edituri` or `previous`, the fixer deletes the dead keywords, and the tag once no live keyword is left. Edit a link holding any of those three by hand. Rewrite `previous` as `prev` where the sequence matters; the fixer cannot write `prev` for you. Keep `self` if the page publishes to WebSub, and `hub` alongside it. Keep `edituri` if the site still serves the XML-RPC endpoint WordPress apps discover through it; once XML-RPC is off, the `EditURI` link points at a dead endpoint and can go. Where the intent was sequence navigation, the living pair covers it:
 
 ```html
 <link rel="prev" href="/page/1">
@@ -43,9 +44,9 @@ Delete the dead keyword by hand; there is no autofix. Keep `self` if the page pu
 
 ## Detectability
 
-Detectable with the selector alone. Each branch pins one dropped token with `~=`, and the `i` flag folds case. Anything unlisted stays quiet by construction.
+Detectable with the selector alone. Each branch pins one dropped token with `~=`, and the `i` flag folds case. Anything unlisted stays quiet by construction. A logic module decides only whether the autofix runs.
 
-There is no autofix. Deleting `self` breaks WebSub topic-URL discovery for a subscriber that relies on it, and deleting `edituri` breaks the WordPress apps' XML-RPC endpoint discovery; a person has to check whether either consumer applies before removing either token.
+The autofix deletes every listed keyword, and the tag once no live keyword is left, on a link whose `rel` holds none of `self`, `edituri` or `previous`. A link holding any of them carries no fix, because the fixer deletes every keyword the selector tests: deleting `self` breaks WebSub topic-URL discovery for a subscriber that relies on it, deleting `edituri` breaks the WordPress apps' XML-RPC endpoint discovery, and deleting `previous` drops a link that user agents treat as `prev` and that Google says other search engines may still read. A person has to check whether a consumer applies, and rewrite `previous` as `prev`, before removing a token.
 
 ## Resources
 

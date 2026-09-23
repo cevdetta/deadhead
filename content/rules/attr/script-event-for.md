@@ -10,7 +10,8 @@ detectability: "yes"
 kind: "element"
 scope: "any"
 selector: "script[event], script[for]"
-fix: { op: "none" }
+match: "logic"
+fix: { op: "remove-attribute", attr: "event" }
 replacement: "Move the code into a listener, target.addEventListener(\"click\", run), then delete the script block."
 tags: ["microsoft", "scripting"]
 impacts: ["maintainability"]
@@ -35,7 +36,7 @@ target.addEventListener("click", run);
 
 ## Detectability
 
-Complete detection. The rule matches `script[event]` or `script[for]`: presence of either attribute is the whole verdict, so no logic module exists. There is no autofix. Deleting either attribute from a skipped block makes it run on load, which is a behaviour change a fix must not make; a person has to decide whether the code should run and move it into `addEventListener`.
+Complete detection. The rule matches `script[event]` or `script[for]`: presence of either attribute is the whole verdict. A logic module decides only whether the autofix runs. It deletes `event` where the block runs the same without it: a lone `event`, a pair on a script that is not a classic script, such as a module, which that step skips, or a pair with `for` set to `window` and `event` set to `onload` or `onload()`. The fix names one attribute, so a lone `for`, or the one a fixed pair leaves behind, stays reported with no fix. On a classic script, a pair naming anything else keeps the block from running, and deleting `event` would run it on load, a behaviour change a fix must not make; that finding carries no fix, and a person has to decide whether the code should run and move it into `addEventListener`.
 
 ## Resources
 

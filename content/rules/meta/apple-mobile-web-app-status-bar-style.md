@@ -10,8 +10,9 @@ detectability: "yes"
 kind: "element"
 scope: "head"
 selector: 'meta[name="apple-mobile-web-app-status-bar-style" i]'
-fix: { op: "none" }
-replacement: "Keep it for a full-screen Home Screen app; theme-color styles Safari's own UI, a different surface. Delete only a content=\"default\" tag."
+match: "logic"
+fix: { op: "remove-element" }
+replacement: "Keep it for a full-screen Home Screen app; theme-color styles Safari's own UI, a different surface. Delete only a tag with content=\"default\" or no content."
 tags: ["apple", "web-app"]
 impacts: ["maintainability"]
 related: ["meta/apple-mobile-web-app-capable", "meta/apple-mobile-web-app-title"]
@@ -36,13 +37,13 @@ Keep the tag if the site ships a full-screen Home Screen app and needs `black` o
 <meta name="theme-color" content="#226DAA">
 ```
 
-Delete the tag only when its value is `default`, since that is already the default with the tag absent.
+Delete the tag only when its value is `default` or it has no `content`, since either matches the status bar with the tag absent. The fixer deletes those.
 
 ## Detectability
 
-Detectable with one selector. Deadhead reports each `meta` with that name and skips pages without such an element. The match uses `=` with the `i` flag: `name` holds a single value, not a token set.
+Detectable with one selector. Deadhead reports each `meta` with that name and skips pages without such an element. The match uses `=` with the `i` flag: `name` holds a single value, not a token set. A logic module decides only whether the autofix runs.
 
-There is no autofix. A full-screen Home Screen app on current iOS loses `black`/`black-translucent` status-bar styling if the tag is deleted, since theme-color does not cover that surface; a person has to check the value and the app's display mode before removing the tag.
+The autofix deletes the tag when `content` is `default` or missing, since the status bar looks the same without it. Any other value carries no fix: a full-screen Home Screen app on current iOS loses `black`/`black-translucent` status-bar styling if the tag is deleted, since theme-color does not cover that surface. A person has to check the app's display mode before removing the tag.
 
 ## Resources
 

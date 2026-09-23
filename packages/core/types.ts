@@ -110,6 +110,12 @@ export type RuleContext = {
 /** `kind: "element"` with `match: "logic"`: the selector pre-filters, this decides. */
 export type MatchFn = (element: ElementPort, ctx: RuleContext) => boolean;
 
+/**
+ * Whether removing what the rule's fix op deletes leaves this element's
+ * behaviour unchanged. A finding whose element fails it carries no fix.
+ */
+export type FixableFn = (element: ElementPort) => boolean;
+
 /** `kind: "document"`: no selector can express it, so the rule walks the document. */
 export type CheckFn = (doc: DocumentPort, ctx: RuleContext) => Finding[];
 

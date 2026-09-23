@@ -408,23 +408,16 @@ export function validateFrontmatter(data: unknown): FrontmatterResult {
 
   // remove-tokens deletes what the selector matches with `[attr~=…]`, and it
   // has to own that match outright:
-  // - `match: "logic"` can decide a finding on a live keyword the selector
-  //   only pre-filters on, and the fixer would delete a keyword the rule
-  //   never tested;
   // - with no selector, there is no `[attr~=…]` test to read the dead
   //   keywords from;
   // - a compound with two positive `[attr~=…]` tests on the same attribute
   //   is a conjunction: it can match with only one of the two keywords
   //   present, and the fixer would delete the live one too.
+  // `match: "logic"` is allowed only for a module that vetoes fixes and never
+  // decides findings; `checkLogicModules` rejects a `match` export there,
+  // since logic could decide on a live keyword the selector only pre-filters on.
   if (fixOp === "remove-tokens") {
-    if (match === "logic") {
-      issues.push(
-        field(
-          ["fix", "op"],
-          '`remove-tokens` cannot pair with `match: "logic"`: the logic may decide a finding on a live keyword the selector only pre-filters on',
-        ),
-      );
-    } else if (selector === null) {
+    if (selector === null) {
       issues.push(
         field(
           ["fix", "op"],

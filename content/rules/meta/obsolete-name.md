@@ -10,7 +10,8 @@ detectability: "yes"
 kind: "element"
 scope: "head"
 selector: 'meta[name="subject" i], meta[name="copyright" i], meta[name="language" i], meta[name="revised" i], meta[name="topic" i], meta[name="summary" i], meta[name="classification" i], meta[name="designer" i], meta[name="reply-to" i], meta[name="owner" i], meta[name="url" i], meta[name="identifier-url" i], meta[name="directory" i], meta[name="pagename" i], meta[name="category" i], meta[name="subtitle" i], meta[name="target" i], meta[name="date" i], meta[name="search_date" i], meta[name="medium" i], meta[name="syndication-source" i], meta[name="original-source" i], meta[name="verify-v1" i], meta[name="y_key" i], meta[name="pagekey" i], meta[name="microid" i], meta[name="readability-verification" i], meta[name="icbm" i], meta[name="norton-safeweb" i], meta[name="tweetmeme-title" i], meta[name="blogcatalog" i], meta[name="apple-touch-fullscreen" i]'
-fix: { op: "none" }
+match: "logic"
+fix: { op: "remove-element" }
 replacement: "For verify-v1, confirm Search Console verification through google-site-verification first; then delete the element. Describe the page with real content instead: <meta name=\"description\" content=\"A short, accurate, human-written summary of the page.\">."
 tags: ["search"]
 impacts: ["seo", "maintainability"]
@@ -40,9 +41,9 @@ Delete the element for the thirty-one dead names; nothing replaces them, because
 
 ## Detectability
 
-Detectable with the selector alone. The comma lists every dead name with `=` (a single value, not a token set) and the `i` flag folds case. Anything unlisted stays quiet by construction.
+Detectable with the selector alone. The comma lists every dead name with `=` (a single value, not a token set) and the `i` flag folds case. Anything unlisted stays quiet by construction. A logic module decides only whether the autofix runs.
 
-There is no autofix. `verify-v1` may still hold a Search Console verification for a site that verified through it and never added `google-site-verification`; deleting it without confirming the current token first can revoke that verification. The other thirty-one names have no such open question, but the rule carries one fix operation for the whole selector, so removal stays a manual step for all of them.
+The autofix deletes the element for the thirty-one dead names. `verify-v1` carries no fix: it may still hold a Search Console verification for a site that verified through it and never added `google-site-verification`, and deleting it without confirming the current token first can revoke that verification.
 
 ## Resources
 

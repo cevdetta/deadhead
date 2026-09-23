@@ -11,7 +11,8 @@ import { loadRules } from "../packages/rules/load.ts";
 /**
  * Rules whose one-attribute fix cannot clear every finding on their own
  * fixture. Phase 2 adds `remove-attributes` and empties this set; a new entry
- * needs a reason in the PR.
+ * needs a reason in the PR. attr/script-event-for: removing `event` from a
+ * `for="window" event="onload"` pair leaves a `for`-only finding.
  */
 const KNOWN_PARTIAL: ReadonlySet<string> = new Set([
   "attr/a-coords-shape",
@@ -23,24 +24,20 @@ const KNOWN_PARTIAL: ReadonlySet<string> = new Set([
   "attr/menu-obsolete",
   "attr/object-obsolete",
   "attr/rev-urn",
+  "attr/script-event-for",
 ]);
 
 /**
- * Rules whose removal changes behaviour; see the fix-safety review. An entry
- * leaves only with new evidence.
+ * Rules whose removal changes behaviour with no provably safe subset; see the
+ * fix-safety review. An entry leaves only with new evidence. Rules where only
+ * some cases are unsafe keep their op and veto those findings with
+ * `fixable()` instead.
  */
 const MUST_NOT_FIX: ReadonlySet<string> = new Set([
   "attr/longdesc-lowsrc",
-  "attr/name-obsolete",
-  "attr/script-charset",
-  "attr/script-event-for",
-  "attr/script-language",
-  "link/obsolete-rel",
   "link/rel-prerender",
-  "meta/apple-mobile-web-app-status-bar-style",
   "meta/http-equiv-x-ua-compatible",
   "meta/msapplication",
-  "meta/obsolete-name",
 ]);
 
 const rules = await loadRules();
@@ -54,9 +51,16 @@ for (const id of MUST_NOT_FIX) {
   });
 }
 
+/**
+ * Every rule with an op must fix something on its own invalid fixture. A rule
+ * with `fixable()` has unfixable cases there by design: the loop must end with
+ * each remaining finding carrying no fix. The rest must clear every finding,
+ * or, for KNOWN_PARTIAL, no more than they started with.
+ */
 for (const rule of fixable) {
   const id = rule.meta.ruleId;
-  test(`${id}: --fix emits a fix and leaves ${KNOWN_PARTIAL.has(id) ? "no more" : "no"} findings of its own`, async () => {
+  const ends = rule.fixable !== undefined ? "only vetoed findings" : KNOWN_PARTIAL.has(id) ? "no more findings" : "no findings";
+  test(`${id}: --fix emits a fix and leaves ${ends} of its own`, async () => {
     const original = await readFile(new URL(`fixtures/${id}/invalid.html`, import.meta.url), "utf8");
     const lint = (source: string) => run([rule], parseHtml(source), { suppressions: parseSuppressions(source), fix: true });
     const before = lint(original);
@@ -69,7 +73,11 @@ for (const rule of fixable) {
       source = applyFixes(source, fixes).output;
     }
     const after = lint(source);
-    if (KNOWN_PARTIAL.has(id)) {
+    if (rule.fixable !== undefined) {
+      assert.notEqual(source, original, "the fix changed nothing");
+      assert.ok(after.length > 0, "invalid.html needs a case fixable() vetoes");
+      assert.deepEqual(after.filter((f) => f.fix !== null).map((f) => f.node.snippet), []);
+    } else if (KNOWN_PARTIAL.has(id)) {
       assert.notEqual(source, original, "the fix changed nothing");
       assert.ok(after.length <= before.length);
     } else assert.deepEqual(after.map((f) => f.node.snippet), []);

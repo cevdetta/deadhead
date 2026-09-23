@@ -29,6 +29,7 @@
 
 import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 import { styleText } from "node:util";
 import { rolldown } from "rolldown";
 
@@ -83,23 +84,42 @@ export function logicEntryFor(meta: RuleMeta): "check" | "match" {
   return meta.kind === "document" ? "check" : "match";
 }
 
-/** Whether a rule needs a logic module inlined. */
+/** Whether a rule declares a logic module. */
 export function needsLogic(meta: RuleMeta): boolean {
   return meta.match === "logic" || meta.kind === "document";
+}
+
+/**
+ * Whether the rule's logic module exports the entry its kind runs. An element
+ * module may export only `fixable`, which vetoes fixes; the DOM has no source
+ * text and never fixes, so that rule runs on its selector alone and nothing
+ * of the module is inlined.
+ */
+export async function exportsEntry(meta: RuleMeta): Promise<boolean> {
+  const file = resolve(ROOT, "packages/rules/logic", `${meta.ruleId}.ts`);
+  const module: Record<string, unknown> = await import(pathToFileURL(file).href);
+  return typeof module[logicEntryFor(meta)] === "function";
 }
 
 export function logicVarName(meta: RuleMeta): string {
   return `${logicEntryFor(meta)}_${meta.ruleId.replace(/[^a-zA-Z0-9]/g, "_")}`;
 }
 
-/** One `{ meta, [match|check] }` literal for the appended `boot()` call. */
+/**
+ * One `{ meta, [match|check] }` literal for the appended `boot()` call. An
+ * element rule with no logic inlined ships as `match: null`, so the engine
+ * lets its selector decide.
+ */
 export function buildRuleLiteral(meta: RuleMeta, hasLogic: boolean): string {
   let logic = "";
+  const slim = toSlimMeta(meta);
   if (hasLogic) {
     const entry = logicEntryFor(meta);
     logic = `, ${entry}: ${GLOBAL}.${logicVarName(meta)}`;
+  } else if (meta.kind === "element") {
+    slim.match = null;
   }
-  return `{ meta: ${JSON.stringify(toSlimMeta(meta))}${logic} }`;
+  return `{ meta: ${JSON.stringify(slim)}${logic} }`;
 }
 
 /** The appended call that survives minification where a tail `return` would not. */
@@ -114,15 +134,16 @@ export async function bundleBookmarklet(rules: RuleMeta[]): Promise<string> {
   const toImport = (file: string): string => JSON.stringify(file.replace(/\\/g, "/"));
   const imports = [`import { boot } from ${toImport(ENTRY)};`];
   const names = ["boot"];
-  const literals = rules.map((meta) => {
-    const withLogic = needsLogic(meta);
+  const literals: string[] = [];
+  for (const meta of rules) {
+    const withLogic = needsLogic(meta) && (await exportsEntry(meta));
     if (withLogic) {
       const file = resolve(ROOT, "packages/rules/logic", `${meta.ruleId}.ts`);
       imports.push(`import { ${logicEntryFor(meta)} as ${logicVarName(meta)} } from ${toImport(file)};`);
       names.push(logicVarName(meta));
     }
-    return buildRuleLiteral(meta, withLogic);
-  });
+    literals.push(buildRuleLiteral(meta, withLogic));
+  }
   const entryCode = `${imports.join("\n")}\nexport { ${names.join(", ")} };\n`;
 
   const built = await rolldown({
