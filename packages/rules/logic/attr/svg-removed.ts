@@ -16,10 +16,6 @@ const REMOVED: ReadonlySet<string> = new Set([
 ]);
 
 /**
- * The tag-list selector is a pre-filter of SVG element names. The check reads
- * `attrNames()`, which every adapter lowercases, instead of
- * `hasAttr("requiredFeatures")`: in a browser, `getAttribute` compares names
- * on SVG elements in their own case, and the parser writes the camelCase
- * spelling.
+ * The tag-list selector is a pre-filter of SVG element names.
  */
 export const match: MatchFn = (element) => element.attrNames().some((name) => REMOVED.has(name));
