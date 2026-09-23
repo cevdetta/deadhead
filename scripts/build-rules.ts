@@ -28,26 +28,33 @@ function ordered(meta: RuleMeta): Record<string, unknown> {
   return out;
 }
 
-const { rules, diagnostics } = await loadRules();
-
-if (diagnostics.length > 0) {
-  printDiagnostics(diagnostics);
-  process.stderr.write(
-    `\n${styleText("red", `${diagnostics.length} problem(s)`)}; refusing to build rules.json\n`,
-  );
-  process.exit(1);
+/**
+ * The compiled rules.json text. Pure: no I/O beyond reading the markdown
+ * source, and no write — `import.meta.main` below owns the file write so
+ * importing this module never rewrites the shared, gitignored output.
+ */
+export async function buildRulesJson(): Promise<string> {
+  const { rules, diagnostics } = await loadRules();
+  if (diagnostics.length > 0) {
+    printDiagnostics(diagnostics);
+    throw new Error(`${diagnostics.length} problem(s); refusing to build rules.json`);
+  }
+  // Sorted by ruleId (loadRules guarantees it) and newline-terminated: the
+  // output is reproducible, so a rebuild that changes nothing produces zero
+  // bytes of diff.
+  return `${JSON.stringify({ schemaVersion: 1, rules: rules.map((rule) => ordered(rule.meta)) }, null, 2)}\n`;
 }
 
-// Sorted by ruleId (loadRules guarantees it) and newline-terminated: the output
-// is reproducible, so a rebuild that changes nothing produces zero bytes of diff.
-const payload = {
-  schemaVersion: 1,
-  rules: rules.map((rule) => ordered(rule.meta)),
-};
-
-await mkdir(dirname(OUT), { recursive: true });
-await writeFile(OUT, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
-
-process.stdout.write(
-  `${styleText("green", "✓")} ${rules.length} rule(s) → ${rel(OUT)}\n`,
-);
+if (import.meta.main) {
+  let json: string;
+  try {
+    json = await buildRulesJson();
+  } catch (err) {
+    process.stderr.write(`\n${styleText("red", (err as Error).message)}\n`);
+    process.exit(1);
+  }
+  await mkdir(dirname(OUT), { recursive: true });
+  await writeFile(OUT, json, "utf8");
+  const count = (JSON.parse(json) as { rules: unknown[] }).rules.length;
+  process.stdout.write(`${styleText("green", "✓")} ${count} rule(s) → ${rel(OUT)}\n`);
+}

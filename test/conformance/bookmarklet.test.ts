@@ -9,9 +9,7 @@
  */
 
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
 import { readFile } from "node:fs/promises";
-import { fileURLToPath } from "node:url";
 import vm from "node:vm";
 import test from "node:test";
 
@@ -22,14 +20,6 @@ import { collectFiles } from "../../packages/cli/lint.ts";
 import { loadRules } from "../../packages/rules/load.ts";
 import { run } from "../../packages/core/index.ts";
 import type { Finding } from "../../packages/core/types.ts";
-
-const ROOT = fileURLToPath(new URL("../../", import.meta.url));
-const script = (name: string) => fileURLToPath(new URL(`../../scripts/${name}`, import.meta.url));
-
-for (const step of ["build-rules.ts", "build-bookmarklet.ts"]) {
-  const built = spawnSync(process.execPath, [script(step)], { cwd: ROOT, encoding: "utf8" });
-  assert.equal(built.status, 0, `${step} failed:\n${built.stderr}`);
-}
 
 const bundle = await readFile(new URL("../../packages/browser/bookmarklet.js", import.meta.url), "utf8");
 const rules = await loadRules();

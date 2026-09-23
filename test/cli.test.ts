@@ -15,12 +15,8 @@ import { applyFixes } from "../packages/core/fix.ts";
 import { parseHtml } from "../packages/cli/adapter.ts";
 
 const BIN = fileURLToPath(new URL("../packages/cli/bin/deadhead.ts", import.meta.url));
-const BUILD = fileURLToPath(new URL("../scripts/build-rules.ts", import.meta.url));
 
-// rules.json is generated and gitignored, so make sure it reflects the
-// markdown before the binary is asked to load it.
-const built = spawnSync(process.execPath, [BUILD], { cwd: ROOT, encoding: "utf8" });
-assert.equal(built.status, 0, "build-rules failed: " + built.stderr);
+// rules.json is built once by `pnpm test` before any test process starts.
 
 const deadhead = (...args: string[]) =>
   spawnSync(process.execPath, [BIN, ...args], { cwd: ROOT, encoding: "utf8" });

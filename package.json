@@ -13,7 +13,7 @@
     "build": "node scripts/build-rules.ts",
     "build:css": "node scripts/build-css.ts",
     "build:bookmarklet": "node --disable-warning=ExperimentalWarning scripts/build-bookmarklet.ts",
-    "test": "node --test",
+    "test": "node scripts/build-rules.ts && node --test",
     "test:conformance": "node --test test/conformance/",
     "check": "node packages/cli/bin/deadhead.ts",
     "check:self": "node packages/cli/bin/deadhead.ts \"test/fixtures/*/*/valid.html\"",
