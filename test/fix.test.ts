@@ -311,3 +311,10 @@ test("remove-tokens fixes from two rules on the same attribute converge on remov
   }
   assert.ok(!output.includes("<link"), output);
 });
+
+test("attr/script-event-for never offers a fix: deleting event would run a script the browser skips", async () => {
+  const { loadRules } = await import("../packages/rules/load.ts");
+  const rule = (await loadRules()).find((r) => r.meta.ruleId === "attr/script-event-for");
+  assert.ok(rule, "rule exists");
+  assert.equal(rule.meta.fix.op, "none");
+});
