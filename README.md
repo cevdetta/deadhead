@@ -47,6 +47,8 @@ pnpm install
 
 ## Usage
 
+> Not yet published. From a clone: `pnpm install && pnpm build && pnpm check <path>`.
+
 Build the rule set from the markdown source of truth, then run the CLI:
 
 ```bash
@@ -82,10 +84,12 @@ a thousand-line
 diff. The same property is what makes ESLint autofix free, and the conformance suite
 asserts the two produce byte-identical output.
 
-A fix is one of `remove-element`, `remove-attribute`, `remove-token` or `none`. They all
-subtract: nothing asserts a value the rule was never asked about. `remove-token` drops a
-single keyword from a space-separated attribute: `rel="shortcut icon mask-icon"` becomes
-`rel="icon mask-icon"`. It edits inside the quotes, so the delimiter you chose survives.
+A fix is one of `remove-element`, `remove-attribute`, `remove-token`, `remove-tokens` or
+`none`. They all subtract: nothing asserts a value the rule was never asked about.
+`remove-token` drops a single keyword from a space-separated attribute:
+`rel="shortcut icon mask-icon"` becomes `rel="icon mask-icon"`. It edits inside the
+quotes, so the delimiter you chose survives. `remove-tokens` deletes every keyword the
+selector tests with `[attr~=…]`; it removes the element only when none survive.
 
 Two things are never fixed automatically: a rule that declares `fix: { op: "none" }`, and
 any rule whose `detectability` is `partial`: if the rule is not certain, it does not get
@@ -139,8 +143,9 @@ Silence a finding in the markup itself:
 ```
 
 `<!-- deadhead-disable -->` (optionally with rule ids) turns findings off until
-`<!-- deadhead-enable -->`. The engine never lints contents of `<pre>`, `<code>`, `<textarea>`, `<samp>` and
-`<kbd>` -- documenting bad markup is not writing it.
+`<!-- deadhead-enable -->`. The engine never lints contents of `<pre>`, `<code>`,
+`<textarea>`, `<samp>`, `<kbd>`, `<iframe>`, `<noembed>`, `<noframes>`, `<noscript>`,
+`<plaintext>`, `<title>` and `<xmp>` -- documenting bad markup is not writing it.
 
 Other commands:
 
@@ -243,8 +248,8 @@ become drift.
 
 Early in development, but the foundations are in place: all three runtimes work and are
 checked against each other, autofix, the config file and the baseline file have landed,
-and the rule documentation is published. The rule set is deliberately small -- it grows
-one researched rule at a time, and that is the bottleneck by design.
+and the rule documentation is published. One markdown file per rule; see the site for the
+list. It grows one researched rule at a time, and that is the bottleneck by design.
 
 ## Contributing
 

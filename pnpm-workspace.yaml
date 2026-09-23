@@ -18,15 +18,3 @@ onlyBuiltDependencies: []
 #   full site without it, and nothing outside site/ depends on esbuild at all.
 allowBuilds:
   esbuild: false
-
-# Exemptions from the release-age cooldown, each one a deliberate "this version,
-# now". `@html-eslint/parser@0.66.1` (and the three packages it pulls along,
-# `es-html-parser` being where the actual fix landed) ships the fix for
-# yeonjuan/html-eslint#687, the quadratic tokenizer we reported: parsing 170KB
-# drops from 25s to 0.4s. The parser is a devDependency, reached only by the
-# eslint-plugin adapter and its tests, and never ships to a consumer.
-minimumReleaseAgeExclude:
-  - '@html-eslint/parser@0.66.1'
-  - '@html-eslint/template-syntax-parser@0.66.1'
-  - '@html-eslint/types@0.66.1'
-  - es-html-parser@0.3.2

@@ -26,4 +26,12 @@ if (diagnostics.length > 0) {
   process.exit(1);
 }
 
+const known = new Set(rules.map((r) => r.meta.ruleId));
+const dangling = rules.flatMap((r) =>
+  r.meta.related.filter((id) => !known.has(id)).map((id) => `${r.meta.ruleId} → ${id}`),
+);
+if (dangling.length > 0) {
+  process.stdout.write(`${styleText("yellow", "warn")} related ids with no rule yet:\n  ${dangling.join("\n  ")}\n`);
+}
+
 process.stdout.write(`${styleText("green", "✓")} ${rules.length} rule(s) valid\n`);

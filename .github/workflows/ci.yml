@@ -15,8 +15,9 @@ concurrency:
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           # Nothing here pushes, so skip the credential helper entirely.
           persist-credentials: false
@@ -31,7 +32,7 @@ jobs:
       # --frozen-lockfile fails on a missing or out-of-date lockfile.
       # No store cache: a cold install is ~2.5s for 368 packages, cheaper
       # than restoring + uploading a ~94MB cache on every run.
-      - uses: pnpm/setup@v2
+      - uses: pnpm/setup@84cb39b217b10273981911c288cd62326dc7c6d2 # v2
         with:
           # Single version: 24 is the floor declared in engines. If it passes
           # on the floor it passes above; a second runner doubles minutes
