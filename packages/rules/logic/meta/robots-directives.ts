@@ -1,4 +1,5 @@
 import type { MatchFn } from "../../types.ts";
+import { stripAsciiWhitespace } from "../../lib/text.ts";
 
 /**
  * The valid robots directive names, lowercased, from Google's valid-rules
@@ -57,6 +58,29 @@ const paramOk = (name: string, value: string): boolean => {
  */
 const WHITESPACE = /[\t\n\f\r ]+/;
 
+/** The name an item opens with: everything before its first colon or space. */
+const leadingName = (item: string): string =>
+  stripAsciiWhitespace(item).split(/[:\t\n\f\r ]/, 1)[0] ?? "";
+
+/**
+ * Split `content` into items. Google accepts RFC 822 and RFC 850 dates for
+ * `unavailable_after` (`Sat, 25 Jun 2010 15:00:00 GMT`), whose own comma
+ * would otherwise cut the date in two. The items after an `unavailable_after`
+ * item therefore fold back into its value until one opens with a known name.
+ */
+const items = (content: string): string[] => {
+  const out: string[] = [];
+  for (const item of content.split(",")) {
+    const last = out.at(-1);
+    if (last !== undefined && leadingName(last) === "unavailable_after" && !VALID_NAMES.has(leadingName(item))) {
+      out[out.length - 1] = `${last},${item}`;
+    } else {
+      out.push(item);
+    }
+  }
+  return out;
+};
+
 /**
  * The `meta[name="robots" i], meta[name="googlebot" i]` selector is only a
  * pre-filter. A tag trips the rule exactly when one of its content tokens
@@ -69,11 +93,11 @@ const WHITESPACE = /[\t\n\f\r ]+/;
 export const match: MatchFn = (element) => {
   const content = element.attr("content");
   if (content === undefined) return false;
-  for (const item of content.toLowerCase().split(",")) {
+  for (const item of items(content.toLowerCase())) {
     const colon = item.indexOf(":");
     if (colon >= 0) {
-      const name = item.slice(0, colon).trim();
-      const value = item.slice(colon + 1).trim();
+      const name = stripAsciiWhitespace(item.slice(0, colon));
+      const value = stripAsciiWhitespace(item.slice(colon + 1));
       if (!VALID_NAMES.has(name) || !paramOk(name, value)) return true;
       continue;
     }

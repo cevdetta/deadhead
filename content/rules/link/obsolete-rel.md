@@ -11,7 +11,7 @@ kind: "element"
 scope: "head"
 selector: 'link[rel~="fluid-icon" i], link[rel~="archives" i], link[rel~="index" i], link[rel~="start" i], link[rel~="self" i], link[rel~="first" i], link[rel~="previous" i], link[rel~="last" i], link[rel~="edituri" i], link[rel~="logo" i], link[rel~="p3pv1" i], link[rel~="publisher" i], link[rel~="original-source" i], link[rel~="profile" i], link[rel~="chrome-webstore-item" i]'
 fix: { op: "none" }
-replacement: "Delete the dead keyword by hand, keeping self and edituri where WebSub or WordPress's XML-RPC discovery still applies. Write previous as prev: <link rel=\"prev\" href=\"/page/1\">, though Google no longer reads the pair."
+replacement: "Keep self and edituri where WebSub or WordPress's XML-RPC discovery still applies, and delete the other dead keywords by hand. Write previous as prev: <link rel=\"prev\" href=\"/page/1\">, though Google no longer reads the pair."
 impacts: ["maintainability"]
 related: ["link/rel-subresource"]
 ---
@@ -34,7 +34,7 @@ Dead relations cost bytes and review time, and sequence fossils cost direction t
 
 ## Use instead
 
-Delete the dead keyword by hand; there is no autofix. Keep `self` if the page publishes to WebSub, and `hub` alongside it. Keep `edituri` if the site still serves the XML-RPC endpoint WordPress apps discover through it; delete both together if XML-RPC is off. Rewrite `previous` as `prev` where the sequence matters. Where the intent was sequence navigation, the living pair covers it:
+Delete the dead keyword by hand; there is no autofix. Keep `self` if the page publishes to WebSub, and `hub` alongside it. Keep `edituri` if the site still serves the XML-RPC endpoint WordPress apps discover through it; once XML-RPC is off, the `EditURI` link points at a dead endpoint and can go. Rewrite `previous` as `prev` where the sequence matters. Where the intent was sequence navigation, the living pair covers it:
 
 ```html
 <link rel="prev" href="/page/1">
@@ -55,3 +55,5 @@ There is no autofix. Deleting `self` breaks WebSub topic-URL discovery for a sub
 - [Google Search Central: pagination](https://developers.google.com/search/docs/specialty/ecommerce/pagination-and-incremental-page-loading): Google "no longer uses" rel=next and rel=prev, though "these links may still be used by other search engines".
 - [W3C: WebSub](https://www.w3.org/TR/websub/): `rel="self"`/`rel="hub"` as the HTML discovery fallback; a subscriber's `hub.topic` request must use "the 'self' URL found during the discovery step".
 - [WordPress Developer Reference: `rsd_link()`](https://developer.wordpress.org/reference/functions/rsd_link/): WordPress core prints the `EditURI` link on every page by default.
+- [WordPress for iOS: `WordPressOrgXMLRPCValidator.swift`](https://github.com/wordpress-mobile/WordPress-iOS/blob/trunk/Modules/Sources/WordPressKit/WordPressOrgXMLRPCValidator.swift): `extractRSDURLFromHTML` pulls the RSD link out of the page when the default XML-RPC path fails.
+- [WordPress for Android: `SelfHostedEndpointFinder.java`](https://github.com/wordpress-mobile/WordPress-Android/blob/trunk/libs/fluxc/src/main/java/org/wordpress/android/fluxc/network/discovery/SelfHostedEndpointFinder.java): `RSD_LINK` regex-matches `<link rel="EditURI" type="application/rsd+xml" title="RSD">` during endpoint discovery.

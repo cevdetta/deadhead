@@ -66,7 +66,9 @@ function textOf(node: Node): string {
     if (current.type === "Text") {
       out += typeof current.value === "string" ? current.value : "";
     } else if (typeof current.value === "object") {
-      // A nested script/style's content, same as the early return above.
+      // An object `value` is a nested script/style's content, same as the early
+      // return above, or an HTML comment's text. Both are appended here, so a
+      // comment's text reaches `text()`, which the other adapters leave out.
       out += typeof current.value.value === "string" ? current.value.value : "";
     } else {
       const children = childrenOf(current);

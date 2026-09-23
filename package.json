@@ -14,7 +14,7 @@
     "build:css": "node scripts/build-css.ts",
     "build:bookmarklet": "node --disable-warning=ExperimentalWarning scripts/build-bookmarklet.ts",
     "test": "node scripts/build-rules.ts && node --test",
-    "test:conformance": "node --test test/conformance/",
+    "test:conformance": "node scripts/build-rules.ts && node --test test/conformance/",
     "check": "node packages/cli/bin/deadhead.ts",
     "check:self": "node packages/cli/bin/deadhead.ts \"test/fixtures/*/*/valid.html\"",
     "check:site": "pnpm site:build && node packages/cli/bin/deadhead.ts site/dist",

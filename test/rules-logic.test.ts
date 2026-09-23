@@ -26,6 +26,14 @@ test("robots: Google's spaced name: value form is valid", async () => {
   assert.equal(await robots("unavailable_after: 25 Jun 2010 15:00:00 PST"), false);
 });
 
+test("robots: RFC 822 and RFC 850 dates keep their comma", async () => {
+  assert.equal(await robots("unavailable_after: Sat, 25 Jun 2010 15:00:00 GMT"), false);
+  assert.equal(await robots("unavailable_after: Saturday, 25-Jun-10 15:00:00 GMT"), false);
+  assert.equal(await robots("noindex, unavailable_after: Sat, 25 Jun 2010 15:00:00 GMT, nofollow"), false);
+  // The date fold stops at the next known name, so a bad value after the date still trips.
+  assert.equal(await robots("unavailable_after: Sat, 25 Jun 2010 15:00:00 GMT, max-snippet: lots"), true);
+});
+
 test("robots: unknown names and bad values still trip", async () => {
   assert.equal(await robots("noarchive"), true);
   assert.equal(await robots("max-snippet: lots"), true);

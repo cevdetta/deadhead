@@ -38,7 +38,7 @@ Write valid directives, comma-separated:
 
 ## Detectability
 
-Detectable with logic refining the selector. The selector prefilters to `robots` and `googlebot` tags; the module in `packages/rules/logic/meta/robots-directives.ts` splits `content` on commas and whitespace, folds to lowercase, and checks each token against the fourteen valid names. Parameterized names need a well-formed value, and the finding points at the tag.
+Detectable with logic refining the selector. The selector prefilters to `robots` and `googlebot` tags; the module in `packages/rules/logic/meta/robots-directives.ts` folds `content` to lowercase and splits it on commas first. An item with a colon splits on its first colon into `name: value`; an item without one splits on whitespace into bare names. Each name is checked against the fourteen valid names, and parameterized names need a well-formed value. Google accepts RFC 822 and RFC 850 dates for `unavailable_after`, and those carry a comma of their own (`Sat, 25 Jun 2010 15:00:00 GMT`), so the items after an `unavailable_after` item fold back into its date until one opens with a valid name. Google documents comma-separated lists, so `noindex max-snippet:50` without the comma is reported: its first colon yields the name `noindex max-snippet`. The finding points at the tag.
 
 ## Resources
 

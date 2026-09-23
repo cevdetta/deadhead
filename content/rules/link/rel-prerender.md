@@ -11,7 +11,7 @@ kind: "element"
 scope: "head"
 selector: 'link[rel~="prerender" i]'
 fix: { op: "none" }
-replacement: "Prerender with a Speculation Rules rule instead of the link hint."
+replacement: "Add a Speculation Rules prerender rule for the next page first, then delete the prerender token."
 tags: ["resource-hints"]
 impacts: ["interop", "performance"]
 related: []
@@ -31,9 +31,7 @@ Speculation Rules cover the work: a prerender rule with moderate eagerness prere
 
 ## Use instead
 
-Declare the next page in a speculation rule set first, then delete the `link` element by
-hand. There is no autofix, and deleting the tag before adding the rule stops the current
-fetch with nothing prefetching in its place:
+Declare the next page in a speculation rule set first, then delete the `prerender` token by hand. There is no autofix, and deleting the token before adding the rule stops the current fetch with nothing prefetching in its place:
 
 ```html
 <script type="speculationrules">

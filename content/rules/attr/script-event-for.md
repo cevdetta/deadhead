@@ -11,17 +11,17 @@ kind: "element"
 scope: "any"
 selector: "script[event], script[for]"
 fix: { op: "none" }
-replacement: "Delete the attributes. Register the handler in script: target.addEventListener(\"click\", run)."
+replacement: "Move the code into a listener, target.addEventListener(\"click\", run), then delete the script block."
 tags: ["microsoft", "scripting"]
 impacts: ["maintainability"]
 related: ["attr/global-contextmenu"]
 ---
 
-`event` and `for` on `script` are IE's way of binding a script block to an element event. HTML keeps one rule for them: a classic script carrying both runs when `for` is `window` and `event` is `onload`, and is skipped otherwise. So the pair either disables the script or restates what the page already does on load.
+`event` and `for` on `script` are IE's way of binding a script block to an element event. HTML keeps one rule for them: a classic script carrying both runs when `for` is `window` and `event` is `onload` or `onload()`, both as ASCII case-insensitive matches once surrounding whitespace is stripped, and is skipped otherwise. So the pair either disables the script or restates what the page already does on load.
 
 ## Why avoid
 
-WHATWG lists both as obsolete with one replacement. Section 16.2 names `event` and `for` on `script` elements as obsolete: use DOM event registration instead. The HTML Standard's script-preparation steps say what the pair still does: with both present, "If for is not an ASCII case-insensitive match for the string "window", then return", and the same for an `event` other than `onload`. A block written for `<button>` clicks never runs.
+WHATWG lists both as obsolete with one replacement. Section 16.2 names `event` and `for` on `script` elements as obsolete: use DOM event registration instead. The HTML Standard's script-preparation steps say what the pair still does: with both present, "If for is not an ASCII case-insensitive match for the string "window", then return", and the same for an `event` that matches neither "onload" nor "onload()". A block written for `<button>` clicks never runs.
 
 MDN names the live mechanism. Its `addEventListener` page calls the method the recommended way to register a listener, working on any event target with capture and once semantics the attributes never had. The old spelling cannot express either; the new one can, which is why migration changes capabilities instead of restating them.
 
@@ -40,5 +40,5 @@ Complete detection. The rule matches `script[event]` or `script[for]`: presence 
 ## Resources
 
 - [WHATWG: Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html): `event` and `for` on `script` are obsolete: DOM event registration.
-- [HTML Standard: prepare the script element](https://html.spec.whatwg.org/multipage/scripting.html#prepare-the-script-element): a classic script with `event` and `for` stops before it runs unless they are `window` and `onload`.
+- [HTML Standard: prepare the script element](https://html.spec.whatwg.org/multipage/scripting.html#prepare-the-script-element): a classic script with `event` and `for` stops before it runs unless `for` is `window` and `event` is `onload` or `onload()`.
 - [MDN: `addEventListener`](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener): the recommended way to register a listener on any event target.

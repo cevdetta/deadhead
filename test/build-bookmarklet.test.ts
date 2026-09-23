@@ -8,6 +8,7 @@ import {
   SLIM_KEYS,
   buildBootCall,
   buildRuleLiteral,
+  bundleBookmarklet,
   logicEntryFor,
   logicVarName,
   needsLogic,
@@ -82,7 +83,8 @@ test("needsLogic matches the assembly filter", () => {
 });
 
 test("the appended boot call survives minification", async () => {
-  const bundle = await readFile(new URL("../packages/browser/bookmarklet.js", import.meta.url), "utf8");
+  const json = JSON.parse(await readFile(new URL("../packages/rules/rules.json", import.meta.url), "utf8"));
+  const bundle = await bundleBookmarklet(json.rules);
   const call = buildBootCall(["{ meta: {} }"]);
   assert.ok(call.startsWith(`${GLOBAL}.boot([`), "boot call shape changed");
   assert.ok(call.endsWith("]);"), "boot call must close the array");

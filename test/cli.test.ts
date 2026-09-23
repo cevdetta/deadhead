@@ -355,6 +355,21 @@ test("an unreadable file is an I/O error: exit 2, never 1", async () => {
   }
 });
 
+test("a config that ignores every HTML file says so", async () => {
+  await sandbox(async (dir) => {
+    await mkdir(join(dir, "site"));
+    await copyFixture("meta/http-equiv-x-ua-compatible", join(dir, "site"), "page.html");
+    await writeFile(
+      join(dir, "deadhead.config.ts"),
+      `export default { include: ["site"], ignore: ["site/**"] };`,
+    );
+    const run = spawnSync(process.execPath, [BIN], { cwd: dir, encoding: "utf8" });
+    assert.equal(run.status, 2, run.stderr);
+    assert.match(run.stderr, /every HTML file in: site is ignored by config/);
+    assert.doesNotMatch(run.stderr, /no HTML files found/);
+  });
+});
+
 test("a directory with no HTML files is a usage error", async () => {
   const dir = await mkdtemp(join(tmpdir(), "dh-"));
   await writeFile(join(dir, "notes.txt"), "hello");

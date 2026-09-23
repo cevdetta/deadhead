@@ -140,12 +140,15 @@ try {
   }
 
   const ignore = config.ignore ?? [];
-  const files = (await collectFiles(targets)).filter(
-    (file) => !ignore.some((pattern) => matchesGlob(file, pattern)),
-  );
+  const found = await collectFiles(targets);
+  const files = found.filter((file) => !ignore.some((pattern) => matchesGlob(file, pattern)));
 
   if (files.length === 0) {
-    fail(`no HTML files found in: ${targets.join(", ")}`);
+    fail(
+      found.length === 0
+        ? `no HTML files found in: ${targets.join(", ")}`
+        : `every HTML file in: ${targets.join(", ")} is ignored by config`,
+    );
   }
 
   const skipTemplates = values["skip-templates"] ?? config.skipTemplates ?? false;

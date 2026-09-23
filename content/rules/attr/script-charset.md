@@ -1,7 +1,7 @@
 ---
 ruleId: "attr/script-charset"
 title: "script charset"
-description: "charset on script is obsolete; documents and scripts use UTF-8, so delete the attribute."
+description: "charset on script is obsolete; save the script in the document's encoding, UTF-8, then delete the attribute."
 pubDate: "2026-09-21"
 status: "avoid"
 severity: "unnecessary"
@@ -11,7 +11,7 @@ kind: "element"
 scope: "any"
 selector: "script[charset]"
 fix: { op: "none" }
-replacement: "Delete the attribute: <script src=\"app.js\"></script>. Scripts inherit UTF-8 from the document."
+replacement: "Save the script file as UTF-8 to match the document, then delete the attribute: <script src=\"app.js\"></script>."
 tags: ["charset", "scripting"]
 impacts: ["maintainability"]
 related: ["attr/script-language"]
@@ -44,3 +44,4 @@ Complete detection. The rule matches `script[charset]`: presence of the attribut
 - [WHATWG: Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#non-conforming-features): `charset` on `script` is obsolete: omit it, since both sides require UTF-8 and the script inherits from the document.
 - [MDN: `<script>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/script): `charset` sits under deprecated attributes as unnecessary, since documents must use UTF-8 and the element inherits from the document.
 - [HTML Standard: prepare the script element](https://html.spec.whatwg.org/multipage/scripting.html#prepare-the-script-element): reads `charset` to pick the decode encoding for an external classic script before falling back to the document's encoding.
+- [Chromium: `script_loader.cc`](https://chromium.googlesource.com/chromium/src/+/main/third_party/blink/renderer/core/script/script_loader.cc): the classic-script branch decodes with `CharsetAttributeValue()` whenever it is non-empty and falls back to the document's encoding otherwise.

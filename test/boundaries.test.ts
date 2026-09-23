@@ -29,6 +29,12 @@ test("packages/rules imports only relative files and node: built-ins", async () 
   assert.deepEqual(bad(await specifiers("packages/rules"), (s) => s.startsWith(".") || s.startsWith("node:")), []);
 });
 
+test("rule logic and lib import only relative files: both are inlined into the bookmarklet", async () => {
+  for (const dir of ["packages/rules/logic", "packages/rules/lib"]) {
+    assert.deepEqual(bad(await specifiers(dir), (s) => s.startsWith("./") || s.startsWith("../")), [], dir);
+  }
+});
+
 test("parse5 appears only in packages/cli/adapter.ts", async () => {
   const all = [
     ...(await specifiers("packages")),

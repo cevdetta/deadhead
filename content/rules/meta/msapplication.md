@@ -48,8 +48,8 @@ The taskbar names are a separate, wider-supported case: `msapplication-task`,
 `-task-separator`, `-tooltip`, `-window`, `-starturl`, `-navbutton-color` and `-allowDomain*`
 are documented as "only supported in IE11 on Windows 10", and IE11 there still reads a pinned
 site's jump list, tooltip, window size, start URL and button colour from them. IE11 on
-Windows 10 LTSC, Windows Server and Embedded installs is the only remaining consumer, and it
-is a supported one through January 2032. `msapplication-config` and the `browserconfig.xml`
+Windows 10 LTSC and Windows Server is the only remaining consumer, and Microsoft's lifecycle
+FAQ keeps it supported there for the lifecycle of the host Windows version. `msapplication-config` and the `browserconfig.xml`
 it points to track the tile names, not the taskbar names: that request survives only on the
 same Windows 8.1-style Start screen, Windows Server 2012 R2 under Extended Security Updates.
 For everyone else the block is dead weight in every page's `<head>`. The tags were never
@@ -86,7 +86,7 @@ meaning, and `meta/application-name` covers it.
 
 There is no autofix. The taskbar names (`msapplication-task`, `-task-separator`,
 `-tooltip`, `-window`, `-starturl`, `-navbutton-color`, `-allowDomain*`) still drive IE11's
-pinned-site taskbar on Windows 10 LTSC, Server and Embedded installs; deleting them changes
+pinned-site taskbar on Windows 10 LTSC and Windows Server; deleting them changes
 that jump list, tooltip, window size, start URL and button colour for that population. The
 tile names and `msapplication-config` are a narrower case: IE11 still reads them, but only
 through the older Windows 8.1-style Start screen, which survives on Windows Server 2012 R2

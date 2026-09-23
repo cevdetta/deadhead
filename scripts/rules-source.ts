@@ -311,10 +311,12 @@ export async function checkLibModules(libDir: string = LIB_DIR, logicDir: string
         });
       }
     }
-    for (const m of text.matchAll(/export\s+(?:const|function)\s+([A-Za-z_$][\w$]*)/g)) {
+    const exported = /export\s+(?:async\s+function\*?|function\*?|const|let|class|type|interface)\s+([A-Za-z_$][\w$]*)/g;
+    for (const m of text.matchAll(exported)) {
       const name = m[1]!;
+      // `import { x }`, `import type { X }` and `import { type X }` all count.
       const used = new RegExp(
-        `import\\s*\\{[^}]*\\b${name}\\b[^}]*\\}\\s*from\\s*["']\\.\\./\\.\\./lib/${file}["']`,
+        `import\\s*(?:type\\s+)?\\{[^}]*\\b${name}\\b[^}]*\\}\\s*from\\s*["']\\.\\./\\.\\./lib/${file}["']`,
       ).test(logicText);
       if (!used) {
         diagnostics.push({

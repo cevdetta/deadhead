@@ -28,12 +28,14 @@ export const someNode = (value: unknown, test: (node: Record<string, unknown>) =
   const stack: unknown[] = [value];
   while (stack.length > 0) {
     const current = stack.pop();
+    // A loop, not `push(...items)`: spreading a huge array into arguments
+    // overflows the call stack with a RangeError.
     if (Array.isArray(current)) {
-      stack.push(...current);
+      for (const item of current) stack.push(item);
     } else if (current !== null && typeof current === "object") {
       const node = current as Record<string, unknown>;
       if (test(node)) return true;
-      stack.push(...Object.values(node));
+      for (const item of Object.values(node)) stack.push(item);
     }
   }
   return false;

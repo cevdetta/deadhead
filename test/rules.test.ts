@@ -230,6 +230,47 @@ test("every packages/rules/lib export is used by a logic module", async () => {
   assert.deepEqual(await checkLibModules(), []);
 });
 
+test("checkLibModules sees async functions and types, and type-only imports", async () => {
+  const { checkLibModules } = await import("../scripts/rules-source.ts");
+  const dir = await mkdtemp(join(tmpdir(), "deadhead-lib-"));
+  try {
+    const lib = join(dir, "lib");
+    const logic = join(dir, "logic", "meta");
+    await mkdir(lib, { recursive: true });
+    await mkdir(logic, { recursive: true });
+    await writeFile(
+      join(lib, "x.ts"),
+      "export async function load() {}\nexport type Shape = { a: 1 };\nexport interface Box { b: 2 }\n",
+    );
+    await writeFile(join(logic, "a.ts"), "export const match = () => false;\n");
+    const unused = (await checkLibModules(lib, join(dir, "logic"))).map((d) => d.message);
+    assert.deepEqual(unused, [
+      "`load` is exported but no logic module imports it",
+      "`Shape` is exported but no logic module imports it",
+      "`Box` is exported but no logic module imports it",
+    ]);
+
+    await writeFile(
+      join(logic, "a.ts"),
+      'import { load } from "../../lib/x.ts";\n' +
+        'import type { Shape } from "../../lib/x.ts";\n' +
+        'import { type Box } from "../../lib/x.ts";\n',
+    );
+    assert.deepEqual(await checkLibModules(lib, join(dir, "logic")), []);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("lib/json-ld someNode walks an array too long to spread into arguments", async () => {
+  const { someNode } = await import("../packages/rules/lib/json-ld.ts");
+  const huge: unknown[] = Array.from({ length: 500_000 }, () => 0);
+  huge.push({ "@type": "Thing" });
+  assert.equal(someNode(huge, (node) => node["@type"] === "Thing"), true);
+  const wide = Object.fromEntries(Array.from({ length: 500_000 }, (_, i) => [`k${i}`, i]));
+  assert.equal(someNode(wide, (node) => node["@type"] === "Thing"), false);
+});
+
 test("lib/csp directiveNames reads the first token of each directive, lowercased", async () => {
   const { directiveNames } = await import("../packages/rules/lib/csp.ts");
   assert.deepEqual(directiveNames(" default-src 'self' ;REPORT-URI /r; ; img-src https://x/navigate-to/"), [

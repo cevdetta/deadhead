@@ -11,7 +11,7 @@ kind: "element"
 scope: "any"
 selector: "script[language]"
 fix: { op: "none" }
-replacement: "Delete the attribute: <script src=\"app.js\"></script>. For data blocks use type: <script type=\"application/json\">."
+replacement: "Where language names JavaScript, delete it: <script src=\"app.js\"></script>. Any other value keeps the block from running, so delete the block or mark data with type: <script type=\"application/json\">."
 tags: ["scripting"]
 impacts: ["maintainability"]
 related: ["attr/script-event-for"]
@@ -48,3 +48,4 @@ Complete detection. The rule matches `script[language]`: presence of the attribu
 - [WHATWG: Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html): `language` on `script` is obsolete: omit for JavaScript, `type` for data blocks.
 - [MDN: `<script>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/script): `language` values were never standardized, so `type` should be used instead.
 - [HTML Standard: prepare the script element](https://html.spec.whatwg.org/multipage/scripting.html#prepare-the-script-element): builds the type string from `language` when `type` is absent, using `text/` plus the value.
+- [Chromium: `script_loader.cc`](https://chromium.googlesource.com/chromium/src/+/main/third_party/blink/renderer/core/script/script_loader.cc): `IsValidClassicScriptTypeAndLanguage` runs a script with no `type` only when `text/` plus the `language` value is a supported JavaScript MIME type.

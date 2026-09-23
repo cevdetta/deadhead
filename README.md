@@ -72,7 +72,8 @@ deadhead --fix dist                   # rewrite files, then report what is left
 ```
 
 Exit codes are the CI contract: **0** nothing at or above the `--fail-on` threshold,
-**1** threshold met, **2** usage, config or I/O error. A broken invocation never looks
+**1** threshold met, **2** usage, config or I/O error, no HTML files to lint, or an
+internal error. A broken invocation never looks
 like a clean run.
 
 ### Fixes are text edits, never re-serialised markup

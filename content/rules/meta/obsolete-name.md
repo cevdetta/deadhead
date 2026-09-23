@@ -11,13 +11,13 @@ kind: "element"
 scope: "head"
 selector: 'meta[name="subject" i], meta[name="copyright" i], meta[name="language" i], meta[name="revised" i], meta[name="topic" i], meta[name="summary" i], meta[name="classification" i], meta[name="designer" i], meta[name="reply-to" i], meta[name="owner" i], meta[name="url" i], meta[name="identifier-url" i], meta[name="directory" i], meta[name="pagename" i], meta[name="category" i], meta[name="subtitle" i], meta[name="target" i], meta[name="date" i], meta[name="search_date" i], meta[name="medium" i], meta[name="syndication-source" i], meta[name="original-source" i], meta[name="verify-v1" i], meta[name="y_key" i], meta[name="pagekey" i], meta[name="microid" i], meta[name="readability-verification" i], meta[name="icbm" i], meta[name="norton-safeweb" i], meta[name="tweetmeme-title" i], meta[name="blogcatalog" i], meta[name="apple-touch-fullscreen" i]'
 fix: { op: "none" }
-replacement: "Delete the element. For verify-v1, confirm Search Console verification through google-site-verification first. Describe the page with real content instead: <meta name=\"description\" content=\"A short, accurate, human-written summary of the page.\">."
+replacement: "For verify-v1, confirm Search Console verification through google-site-verification first; then delete the element. Describe the page with real content instead: <meta name=\"description\" content=\"A short, accurate, human-written summary of the page.\">."
 tags: ["search"]
 impacts: ["seo", "maintainability"]
 related: ["meta/keywords"]
 ---
 
-A `meta` name from the gist era that never standardized feeds no consumer, with one open question: `verify-v1` may still hold a Search Console verification for a site that never migrated to `google-site-verification`. Thirty-two such keywords trip this rule; live names, verification tags and `rating` stay quiet.
+A `meta` name from the gist era that never standardized feeds no consumer, with one open question: `verify-v1` may still hold a Search Console verification for a site that never migrated to `google-site-verification`. Thirty-two such keywords trip this rule; live names, current verification tags such as `google-site-verification`, and `rating` stay quiet.
 
 ## Why avoid
 
@@ -25,7 +25,7 @@ The Standard defines a closed metadata-name set. All thirty-two names were check
 
 The registry agrees case by case. `icbm` sits as Proposal, `blogcatalog` as Incomplete proposal, and `verify-v1` as superseded legacy.
 
-The list mixes verification tokens, geo jokes, SEO hopefuls and dead vendor hooks. Each had a moment, and thirty-one no longer have a consumer. `verify-v1` is the exception under review: Google's last public word on it, from December 2012, says Search "currently" supports "ye olde format", and Search Console's help page says it drops a site's verification once its token disappears. No later statement says whether Search Console still recognizes the legacy `verify-v1` spelling.
+The list mixes verification tokens, geo jokes, SEO hopefuls and dead vendor hooks. Each had a moment, and thirty-one no longer have a consumer. `verify-v1` is the one name whose consumer is unsettled: Google's last public word on it, from December 2012, says Search "currently" supports "ye olde format", and Search Console's help page says it drops a site's verification once its token disappears. No later statement says whether Search Console still recognizes the legacy `verify-v1` spelling.
 
 Dead keywords cost bytes and review time, and the SEO-flavored ones cost hope too. Filling them feels like optimization while changing nothing.
 

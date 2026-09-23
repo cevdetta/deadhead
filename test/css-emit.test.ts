@@ -7,10 +7,9 @@
  */
 
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-import { scoped } from "../scripts/build-css.ts";
+import { renderCss, scoped } from "../scripts/build-css.ts";
 import { loadRules } from "../packages/rules/load.ts";
 
 const rules = await loadRules();
@@ -32,9 +31,9 @@ test("the scope prefix distributes over every comma branch", () => {
   );
 });
 
-test("the scope prefix distributes and no branch emits empty", async () => {
-  const css = await readFile(new URL("../packages/browser/deadhead.css", import.meta.url), "utf8");
-  assert.ok(css.includes("deadhead"), "expected the built stylesheet");
+test("the scope prefix distributes and no branch emits empty", () => {
+  const css = renderCss(rules.map((rule) => rule.meta));
+  assert.ok(css.includes("deadhead"), "expected the rendered stylesheet");
   for (const rule of rules) {
     if (rule.meta.selector === null) continue;
     const emitted = scoped(rule.meta);
