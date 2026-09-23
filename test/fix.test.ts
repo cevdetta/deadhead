@@ -318,3 +318,21 @@ test("attr/script-event-for never offers a fix: deleting event would run a scrip
   assert.ok(rule, "rule exists");
   assert.equal(rule.meta.fix.op, "none");
 });
+
+// --- performance --------------------------------------------------------
+
+test("applyFixes is linear: 50k fixes finish fast", async () => {
+  const { applyFixes: applyFixesModule } = await import("../packages/core/fix.ts");
+  const unit = '<i class="x"></i>';
+  const source = unit.repeat(50_000);
+  const fixes = Array.from({ length: 50_000 }, (_, i) => ({
+    ruleId: "t",
+    range: [i * unit.length + 2, i * unit.length + 12] as const,
+    text: "",
+  }));
+  const started = performance.now();
+  const { output, applied } = applyFixesModule(source, fixes);
+  assert.equal(applied.length, 50_000);
+  assert.equal(output, "<i></i>".repeat(50_000));
+  assert.ok(performance.now() - started < 500, "took too long");
+});

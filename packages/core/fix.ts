@@ -198,19 +198,22 @@ export function applyFixes(source: string, fixes: Fix[]): ApplyResult {
 
   const applied: Fix[] = [];
   const skipped: Fix[] = [];
-  let output = source;
   let lastStart = Number.POSITIVE_INFINITY;
 
+  const pieces: string[] = [];
+  let cursor = source.length;
   for (const fix of ordered) {
     const [start, end] = fix.range;
     if (end > lastStart) {
       skipped.push(fix);
       continue;
     }
-    output = output.slice(0, start) + fix.text + output.slice(end);
+    pieces.push(source.slice(end, cursor), fix.text);
+    cursor = start;
     applied.push(fix);
     lastStart = start;
   }
+  pieces.push(source.slice(0, cursor));
 
-  return { output, applied: applied.reverse(), skipped: skipped.reverse() };
+  return { output: pieces.reverse().join(""), applied: applied.reverse(), skipped: skipped.reverse() };
 }
