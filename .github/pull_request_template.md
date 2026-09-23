@@ -13,6 +13,8 @@ Closes #
 - [ ] `severity` is justified: `harmful` breaks something for users; `deprecated` is
       formally obsolete but inert; `unnecessary` works but is dead weight
 - [ ] Fixtures pass in all three adapters (conformance suite)
+- [ ] Each tag is carried by ≥2 rules
+- [ ] If the rule has a fix op, `test/fix-golden.test.ts` covers it and the fix changes no behaviour
 
 ## Notes for the reviewer
 

@@ -9,7 +9,7 @@
  */
 
 import { readdir, readFile } from "node:fs/promises";
-import { relative, resolve, sep } from "node:path";
+import { join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { styleText } from "node:util";
 import { type Document, isMap, isScalar, parseDocument } from "yaml";
@@ -27,6 +27,7 @@ import {
 export const ROOT = fileURLToPath(new URL("../", import.meta.url));
 export const RULES_DIR = resolve(ROOT, "content/rules");
 export const LOGIC_DIR = resolve(ROOT, "packages/rules/logic");
+export const LIB_DIR = resolve(ROOT, "packages/rules/lib");
 
 export type Diagnostic = { file: string; line: number; col: number; message: string };
 
@@ -219,10 +220,68 @@ export function checkTagUsage(rules: LoadedRule[]): Diagnostic[] {
   return diagnostics;
 }
 
+/** Where each logic entry point a module exports is declared. */
+const ENTRY_EXPORT = /^export\s+(?:const|let|function|async\s+function)\s+(match|check|fixable)\b/gm;
+
+function logicExports(text: string): Map<string, { line: number; col: number }> {
+  const found = new Map<string, { line: number; col: number }>();
+  for (const m of text.matchAll(ENTRY_EXPORT)) {
+    const name = m[1]!;
+    if (!found.has(name)) found.set(name, offsetToLineCol(text, m.index + m[0].length - name.length));
+  }
+  return found;
+}
+
+/**
+ * What a rule's module must export, given the rule's frontmatter. An element
+ * rule exports `match`, `fixable` or both; a document rule exports `check`.
+ * `fixable` vetoes a fix per element, so it needs a fix to veto and an element
+ * to judge. `remove-tokens` deletes what the selector tested, so the selector
+ * must own the match: its module may veto fixes but never decide findings.
+ */
+function checkLogicExports(rule: LoadedRule, module: string, text: string): Diagnostic[] {
+  const file = `packages/rules/logic/${module}`;
+  const exports = logicExports(text);
+  const at = (name: string, message: string): Diagnostic => ({
+    file,
+    ...(exports.get(name) ?? { line: 1, col: 1 }),
+    message,
+  });
+  const diagnostics: Diagnostic[] = [];
+  const { kind, fix } = rule.meta;
+
+  if (kind === "document") {
+    if (!exports.has("check")) diagnostics.push(at("check", "a `kind: \"document\"` rule's module must export check()"));
+    if (exports.has("fixable")) {
+      diagnostics.push(
+        at("fixable", "`fixable` is for element rules: a document rule decides its findings, and their fixes, in check()"),
+      );
+    }
+    return diagnostics;
+  }
+
+  if (!exports.has("match") && !exports.has("fixable")) {
+    diagnostics.push(at("match", "an element rule's module must export match(), fixable() or both"));
+  }
+  if (exports.has("fixable") && fix.op === "none") {
+    diagnostics.push(at("fixable", "exports `fixable` but the rule's fix op is `none`: there is no fix to veto"));
+  }
+  if (exports.has("match") && fix.op === "remove-tokens") {
+    diagnostics.push(
+      at(
+        "match",
+        "`remove-tokens` cannot pair with match(): the logic may decide a finding on a live keyword the selector only pre-filters on. Export `fixable` alone",
+      ),
+    );
+  }
+  return diagnostics;
+}
+
 /**
  * A rule declaring `match: "logic"` must have a module, and a module must have
  * a rule. The orphan half matters most: a logic file with no markdown is a rule
- * with no documentation, which the project defines as not a rule.
+ * with no documentation, which the project defines as not a rule. A module that
+ * exists must export what its rule's kind and fix op need.
  */
 export async function checkLogicModules(
   rules: LoadedRule[],
@@ -255,7 +314,9 @@ export async function checkLogicModules(
         col: 1,
         message: `declares \`match: "logic"\` but packages/rules/logic/${expected} does not exist`,
       });
+      continue;
     }
+    diagnostics.push(...checkLogicExports(rule, expected, await readFile(join(logicDir, expected), "utf8")));
   }
 
   for (const module of modules) {
@@ -270,7 +331,64 @@ export async function checkLogicModules(
     });
   }
 
-  return diagnostics.sort((a, b) => a.file.localeCompare(b.file));
+  return diagnostics.sort((a, b) => a.file.localeCompare(b.file) || a.line - b.line || a.col - b.col);
+}
+
+/**
+ * `packages/rules/lib/` holds helpers shared by logic modules. It sits beside
+ * `logic/` so the one-module-per-rule check never sees it. Two things are
+ * checked instead: no dead exports, and no import that would break the
+ * package's zero-dependency promise.
+ */
+export async function checkLibModules(libDir: string = LIB_DIR, logicDir: string = LOGIC_DIR): Promise<Diagnostic[]> {
+  const diagnostics: Diagnostic[] = [];
+  let libFiles: string[];
+  try {
+    libFiles = (await readdir(libDir)).filter((f) => f.endsWith(".ts")).sort();
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code === "ENOENT") return [];
+    throw err;
+  }
+  const logicText = (
+    await Promise.all(
+      (await readdir(logicDir, { recursive: true }))
+        .filter((f) => f.endsWith(".ts"))
+        .map((f) => readFile(join(logicDir, f), "utf8")),
+    )
+  ).join("\n");
+
+  for (const file of libFiles) {
+    const path = join(libDir, file);
+    const text = await readFile(path, "utf8");
+    for (const m of text.matchAll(/(?:from|import)\s*["']([^"']+)["']/g)) {
+      const spec = m[1]!;
+      if (!spec.startsWith("./") && spec !== "../types.ts") {
+        diagnostics.push({
+          file: rel(path),
+          line: 1,
+          col: 1,
+          message: `lib may import only ./*.ts or ../types.ts, found ${spec}`,
+        });
+      }
+    }
+    const exported = /export\s+(?:async\s+function\*?|function\*?|const|let|class|type|interface)\s+([A-Za-z_$][\w$]*)/g;
+    for (const m of text.matchAll(exported)) {
+      const name = m[1]!;
+      // `import { x }`, `import type { X }` and `import { type X }` all count.
+      const used = new RegExp(
+        `import\\s*(?:type\\s+)?\\{[^}]*\\b${name}\\b[^}]*\\}\\s*from\\s*["']\\.\\./\\.\\./lib/${file}["']`,
+      ).test(logicText);
+      if (!used) {
+        diagnostics.push({
+          file: rel(path),
+          line: 1,
+          col: 1,
+          message: `\`${name}\` is exported but no logic module imports it`,
+        });
+      }
+    }
+  }
+  return diagnostics;
 }
 
 /** `path:line:col  message`, the shape every editor can jump to. */

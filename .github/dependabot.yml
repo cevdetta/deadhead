@@ -19,3 +19,20 @@ updates:
     groups:
       tooling:
         patterns: ["*"]
+    # @types/node pins to the ^24 major on purpose (see CLAUDE.md): a Node
+    # 26-only API failing typecheck is the signal that catches it early.
+    ignore:
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: npm
+    directory: /site
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: "chore(deps)"
+    # site/ is pinned to typescript@6 because astro check needs the TS 6 API;
+    # a major bump here needs a deliberate removal, not an automated PR.
+    ignore:
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]

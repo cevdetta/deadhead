@@ -27,8 +27,9 @@
  * printed for the bookmark itself.
  */
 
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { dirname, relative, resolve } from "node:path";
+import { readFile, writeFile } from "node:fs/promises";
+import { resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 import { styleText } from "node:util";
 import { rolldown } from "rolldown";
 
@@ -38,11 +39,6 @@ import { ROOT, rel } from "./rules-source.ts";
 const ENTRY = resolve(ROOT, "packages/browser/bookmarklet.ts");
 const RULES_JSON = resolve(ROOT, "packages/rules/rules.json");
 const OUT = resolve(ROOT, "packages/browser/bookmarklet.js");
-// Generated entry, not source: it exists so rolldown sees the logic modules,
-// which rules.json reaches without an import. Under .git/ it never pollutes
-// the tree and never ships.
-const GEN_DIR = resolve(ROOT, ".git/deadhead/bundle-entry");
-const GEN_ENTRY = resolve(GEN_DIR, "entry.ts");
 /** The one page-global the snippet leaves behind. Double runs redeclare it. */
 export const GLOBAL = "__deadhead";
 
@@ -88,23 +84,42 @@ export function logicEntryFor(meta: RuleMeta): "check" | "match" {
   return meta.kind === "document" ? "check" : "match";
 }
 
-/** Whether a rule needs a logic module inlined. */
+/** Whether a rule declares a logic module. */
 export function needsLogic(meta: RuleMeta): boolean {
   return meta.match === "logic" || meta.kind === "document";
+}
+
+/**
+ * Whether the rule's logic module exports the entry its kind runs. An element
+ * module may export only `fixable`, which vetoes fixes; the DOM has no source
+ * text and never fixes, so that rule runs on its selector alone and nothing
+ * of the module is inlined.
+ */
+export async function exportsEntry(meta: RuleMeta): Promise<boolean> {
+  const file = resolve(ROOT, "packages/rules/logic", `${meta.ruleId}.ts`);
+  const module: Record<string, unknown> = await import(pathToFileURL(file).href);
+  return typeof module[logicEntryFor(meta)] === "function";
 }
 
 export function logicVarName(meta: RuleMeta): string {
   return `${logicEntryFor(meta)}_${meta.ruleId.replace(/[^a-zA-Z0-9]/g, "_")}`;
 }
 
-/** One `{ meta, [match|check] }` literal for the appended `boot()` call. */
+/**
+ * One `{ meta, [match|check] }` literal for the appended `boot()` call. An
+ * element rule with no logic inlined ships as `match: null`, so the engine
+ * lets its selector decide.
+ */
 export function buildRuleLiteral(meta: RuleMeta, hasLogic: boolean): string {
   let logic = "";
+  const slim = toSlimMeta(meta);
   if (hasLogic) {
     const entry = logicEntryFor(meta);
     logic = `, ${entry}: ${GLOBAL}.${logicVarName(meta)}`;
+  } else if (meta.kind === "element") {
+    slim.match = null;
   }
-  return `{ meta: ${JSON.stringify(toSlimMeta(meta))}${logic} }`;
+  return `{ meta: ${JSON.stringify(slim)}${logic} }`;
 }
 
 /** The appended call that survives minification where a tail `return` would not. */
@@ -112,54 +127,56 @@ export function buildBootCall(literals: string[]): string {
   return `${GLOBAL}.boot([\n${literals.join(",\n")}\n]);`;
 }
 
-const { rules } = JSON.parse(await readFile(RULES_JSON, "utf8")) as { rules: RuleMeta[] };
+const ENTRY_ID = "\0deadhead-bookmarklet-entry";
 
-const logicFiles = new Map<string, string>();
-for (const meta of rules) {
-  if (meta.match !== "logic" && meta.kind !== "document") continue;
-  logicFiles.set(meta.ruleId, resolve(ROOT, "packages/rules/logic", `${meta.ruleId}.ts`));
-}
-
-/** Import specifier from the generated entry to a repo file. */
-export const spec = (file: string): string => {
-  const turned = relative(dirname(GEN_ENTRY), file).replace(/\\/g, "/");
-  return turned.startsWith(".") ? turned : `./${turned}`;
-};
-
-const imports = [`import { boot } from "${spec(ENTRY)}";`];
-const names = ["boot"];
-const ruleLiterals = rules.map((meta) => {
-  const file = logicFiles.get(meta.ruleId);
-  if (file !== undefined) {
-    const entry = logicEntryFor(meta);
-    const name = logicVarName(meta);
-    imports.push(`import { ${entry} as ${name} } from "${spec(file)}";`);
-    names.push(name);
+/** The bookmarklet for a rule set, bundled in memory. No file is written. */
+export async function bundleBookmarklet(rules: RuleMeta[]): Promise<string> {
+  const toImport = (file: string): string => JSON.stringify(file.replace(/\\/g, "/"));
+  const imports = [`import { boot } from ${toImport(ENTRY)};`];
+  const names = ["boot"];
+  const literals: string[] = [];
+  for (const meta of rules) {
+    const withLogic = needsLogic(meta) && (await exportsEntry(meta));
+    if (withLogic) {
+      const file = resolve(ROOT, "packages/rules/logic", `${meta.ruleId}.ts`);
+      imports.push(`import { ${logicEntryFor(meta)} as ${logicVarName(meta)} } from ${toImport(file)};`);
+      names.push(logicVarName(meta));
+    }
+    literals.push(buildRuleLiteral(meta, withLogic));
   }
-  return buildRuleLiteral(meta, file !== undefined);
-});
+  const entryCode = `${imports.join("\n")}\nexport { ${names.join(", ")} };\n`;
 
-await mkdir(GEN_DIR, { recursive: true });
-await writeFile(GEN_ENTRY, `${imports.join("\n")}\nexport { ${names.join(", ")} };\n`);
+  const built = await rolldown({
+    input: ENTRY_ID,
+    plugins: [
+      {
+        name: "deadhead-entry",
+        resolveId: (id) => (id === ENTRY_ID ? ENTRY_ID : null),
+        load: (id) => (id === ENTRY_ID ? entryCode : null),
+      },
+    ],
+  });
+  const { output } = await built.generate({ format: "iife", name: GLOBAL, minify: true });
+  await built.close();
+  const chunk = output[0];
+  if (chunk === undefined || !("code" in chunk)) throw new Error("rolldown emitted no chunk");
 
-const built = await rolldown({ input: GEN_ENTRY });
-const { output } = await built.generate({ format: "iife", name: GLOBAL, minify: true });
-await built.close();
-const chunk = output[0];
-if (chunk === undefined || !("code" in chunk)) throw new Error("rolldown emitted no chunk");
-
-const bundle = `/* deadhead bookmarklet — generated by scripts/build-bookmarklet.ts. Do not edit.
- * ${rules.length} rule(s) inlined. No network access: nothing here can be blocked by CSP.
+  return `/* deadhead bookmarklet — generated by scripts/build-bookmarklet.ts. Do not edit.
+ * ${rules.length} rule(s) inlined. No network access.
  * Paste into devtools → Sources → Snippets, or use the javascript: URL. */
 ${chunk.code.trimEnd()}
-${buildBootCall(ruleLiterals)}
+${buildBootCall(literals)}
 `;
+}
 
-await writeFile(OUT, bundle, "utf8");
-
-const url = `javascript:${encodeURIComponent(bundle)}`;
-process.stdout.write(
-  `${styleText("green", "✓")} ${rules.length} rule(s) → ${rel(OUT)}\n` +
-    `  snippet: paste the file into devtools → Sources → Snippets\n` +
-    `  bookmarklet URL: ${(url.length / 1024).toFixed(1)} kB\n`,
-);
+if (import.meta.main) {
+  const { rules } = JSON.parse(await readFile(RULES_JSON, "utf8")) as { rules: RuleMeta[] };
+  const bundle = await bundleBookmarklet(rules);
+  await writeFile(OUT, bundle, "utf8");
+  const url = `javascript:${encodeURIComponent(bundle)}`;
+  process.stdout.write(
+    `${styleText("green", "✓")} ${rules.length} rule(s) → ${rel(OUT)}\n` +
+      `  snippet: paste the file into devtools → Sources → Snippets\n` +
+      `  bookmarklet URL: ${(url.length / 1024).toFixed(1)} kB\n`,
+  );
+}

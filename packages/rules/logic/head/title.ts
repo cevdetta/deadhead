@@ -1,8 +1,5 @@
 import type { CheckFn, ElementPort } from "../../types.ts";
-
-/** ASCII whitespace, as the HTML Standard defines it — not `String#trim`. */
-const stripAsciiWhitespace = (value: string): string =>
-  value.replace(/^[\t\n\f\r ]+/, "").replace(/[\t\n\f\r ]+$/, "");
+import { stripAsciiWhitespace } from "../../lib/text.ts";
 
 /**
  * A `title` inside `<svg>` is SVG's own element, the accessible name of a

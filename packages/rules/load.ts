@@ -15,7 +15,7 @@ import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 
 import type { Rule } from "../core/engine.ts";
-import type { CheckFn, MatchFn } from "../core/types.ts";
+import type { CheckFn, FixableFn, MatchFn } from "../core/types.ts";
 import type { RuleMeta } from "../core/vocabulary.ts";
 
 const RULES_JSON = new URL("./rules.json", import.meta.url);
@@ -71,13 +71,19 @@ export async function loadRules(): Promise<Rule[]> {
       );
       const entry = meta.kind === "document" ? "check" : "match";
       const fn = module[entry];
-      if (typeof fn !== "function") {
+      const fixable = meta.kind === "element" ? module["fixable"] : undefined;
+      // An element module may export `fixable` alone: the selector matches,
+      // and the module only vetoes fixes.
+      if (typeof fn !== "function" && typeof fixable !== "function") {
         throw new Error(
-          `${meta.ruleId}: packages/rules/logic/${meta.ruleId}.ts must export ${entry}()`,
+          `${meta.ruleId}: packages/rules/logic/${meta.ruleId}.ts must export ${meta.kind === "document" ? "check()" : "match() or fixable()"}`,
         );
       }
-      if (meta.kind === "document") rule.check = fn as CheckFn;
-      else rule.match = fn as MatchFn;
+      if (typeof fn === "function") {
+        if (meta.kind === "document") rule.check = fn as CheckFn;
+        else rule.match = fn as MatchFn;
+      }
+      if (typeof fixable === "function") rule.fixable = fixable as FixableFn;
     }
 
     rules.push(rule);

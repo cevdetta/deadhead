@@ -14,7 +14,7 @@ fix: { op: "none" }
 replacement: "Serve a regular favicon instead: <link rel=\"icon\" href=\"/icon.svg\" type=\"image/svg+xml\">, then delete the mask icon and its SVG."
 tags: ["apple", "icons"]
 impacts: ["maintainability"]
-related: ["link/shortcut-icon", "link/apple-touch-icon"]
+related: ["link/apple-touch-icon-precomposed", "link/shortcut-icon"]
 ---
 
 `<link rel="mask-icon">` serves one retired surface: Safari pinned tabs. Safari 9 on OS X

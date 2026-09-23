@@ -1,7 +1,7 @@
 ---
 ruleId: "meta/apple-mobile-web-app-status-bar-style"
 title: "meta name=\"apple-mobile-web-app-status-bar-style\""
-description: "Apple switch for the status bar of full-screen Home Screen apps; theme-color styles browser UI on current engines."
+description: "Apple switch for the status bar of full-screen Home Screen apps; theme-color styles a different surface and does not replace it."
 pubDate: "2026-09-19"
 status: "avoid"
 severity: "unnecessary"
@@ -10,39 +10,45 @@ detectability: "yes"
 kind: "element"
 scope: "head"
 selector: 'meta[name="apple-mobile-web-app-status-bar-style" i]'
+match: "logic"
 fix: { op: "remove-element" }
-replacement: "Delete it. Style browser UI with <meta name=\"theme-color\" content=\"#226DAA\">."
+replacement: "Keep it for a full-screen Home Screen app; theme-color styles Safari's own UI, a different surface. Delete only a tag with content=\"default\" or no content."
 tags: ["apple", "web-app"]
 impacts: ["maintainability"]
 related: ["meta/apple-mobile-web-app-capable", "meta/apple-mobile-web-app-title"]
 ---
 
-`<meta name="apple-mobile-web-app-status-bar-style">` styles the status bar of a full-screen Home Screen app. No other browser acts on the switch. You style browser UI with theme-color.
+`<meta name="apple-mobile-web-app-status-bar-style">` styles the status bar of a full-screen Home Screen app. No other browser acts on the switch. theme-color styles Safari's own tab and overscroll UI, a different surface, and does not replace it there.
 
 ## Why avoid
 
-Apple defined the switch for full-screen Home Screen apps and marks it an Apple extension. It takes three values, `default`, `black`, and `black-translucent`. It has no effect without the full-screen switch beside it.
+Apple defined the switch for full-screen Home Screen apps and marks it an Apple extension. It takes three values, `default`, `black`, and `black-translucent`. It has no effect without full-screen mode.
 
-The sibling rule drops that full-screen switch for the manifest. A switch with no trigger adds bytes and styles nothing.
+Deleting the sibling `apple-mobile-web-app-capable` tag does not remove that mode: since iOS 11.3 a manifest with `display` set to `standalone` launches the Home Screen app without it, and Maximiliano Firtman's iOS PWA compatibility table lists `black-translucent` as "still the only way to get a fullscreen app".
 
-WebKit gives theme-color the status-bar job on iOS 15 and later. The HTML Standard names theme-color a standard metadata name for UI color. You set theme-color per page and drop the old switch.
+theme-color does not do this job. WebKit's Safari 15 announcement documents theme-color coloring "the status bar and overscroll area in Safari" itself, the browser chrome, not a standalone Home Screen app's status bar. Since Safari 26 even that Safari-chrome tint comes from the page background and fixed or sticky elements, not from theme-color (WebKit bug 301756). Apple's `black-translucent` value still lays page content under the status bar in a standalone app; only `content="default"`, the existing default, is a no-op.
 
 ## Use instead
 
-Delete the element. Ship theme-color:
+Keep the tag if the site ships a full-screen Home Screen app and needs `black` or `black-translucent`. Ship theme-color too, for Safari's own UI, since it styles a different surface:
 
 ```html
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#226DAA">
 ```
 
+Delete the tag only when its value is `default` or it has no `content`, since either matches the status bar with the tag absent. The fixer deletes those.
+
 ## Detectability
 
-Detectable with one selector. Deadhead reports each `meta` with that name and skips pages without such an element. The match uses `=` with the `i` flag: `name` holds a single value, not a token set.
+Detectable with one selector. Deadhead reports each `meta` with that name and skips pages without such an element. The match uses `=` with the `i` flag: `name` holds a single value, not a token set. A logic module decides only whether the autofix runs.
 
-The fix drops the element. You keep theme-color as the single source for UI color. On iOS below 15, a full-screen Home Screen app loses black status-bar styling; theme-color covers iOS 15 and later.
+The autofix deletes the tag when `content` is `default` or missing, since the status bar looks the same without it. Any other value carries no fix: a full-screen Home Screen app on current iOS loses `black`/`black-translucent` status-bar styling if the tag is deleted, since theme-color does not cover that surface. A person has to check the app's display mode before removing the tag.
 
 ## Resources
 
 - [Apple Developer: Supported Meta Tags (Safari HTML Reference, archived)](https://developer.apple.com/library/archive/documentation/AppleApplications/Reference/SafariHTMLRef/Articles/MetaTags.html): Apple defines the tag as an Apple extension with three values and no effect without full-screen mode.
-- [WebKit blog: New WebKit Features in Safari 15 (October 2021)](https://webkit.org/blog/11989/new-webkit-features-in-safari-15/): WebKit supports theme-color in meta and manifest, and theme-color changes the status bar color on iOS 15.
+- [WebKit blog: New WebKit Features in Safari 15 (October 2021)](https://webkit.org/blog/11989/new-webkit-features-in-safari-15/): WebKit supports theme-color in meta and manifest, and theme-color colors the status bar and overscroll area in Safari's own browser chrome.
 - [HTML Standard: meta theme-color](https://html.spec.whatwg.org/multipage/semantics.html#meta-theme-color): theme-color is a standard metadata name for a color browsers use to customize surrounding UI.
+- [Maximiliano Firtman: iOS PWA compatibility notes](https://firt.dev/notes/pwa-ios/): a secondary compatibility table; `apple-mobile-web-app-capable` is optional since iOS 11.3 with manifest `display: standalone`, and `black-translucent` is "still the only way to get a fullscreen app".
+- [WebKit Bugzilla 301756](https://bugs.webkit.org/show_bug.cgi?id=301756): as of Safari 26, Safari's own chrome tint comes from the page background and fixed or sticky elements, not from theme-color.

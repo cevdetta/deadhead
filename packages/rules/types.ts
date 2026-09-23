@@ -13,6 +13,7 @@ export type {
   DocumentPort,
   ElementPort,
   Finding,
+  FixableFn,
   Loc,
   MatchFn,
   Range,

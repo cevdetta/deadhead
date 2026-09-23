@@ -5,7 +5,7 @@
  * Exit codes are the contract CI depends on:
  *   0  no finding at or above the `--fail-on` threshold
  *   1  threshold met
- *   2  usage, config, or I/O error
+ *   2  usage, config, I/O error, or an internal error
  *
  * The distinction matters: a broken invocation and a clean run must never look
  * the same to a build script, and findings must never look like a crash.
@@ -140,9 +140,16 @@ try {
   }
 
   const ignore = config.ignore ?? [];
-  const files = (await collectFiles(targets)).filter(
-    (file) => !ignore.some((pattern) => matchesGlob(file, pattern)),
-  );
+  const found = await collectFiles(targets);
+  const files = found.filter((file) => !ignore.some((pattern) => matchesGlob(file, pattern)));
+
+  if (files.length === 0) {
+    fail(
+      found.length === 0
+        ? `no HTML files found in: ${targets.join(", ")}`
+        : `every HTML file in: ${targets.join(", ")} is ignored by config`,
+    );
+  }
 
   const skipTemplates = values["skip-templates"] ?? config.skipTemplates ?? false;
   const results = await lintFiles(files, rules, {
@@ -227,5 +234,12 @@ try {
 } catch (err) {
   if (err instanceof UsageError || err instanceof RulesNotBuiltError) fail(err.message);
   if (err instanceof ConfigError || err instanceof BaselineError) fail(err.message);
-  throw err;
+  // Anything else is an I/O failure or a bug. Exit 1 means "findings"; a crash
+  // must never look like one, so it is 2 with the cause on stderr.
+  const code = (err as NodeJS.ErrnoException).code;
+  fail(
+    code !== undefined
+      ? `${code}: ${(err as Error).message}`
+      : `internal error: ${(err as Error).stack ?? String(err)}`,
+  );
 }

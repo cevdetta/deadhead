@@ -8,6 +8,8 @@ import {
   SLIM_KEYS,
   buildBootCall,
   buildRuleLiteral,
+  bundleBookmarklet,
+  exportsEntry,
   logicEntryFor,
   logicVarName,
   needsLogic,
@@ -81,8 +83,22 @@ test("needsLogic matches the assembly filter", () => {
   assert.equal(needsLogic(meta({ kind: "document", match: null })), true);
 });
 
+test("a module exporting only fixable() inlines nothing and ships as selector-only", async () => {
+  const rule = (await loadRules()).find((r) => r.meta.ruleId === "attr/script-language");
+  assert.ok(rule?.fixable && !rule.match, "attr/script-language exports fixable() alone");
+  assert.equal(needsLogic(rule.meta), true);
+  assert.equal(await exportsEntry(rule.meta), false);
+  const literal = buildRuleLiteral(rule.meta, false);
+  assert.match(literal, /"match":null/);
+  assert.doesNotMatch(literal, /__deadhead\./);
+  const json = JSON.parse(await readFile(new URL("../packages/rules/rules.json", import.meta.url), "utf8"));
+  const bundle = await bundleBookmarklet(json.rules);
+  assert.doesNotMatch(bundle, /match_attr_script_language/);
+});
+
 test("the appended boot call survives minification", async () => {
-  const bundle = await readFile(new URL("../packages/browser/bookmarklet.js", import.meta.url), "utf8");
+  const json = JSON.parse(await readFile(new URL("../packages/rules/rules.json", import.meta.url), "utf8"));
+  const bundle = await bundleBookmarklet(json.rules);
   const call = buildBootCall(["{ meta: {} }"]);
   assert.ok(call.startsWith(`${GLOBAL}.boot([`), "boot call shape changed");
   assert.ok(call.endsWith("]);"), "boot call must close the array");
@@ -94,10 +110,10 @@ test("every rule in rules.json assembles with the right entry", async () => {
   const rules = await loadRules();
   assert.ok(rules.length > 0);
   for (const rule of rules) {
-    const hasLogic = needsLogic(rule.meta);
+    const hasLogic = needsLogic(rule.meta) && (await exportsEntry(rule.meta));
     const literal = buildRuleLiteral(rule.meta, hasLogic);
     if (!hasLogic) {
-      assert.doesNotMatch(literal, /match:|check:/, rule.meta.ruleId);
+      assert.doesNotMatch(literal, /match: __deadhead|check:/, rule.meta.ruleId);
       continue;
     }
     if (rule.meta.kind === "document") {
@@ -108,4 +124,13 @@ test("every rule in rules.json assembles with the right entry", async () => {
       assert.doesNotMatch(literal, /check: __deadhead/, rule.meta.ruleId);
     }
   }
+});
+
+test("bundleBookmarklet builds in memory and never touches .git", async () => {
+  const { bundleBookmarklet } = await import("../scripts/build-bookmarklet.ts");
+  const { readFile, stat } = await import("node:fs/promises");
+  const json = JSON.parse(await readFile(new URL("../packages/rules/rules.json", import.meta.url), "utf8"));
+  const bundle = await bundleBookmarklet(json.rules);
+  assert.match(bundle, /__deadhead\.boot\(\[/);
+  await assert.rejects(stat(new URL("../.git/deadhead/bundle-entry/entry.ts", import.meta.url)));
 });

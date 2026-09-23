@@ -59,18 +59,19 @@ export function walk(
   const visitBody = options.visitBody ?? true;
   const skipTemplates = options.skipTemplates ?? false;
 
-  const descend = (element: ElementPort, inherited: Region): void => {
+  // An explicit stack: markup nested thousands deep is legal HTML, and a
+  // recursive walk dies on it. Children are pushed in reverse so they pop in
+  // document order.
+  const stack: [ElementPort, Region][] = [[root, null]];
+  while (stack.length > 0) {
+    const [element, inherited] = stack.pop()!;
     const tag = element.tag;
     const region: Region = tag === "head" ? "head" : tag === "body" ? "body" : inherited;
-
-    if (region === "body" && !visitBody) return;
-    if (skipTemplates && tag === "template") return;
-
+    if (region === "body" && !visitBody) continue;
+    if (skipTemplates && tag === "template") continue;
     visit(element, region);
-
-    if (OPAQUE.has(tag)) return;
-    for (const child of element.children()) descend(child, region);
-  };
-
-  descend(root, null);
+    if (OPAQUE.has(tag)) continue;
+    const children = element.children();
+    for (let i = children.length - 1; i >= 0; i--) stack.push([children[i]!, region]);
+  }
 }

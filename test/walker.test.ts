@@ -67,3 +67,17 @@ test("an empty document walks nothing rather than throwing", () => {
   walk(null, (element) => seen.push(element.tag));
   assert.deepEqual(seen, []);
 });
+
+test("deeply nested markup does not overflow the stack", async () => {
+  const { parseHtml } = await import("../packages/cli/adapter.ts");
+  const { run } = await import("../packages/core/engine.ts");
+  const depth = 10_000;
+  const html = `<!doctype html><html lang="en"><head><title>x</title></head><body>${"<div>".repeat(depth)}<blink>x</blink>${"</div>".repeat(depth)}</body></html>`;
+  const parsed = parseHtml(html);
+  const findings = run(
+    [{ meta: { ruleId: "element/blink", title: "t", description: "d", pubDate: "2026-01-01", status: "avoid", severity: "unnecessary", standardsBasis: "spec", detectability: "yes", kind: "element", scope: "body", selector: "blink", match: null, fix: { op: "none", attr: null, token: null }, replacement: "r", tags: [], impacts: [], related: [] } }],
+    parsed,
+  );
+  assert.equal(findings.length, 1);
+  assert.equal(parsed.root?.children()[1]?.children()[0]?.text().length, 1);
+});

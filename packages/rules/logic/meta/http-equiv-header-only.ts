@@ -1,4 +1,5 @@
 import type { MatchFn } from "../../types.ts";
+import { stripAsciiWhitespace } from "../../lib/text.ts";
 
 /**
  * Security and CORS headers that browsers only honour as HTTP response
@@ -24,10 +25,6 @@ const HEADER_ONLY: ReadonlySet<string> = new Set([
   "access-control-allow-origin",
   "referrer-policy",
 ]);
-
-/** ASCII whitespace, as the HTML Standard defines it — not `String#trim`. */
-const stripAsciiWhitespace = (value: string): string =>
-  value.replace(/^[\t\n\f\r ]+/, "").replace(/[\t\n\f\r ]+$/, "");
 
 /**
  * The `meta[http-equiv]` selector is only a pre-filter. A tag is claimed

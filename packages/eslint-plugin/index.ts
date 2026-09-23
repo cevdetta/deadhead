@@ -48,8 +48,9 @@ type EslintRule = {
 
 /**
  * A fix is offered only when the engine produced one. It is `null` for
- * `fix: { op: "none" }` and for every `detectability: "partial"` rule, so
- * ESLint is never handed an edit the CLI would refuse to make.
+ * `fix: { op: "none" }`, for every `detectability: "partial"` rule and for a
+ * finding the rule's `fixable()` vetoes, so ESLint is never handed an edit the
+ * CLI would refuse to make.
  */
 const fixDescriptor = (
   fix: Finding["fix"],

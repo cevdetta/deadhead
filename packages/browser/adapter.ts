@@ -27,12 +27,29 @@ const childElements = (element: Element): Element[] =>
 
 function makePorts(): (element: Element) => ElementPort {
   return withPortCache<Element>((element, portFor) => {
+    // getAttribute lowercases its argument only for HTML elements in an HTML
+    // document. On SVG and MathML it compares exactly, and the parser has
+    // already written `viewBox`, `baseProfile`. One lowercased map, built on
+    // first use, keeps the port's case-insensitive promise everywhere. The
+    // first attribute of a name wins, as it does for getAttribute.
+    let attrs: Map<string, string> | undefined;
+    const attrMap = (): Map<string, string> => {
+      if (attrs === undefined) {
+        attrs = new Map();
+        for (const { name, value } of element.attributes) {
+          const key = name.toLowerCase();
+          if (!attrs.has(key)) attrs.set(key, value);
+        }
+      }
+      return attrs;
+    };
+
     const port: ElementPort = {
       // `tagName` is uppercase for HTML elements in a real document.
       tag: element.tagName.toLowerCase(),
-      attr: (name) => element.getAttribute(name) ?? undefined,
-      hasAttr: (name) => element.hasAttribute(name),
-      attrNames: () => [...element.getAttributeNames()].map((name) => name.toLowerCase()),
+      attr: (name) => attrMap().get(name.toLowerCase()),
+      hasAttr: (name) => attrMap().has(name.toLowerCase()),
+      attrNames: () => [...attrMap().keys()],
       // No source text, so no attribute range either — and therefore no fixes.
       attrRange: () => null,
       text: () => element.textContent ?? "",

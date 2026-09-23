@@ -15,12 +15,8 @@ import { applyFixes } from "../packages/core/fix.ts";
 import { parseHtml } from "../packages/cli/adapter.ts";
 
 const BIN = fileURLToPath(new URL("../packages/cli/bin/deadhead.ts", import.meta.url));
-const BUILD = fileURLToPath(new URL("../scripts/build-rules.ts", import.meta.url));
 
-// rules.json is generated and gitignored, so make sure it reflects the
-// markdown before the binary is asked to load it.
-const built = spawnSync(process.execPath, [BUILD], { cwd: ROOT, encoding: "utf8" });
-assert.equal(built.status, 0, "build-rules failed: " + built.stderr);
+// rules.json is built once by `pnpm test` before any test process starts.
 
 const deadhead = (...args: string[]) =>
   spawnSync(process.execPath, [BIN, ...args], { cwd: ROOT, encoding: "utf8" });
@@ -36,7 +32,10 @@ test("every rule in content/rules is loaded, with its logic module attached", ()
     if (rule.meta.kind === "document") {
       assert.equal(typeof rule.check, "function", `${rule.meta.ruleId} needs check()`);
     } else if (rule.meta.match === "logic") {
-      assert.equal(typeof rule.match, "function", `${rule.meta.ruleId} needs match()`);
+      assert.ok(
+        typeof rule.match === "function" || typeof rule.fixable === "function",
+        `${rule.meta.ruleId} needs match() or fixable()`,
+      );
     }
   }
 });
@@ -335,9 +334,53 @@ test("a dead keyword next to a live one loses the keyword, never the link", () =
 test("--fix converges when two rules strip keywords from the same link", async () => {
   await sandbox(async (dir) => {
     const file = join(dir, "page.html");
-    // index (link/obsolete-rel) and pavatar (link/rel-dead-vendor) share one rel.
-    await writeFile(file, relPage('<link rel="alternate index pavatar" href="/feed.xml">'));
+    // sitemap (link/sitemap) and pavatar (link/rel-dead-vendor) share one rel.
+    await writeFile(file, relPage('<link rel="alternate sitemap pavatar" href="/feed.xml">'));
     deadhead("--fix", "--fail-on=none", file);
     assert.match(await readFile(file, "utf8"), /<link rel="alternate" href="\/feed\.xml">/);
   });
+});
+
+test("an unreadable file is an I/O error: exit 2, never 1", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "dh-"));
+  const file = join(dir, "locked.html");
+  await writeFile(file, "<!doctype html><title>x</title>");
+  const { chmod } = await import("node:fs/promises");
+  await chmod(file, 0o000);
+  try {
+    const run = deadhead(file);
+    if (process.getuid?.() === 0) return; // root reads anything; nothing to assert
+    assert.equal(run.status, 2, run.stderr);
+    assert.match(run.stderr, /EACCES|permission/i);
+  } finally {
+    await chmod(file, 0o644);
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("a config that ignores every HTML file says so", async () => {
+  await sandbox(async (dir) => {
+    await mkdir(join(dir, "site"));
+    await copyFixture("meta/http-equiv-x-ua-compatible", join(dir, "site"), "page.html");
+    await writeFile(
+      join(dir, "deadhead.config.ts"),
+      `export default { include: ["site"], ignore: ["site/**"] };`,
+    );
+    const run = spawnSync(process.execPath, [BIN], { cwd: dir, encoding: "utf8" });
+    assert.equal(run.status, 2, run.stderr);
+    assert.match(run.stderr, /every HTML file in: site is ignored by config/);
+    assert.doesNotMatch(run.stderr, /no HTML files found/);
+  });
+});
+
+test("a directory with no HTML files is a usage error", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "dh-"));
+  await writeFile(join(dir, "notes.txt"), "hello");
+  try {
+    const run = deadhead(dir);
+    assert.equal(run.status, 2);
+    assert.match(run.stderr, /no HTML files/);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
 });

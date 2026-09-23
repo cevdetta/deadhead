@@ -1,4 +1,5 @@
 import type { MatchFn } from "../../types.ts";
+import { stripAsciiWhitespace } from "../../lib/text.ts";
 
 /**
  * The DNS prefetch-control pragma, minus its one working value.
@@ -12,10 +13,6 @@ import type { MatchFn } from "../../types.ts";
  * problem statement that does not exist. Possible follow-up, not this rule.
  */
 const OPT_OUT: string = "off";
-
-/** ASCII whitespace, as the HTML Standard defines it — not `String#trim`. */
-const stripAsciiWhitespace = (value: string): string =>
-  value.replace(/^[\t\n\f\r ]+/, "").replace(/[\t\n\f\r ]+$/, "");
 
 /**
  * The `meta[http-equiv="x-dns-prefetch-control" i]` selector is only a

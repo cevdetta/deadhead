@@ -1,14 +1,11 @@
 import type { CheckFn } from "../../types.ts";
+import { stripAsciiWhitespace } from "../../lib/text.ts";
 
 /**
  * The four properties ogp.me requires on every page.
  * https://ogp.me/#metadata
  */
 const REQUIRED: string[] = ["og:title", "og:type", "og:url", "og:image"];
-
-/** ASCII whitespace, as the HTML Standard defines it — not `String#trim`. */
-const stripAsciiWhitespace = (value: string): string =>
-  value.replace(/^[\t\n\f\r ]+/, "").replace(/[\t\n\f\r ]+$/, "");
 
 /**
  * No selector can express "some og: tags but not all four", which is what
