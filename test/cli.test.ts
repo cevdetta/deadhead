@@ -337,3 +337,32 @@ test("--fix converges when two rules strip keywords from the same link", async (
     assert.match(await readFile(file, "utf8"), /<link rel="alternate" href="\/feed\.xml">/);
   });
 });
+
+test("an unreadable file is an I/O error: exit 2, never 1", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "dh-"));
+  const file = join(dir, "locked.html");
+  await writeFile(file, "<!doctype html><title>x</title>");
+  const { chmod } = await import("node:fs/promises");
+  await chmod(file, 0o000);
+  try {
+    const run = deadhead(file);
+    if (process.getuid?.() === 0) return; // root reads anything; nothing to assert
+    assert.equal(run.status, 2, run.stderr);
+    assert.match(run.stderr, /EACCES|permission/i);
+  } finally {
+    await chmod(file, 0o644);
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("a directory with no HTML files is a usage error", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "dh-"));
+  await writeFile(join(dir, "notes.txt"), "hello");
+  try {
+    const run = deadhead(dir);
+    assert.equal(run.status, 2);
+    assert.match(run.stderr, /no HTML files/);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
