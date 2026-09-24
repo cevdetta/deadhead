@@ -85,12 +85,14 @@ a thousand-line
 diff. The same property is what makes ESLint autofix free, and the conformance suite
 asserts the two produce byte-identical output.
 
-A fix is one of `remove-element`, `remove-attribute`, `remove-token`, `remove-tokens` or
-`none`. They all subtract: nothing asserts a value the rule was never asked about.
-`remove-token` drops a single keyword from a space-separated attribute:
+A fix is one of `remove-element`, `remove-attribute`, `remove-attributes`, `remove-token`,
+`remove-tokens` or `none`. They all subtract: nothing asserts a value the rule was never
+asked about. `remove-token` drops a single keyword from a space-separated attribute:
 `rel="shortcut icon mask-icon"` becomes `rel="icon mask-icon"`. It edits inside the
 quotes, so the delimiter you chose survives. `remove-tokens` deletes every keyword the
 selector tests with `[attr~=…]`; it removes the element only when none survive.
+`remove-attributes` deletes every attribute the selector tests by a bare `[attr]`
+presence test, keeping every other attribute as written.
 
 Two things are never fixed automatically: a rule that declares `fix: { op: "none" }`, and
 any rule whose `detectability` is `partial`: if the rule is not certain, it does not get

@@ -302,7 +302,7 @@ test("remove-attributes takes no attr or token, and needs a bare [attr] test", (
   );
 });
 
-test("remove-attributes allows match: logic; checkLogicModules rejects a match() export there", () => {
+test("remove-attributes allows match: logic", () => {
   assert.deepEqual(
     messages({
       selector: "a[coords], a[shape]",
@@ -314,11 +314,8 @@ test("remove-attributes allows match: logic; checkLogicModules rejects a match()
 });
 
 test("remove-attributes rejects a missing selector", () => {
-  const withoutSelector = base();
-  delete withoutSelector["selector"];
   assert.match(
     messages({
-      ...withoutSelector,
       selector: undefined,
       fix: { op: "remove-attributes" },
     }).join("\n"),

@@ -14,14 +14,14 @@ fix: { op: "remove-attributes" }
 replacement: "Delete the attributes. Invoke resources with data and type: <object data=\"clip.mp4\" type=\"video/mp4\">."
 tags: ["embedding"]
 impacts: ["maintainability"]
-related: ["attr/global-contextmenu"]
+related: ["attr/global-contextmenu", "element/plugin-embed"]
 ---
 
 Seven plugin-era attributes on `object` invoke nothing. WHATWG lists each as obsolete with a replacement, `data` and `type` for invocation plus plain markup for the rest, since browsers run no plug-ins and the object renders or falls back without them.
 
 ## Why avoid
 
-WHATWG lists all seven as obsolete with a replacement each. Section 16.2 sends the four invocation attributes (`archive`, `code`, `codebase`, `codetype`) to the `data` and `type` attributes, with `param` elements for same-named parameters. It tells authors to repeat the `object` element instead of declaring it (`declare`), to optimize the resource instead of messaging about it (`standby`), and to avoid untrusted resources instead of type-checking them (`typemustmatch`). The plugin era these attributes configured is over; browsers run no plug-ins.
+WHATWG lists all seven as obsolete with a replacement each. Section 16.2 sends the invocation attributes `archive`, `code`, `codebase` and `codetype` to the `data` and `type` attributes, with `param` elements for same-named parameters; it gives `classid` the same direction, but `element/plugin-embed` owns that attribute, since removing it changes how `object` chooses its fallback. It tells authors to repeat the `object` element instead of declaring it (`declare`), to optimize the resource instead of messaging about it (`standby`), and to avoid untrusted resources instead of type-checking them (`typemustmatch`). The plugin era these attributes configured is over; browsers run no plug-ins.
 
 MDN documents the live pair that remains. Its `object` page requires at least one of `data` and `type` to be defined, with `data` as the resource address and `type` as its content type. Every job the seven attributes once split across invocations, declarations and loading messages now reduces to that pair plus plain markup.
 
