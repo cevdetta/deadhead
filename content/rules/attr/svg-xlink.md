@@ -45,7 +45,7 @@ and "Deprecated the 'xlink:title' attribute in favor of using child 'title' elem
 Linking chapter keeps `xlink:title` "for backwards compatibility" and adds: "New content
 should use a 'title' child element rather than a 'xlink:title' attribute."
 
-Two of the six still act through compatibility code. Blink's `SVGAElement` opens the link
+Two of the six descriptors still act through compatibility code. Blink's `SVGAElement` opens the link
 in a new tab when `target` is empty and `xlink:show` is `new`, and returns `xlink:title`
 as the element's title. Gecko's `SVGAElement` maps `new` to `_blank` as well, and for
 `replace` returns an empty target that skips `<base target>`. The other four,
@@ -100,9 +100,9 @@ rewrite the attributes by hand.
 
 ## Resources
 
-- [SVG2: Deprecated XLink URL reference attributes](https://www.w3.org/TR/SVG2/linking.html): the XLink-namespace usage is now deprecated in favor of `href` without a namespace; where both are present the plain value wins and the XLink one is ignored.
-- [SVG2: Processing of URL references](https://www.w3.org/TR/SVG2/linking.html): legacy `xlink:href` is processed if no such `href` exists on the element, and skipped otherwise, and generators must emit the plain spelling.
-- [SVG 2 Chapter 16: Linking](https://www.w3.org/TR/SVG2/linking.html): `xlink:title` is a "Deprecated attribute"; "New content should use a 'title' child element".
+- [SVG2: Deprecated XLink URL reference attributes](https://www.w3.org/TR/SVG2/linking.html#XLinkRefAttrs): the XLink-namespace usage is now deprecated in favor of `href` without a namespace; where both are present the plain value wins and the XLink one is ignored; a conforming generator must emit the plain spelling.
+- [SVG2: Processing of URL references](https://www.w3.org/TR/SVG2/linking.html#processingURL): legacy `xlink:href` is processed if no such `href` exists on the element, and skipped otherwise.
+- [SVG 2 Chapter 16: `xlink:title`](https://www.w3.org/TR/SVG2/linking.html#XLinkTitleAttribute): `xlink:title` is a "Deprecated attribute"; "New content should use a 'title' child element".
 - [SVG 2 Appendix K.2.20: Linking chapter changes](https://www.w3.org/TR/SVG2/changes.html#linking): W3C Candidate Recommendation, 2018-10-04; removes five attributes and deprecates `xlink:title`.
 - [MDN: `xlink:href`](https://developer.mozilla.org/en-US/docs/Web/SVG/Reference/Attribute/xlink:href): badges the attribute Deprecated, calls for `href` since SVG 2 removed the need for the namespace, and lists the fifteen elements that take it.
 - [Chromium: svg_a_element.cc](https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink/renderer/core/svg/svg_a_element.cc): `xlink:show` `new` maps to `_blank`, and `title()` returns `xlink:title`.

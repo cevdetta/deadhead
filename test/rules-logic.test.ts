@@ -77,9 +77,16 @@ test("script-language: fixable when type overrides it or it already names JavaSc
   assert.equal(await on('language=" javascript"'), false);
 });
 
-test("charset-obsolete: fixable on a and link", async () => {
+test("charset-obsolete: fixable on a, and on a link that loads no stylesheet", async () => {
+  const link = (attrs: string) => fixableOn("attr/charset-obsolete", `<link charset="iso-8859-1" ${attrs}>`, "link");
   assert.equal(await fixableOn("attr/charset-obsolete", '<a href="page.html" charset="iso-8859-1">x</a>', "a"), true);
-  assert.equal(await fixableOn("attr/charset-obsolete", '<link rel="stylesheet" href="a.css" charset="iso-8859-1">', "link"), true);
+  assert.equal(await link('rel="alternate" href="feed.xml"'), true);
+  assert.equal(await link('rel="icon" href="favicon.ico"'), true);
+  assert.equal(await link('rel="stylesheet"'), true);
+  // A stylesheet with no BOM, HTTP charset or @charset decodes by the attribute.
+  assert.equal(await link('rel="stylesheet" href="a.css"'), false);
+  assert.equal(await link('rel="alternate STYLESHEET" href="a.css"'), false);
+  assert.equal(await link('rel="\tStyleSheet " href="a.css"'), false);
 });
 
 test("charset-obsolete: fixable on script unless it decodes an external classic script", async () => {

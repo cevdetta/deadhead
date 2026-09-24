@@ -38,7 +38,7 @@ Put the description in a caption:
 </table>
 ```
 
-A longer description fits in the caption after the title, in a `details` element inside the caption, or in a `figure` whose `figcaption` holds both. The W3C WAI tables tutorial shows each pattern, and notes that `aria-describedby` has weaker assistive technology support than a caption.
+A longer description fits in the caption after the title, in a `details` element inside the caption, or in a `figure` whose `figcaption` holds both. The W3C WAI tables tutorial shows the caption, `figure` and `aria-describedby` patterns, and flags the last two in the same words: each "may not be as widely supported by assistive technology than other approaches for summaries on this page". The caption is the one it does not flag.
 
 ## Detectability
 
@@ -49,4 +49,4 @@ Complete detection. The rule matches `table[summary]`: presence of the attribute
 - [HTML Standard: Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#non-conforming-features): `summary` on `table` is obsolete; use one of the techniques for describing tables instead.
 - [HTML Standard: Techniques for describing tables](https://html.spec.whatwg.org/multipage/tables.html#table-descriptions-techniques): prose around the table, the `caption`, a `details` element inside the `caption`, or a `figure` and its `figcaption`.
 - [MDN: `<table>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/table): `summary` sits under deprecated attributes with `<caption>` as the replacement; the accessibility section says who a caption helps.
-- [W3C WAI: Caption & Summary](https://www.w3.org/WAI/tutorials/tables/caption-summary/): a table summary goes in the `caption`, a `figure` and `figcaption`, or `aria-describedby`, the last two with weaker assistive technology support.
+- [W3C WAI: Caption & Summary](https://www.w3.org/WAI/tutorials/tables/caption-summary/): a table summary goes in the `caption`, a `figure` and `figcaption`, or `aria-describedby`; the `figure` and `aria-describedby` notes say each "may not be as widely supported by assistive technology" as the other approaches.
