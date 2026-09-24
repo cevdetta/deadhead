@@ -87,6 +87,7 @@ thinks of it.
 6. **Group by kind and consequence, never by era.** Split out any member whose fix or consequence differs, so the safe members keep an autofix.
 7. **One owner per keyword.** A catch-all (`meta/http-equiv-unregistered-pragmas`) excludes every value another rule owns.
 8. **Titles show the markup.** An element or attribute rule's title is the markup in angle brackets with quoted values: `<meta name="keywords">`, `<link rel="copyright">`, `<svg baseProfile>`. A group's title is the markup plus its plural noun: `<table> presentational attributes`, `<link rel> navigation keywords`. A document or head rule's title is a short sentence-case phrase: `Doctype missing or in quirks mode`. **Descriptions are ≤140 characters** and state the consequence. The site builds the page `<title>` from these.
+9. **Severity and basis follow the spec text.** HTML §16.1 "obsolete but conforming" and "authors should omit" → `unnecessary` / `spec`. HTML §16.2 non-conforming, or dropped from a spec that once defined it → `deprecated` / `spec-obsolete` when inert. Anything that breaks behaviour for users → `harmful`, whatever its basis.
 
 `pnpm validate:rules` enforces rules 5 and 8's length limit: a `ruleId` carrying a
 verdict word, or a `description` over 140 characters, fails with `file:line:col`, unless
