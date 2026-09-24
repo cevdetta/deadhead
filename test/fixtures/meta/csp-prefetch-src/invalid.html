@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CSP with prefetch-src</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; prefetch-src 'self'">
+    <meta http-equiv="content-security-policy" content="default-src 'self'; Prefetch-Src https://cdn.example.com">
+  </head>
+  <body>
+    <p>Both policies name prefetch-src, a directive CSP no longer defines.</p>
+  </body>
+</html>

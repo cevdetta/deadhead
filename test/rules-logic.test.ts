@@ -41,6 +41,19 @@ test("robots: unknown names and bad values still trip", async () => {
   assert.equal(await robots("noindex nofollow"), false);
 });
 
+for (const directive of ["prefetch-src", "plugin-types", "navigate-to", "referrer", "reflected-xss"]) {
+  test(`csp-${directive}: trips on the directive name, never on a value or another directive`, async () => {
+    const { match } = await import(`../packages/rules/logic/meta/csp-${directive}.ts`);
+    const on = (content: string) =>
+      match(portOf(`<meta http-equiv="Content-Security-Policy" content="${content}">`, "meta"), ctx);
+    assert.equal(await on(`default-src 'self'; ${directive} x`), true);
+    assert.equal(await on(`  ${directive.toUpperCase()}\tx ;`), true);
+    assert.equal(await on(`default-src https://example.com/${directive}/`), false);
+    assert.equal(await on(`default-src 'self'; report-uri /${directive}`), false);
+    assert.equal(await on(""), false);
+  });
+}
+
 // --- fixable(): the autofix runs only where removal is inert -----------------
 
 /** fixable() of `ruleId` on the first element matching `selector` in `html`. */
@@ -142,10 +155,10 @@ test("document-info-keywords: fixable unless rel holds self", async () => {
   assert.equal(await on("profile self"), false);
 });
 
-test("obsolete-name: fixable unless the name is verify-v1", async () => {
-  const on = (name: string) => fixableOn("meta/obsolete-name", `<meta name="${name}" content="x">`, "meta");
-  assert.equal(await on("subject"), true);
-  assert.equal(await on("ICBM"), true);
+test("verification-names: fixable unless the name is verify-v1", async () => {
+  const on = (name: string) => fixableOn("meta/verification-names", `<meta name="${name}" content="x">`, "meta");
+  assert.equal(await on("y_key"), true);
+  assert.equal(await on("BlogCatalog"), true);
   assert.equal(await on("verify-v1"), false);
   assert.equal(await on("Verify-V1"), false);
 });

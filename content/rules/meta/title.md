@@ -14,7 +14,7 @@ fix: { op: "remove-element" }
 replacement: "Delete the tag. The document title lives in <title>: <title>ExampleSocialSite: Sign up for a new account.</title>."
 tags: ["search"]
 impacts: ["seo", "maintainability"]
-related: ["meta/obsolete-name", "meta/keywords"]
+related: ["meta/page-info-names", "meta/keywords"]
 ---
 
 `<meta name="title">` repeats the document title for nobody. The WHATWG registry never registered the bare name, and the title pipeline never reads it. Every instance the crawl found copies `<title>` word for word.

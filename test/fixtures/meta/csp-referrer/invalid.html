@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CSP with referrer</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; referrer no-referrer">
+    <meta http-equiv="content-security-policy" content="default-src 'self'; Referrer origin">
+  </head>
+  <body>
+    <p>Both policies name referrer, a directive CSP no longer defines.</p>
+  </body>
+</html>
