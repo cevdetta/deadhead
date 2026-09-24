@@ -354,13 +354,17 @@ test("lib/json-ld someNode walks an array too long to spread into arguments", as
   assert.equal(someNode(wide, (node) => node["@type"] === "Thing"), false);
 });
 
-test("lib/csp directiveNames reads the first token of each directive, lowercased", async () => {
-  const { directiveNames } = await import("../packages/rules/lib/csp.ts");
-  assert.deepEqual(directiveNames(" default-src 'self' ;REPORT-URI /r; ; img-src https://x/navigate-to/"), [
-    "default-src",
-    "report-uri",
-    "img-src",
-  ]);
+test("lib/csp hasDirective reads the first token of each directive, lowercased", async () => {
+  const { hasDirective } = await import("../packages/rules/lib/csp.ts");
+  const { parseHtml } = await import("../packages/cli/adapter.ts");
+  const content = " default-src 'self' ;REPORT-URI /r; ; img-src https://x/navigate-to/";
+  const meta = parseHtml(`<meta http-equiv=" Content-Security-Policy " content="${content}">`).doc.querySelector("meta");
+  assert.ok(meta);
+  for (const name of ["default-src", "report-uri", "img-src"]) assert.equal(hasDirective(meta, name), true, name);
+  for (const name of ["navigate-to", "self", "r", "https://x/navigate-to/"]) assert.equal(hasDirective(meta, name), false, name);
+  const other = parseHtml(`<meta http-equiv="refresh" content="report-uri /r">`).doc.querySelector("meta");
+  assert.ok(other);
+  assert.equal(hasDirective(other, "report-uri"), false);
 });
 
 /** The `script` element of `<script attrs></script>`, through the CLI adapter. */

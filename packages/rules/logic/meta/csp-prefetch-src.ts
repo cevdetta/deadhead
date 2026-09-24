@@ -1,6 +1,5 @@
 import type { MatchFn } from "../../types.ts";
-import { directiveNames, isCspMeta } from "../../lib/csp.ts";
+import { hasDirective } from "../../lib/csp.ts";
 
-/** A meta policy that names the `prefetch-src` directive; `directiveNames` reads names, never values. */
-export const match: MatchFn = (el) =>
-  isCspMeta(el) && (el.attr("content") ?? "") !== "" && directiveNames(el.attr("content")!).includes("prefetch-src");
+/** A meta policy that names the `prefetch-src` directive. */
+export const match: MatchFn = (element) => hasDirective(element, "prefetch-src");

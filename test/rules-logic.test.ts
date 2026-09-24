@@ -41,7 +41,9 @@ test("robots: unknown names and bad values still trip", async () => {
   assert.equal(await robots("noindex nofollow"), false);
 });
 
-for (const directive of ["prefetch-src", "plugin-types", "navigate-to", "referrer", "reflected-xss"]) {
+for (const directive of [
+  "prefetch-src", "plugin-types", "navigate-to", "referrer", "reflected-xss", "report-uri", "block-all-mixed-content",
+]) {
   test(`csp-${directive}: trips on the directive name, never on a value or another directive`, async () => {
     const { match } = await import(`../packages/rules/logic/meta/csp-${directive}.ts`);
     const on = (content: string) =>
@@ -49,7 +51,7 @@ for (const directive of ["prefetch-src", "plugin-types", "navigate-to", "referre
     assert.equal(await on(`default-src 'self'; ${directive} x`), true);
     assert.equal(await on(`  ${directive.toUpperCase()}\tx ;`), true);
     assert.equal(await on(`default-src https://example.com/${directive}/`), false);
-    assert.equal(await on(`default-src 'self'; report-uri /${directive}`), false);
+    assert.equal(await on(`default-src 'self'; ${directive}-extra x`), false);
     assert.equal(await on(""), false);
   });
 }
@@ -162,6 +164,18 @@ test("verification-names: fixable unless the name is verify-v1", async () => {
   assert.equal(await on("verify-v1"), false);
   assert.equal(await on("Verify-V1"), false);
 });
+
+for (const tag of ["cursor", "solidcolor"]) {
+  test(`${tag}: fixable only inside svg and without an id`, async () => {
+    const on = (html: string) => fixableOn(`element/${tag}`, html, tag);
+    assert.equal(await on(`<svg><defs><${tag}></${tag}></defs></svg>`), true);
+    assert.equal(await on(`<svg><g><defs><${tag} x="1"></${tag}></defs></g></svg>`), true);
+    assert.equal(await on(`<svg><defs><${tag} id="a"></${tag}></defs></svg>`), false);
+    assert.equal(await on(`<svg><defs><${tag} id=""></${tag}></defs></svg>`), false);
+    assert.equal(await on(`<p><${tag}>Text</${tag}></p>`), false);
+    assert.equal(await on(`<${tag}></${tag}>`), false);
+  });
+}
 
 test("apple-mobile-web-app-status-bar-style: fixable only for default or a missing content", async () => {
   const on = (attrs: string) =>

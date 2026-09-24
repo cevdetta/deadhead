@@ -18,7 +18,7 @@ impacts: ["seo", "maintainability"]
 related: ["meta/page-info-names", "meta/keywords"]
 ---
 
-Six `meta` names once proved to a service that the site's owner controlled the page: `verify-v1`, `y_key`, `microid`, `readability-verification`, `norton-safeweb` and `blogcatalog`. A seventh, `pagekey`, has no documented reader at all. The services closed, or read a different name, so six of the seven tokens prove nothing to anyone. The last is an open question: `verify-v1` may still hold a Google Search Console verification for a site that never added `google-site-verification`. Current verification tags such as `google-site-verification` and `msvalidate.01` stay quiet.
+Seven `meta` names claim, or look like they claim, ownership of a page for some service. Four were documented as ownership checks: `verify-v1` for Google, `y_key` for Yahoo! Site Explorer, `blogcatalog` for BlogCatalog and `microid` for MicroID. `readability-verification` carries the name of Readability, a closed service; `norton-safeweb` is a truncated form of Norton's registered name; `pagekey` has no documented reader at all. Six of the seven prove nothing to anyone. The last is an open question: `verify-v1` may still hold a Google Search Console verification for a site that never added `google-site-verification`. Current verification tags such as `google-site-verification` and `msvalidate.01` stay quiet.
 
 ## Why avoid
 
@@ -26,10 +26,10 @@ The HTML Standard's predefined metadata names include none of the seven. Its "Ot
 
 - `verify-v1`: "Superseded by google-site-verification. Legacy verification for Google Sitemaps."
 - `y_key`: "Used to verify ownership for Yahoo! Site Explorer". Yahoo merged Site Explorer into Bing Webmaster Tools and closed it on 21 November 2011.
-- `blogcatalog`: an Incomplete proposal, because its "Claimed spec link is not a link to a spec".
+- `blogcatalog`: "Used to verify ownership of Blog Catalog.com", an Incomplete proposal because its "Claimed spec link is not a link to a spec".
 - `norton-safeweb`: Norton's registered name is `norton-safeweb-site-verification`. The bare `norton-safeweb` matches no documented reader.
 
-The rest have no registry entry. `microid` is MicroID's ownership claim, defined in an individual Internet-Draft that expired without becoming an RFC. `readability-verification` belonged to Readability, whose service shut down on 30 September 2016. `pagekey` has neither a registry entry nor a service that documents it. Google's list of supported meta tags names `google-site-verification` and none of these, and Google states it "will ignore meta tags that it doesn't support".
+The rest have no registry entry. `microid` is MicroID's ownership claim, defined in an individual Internet-Draft that expired without becoming an RFC. `readability-verification` names Readability, a read-later service that shut down on 30 September 2016; no source documents what read the tag, and the service is gone either way. `pagekey` has neither a registry entry nor a service that documents it. Google's list of supported meta tags names `google-site-verification` and none of these, and Google states it "will ignore meta tags that it doesn't support".
 
 `verify-v1` is the one name whose reader is unsettled. Google's last public word on it, from December 2012, says Search "currently" supports "ye olde format", and Search Console's help page says a verification lasts only as long as Search Console can confirm the token. No later statement says whether Search Console still recognizes the `verify-v1` spelling.
 
@@ -58,4 +58,4 @@ The autofix deletes the element for six names. `verify-v1` carries no fix: it ma
 - [Search Console Help: Verify your site ownership](https://support.google.com/webmasters/answer/9008080): verification "lasts as long as Search Console can confirm the presence and validity of your verification token".
 - [Search Engine Roundtable: Yahoo Site Explorer closing down today](https://www.seroundtable.com/goodbye-yahoo-site-explorer-14346.html): Site Explorer, the reader of `y_key`, closed on 21 November 2011.
 - [IETF Datatracker: draft-miller-microid](https://datatracker.ietf.org/doc/draft-miller-microid/): the MicroID specification, an expired individual Internet-Draft.
-- [Readability: the bookmarking service will shut down on September 30, 2016](https://medium.com/@readability/the-readability-bookmarking-service-will-shut-down-on-september-30-2016-1641cc18e02b): the service behind `readability-verification` closed.
+- [Readability: the bookmarking service will shut down on September 30, 2016](https://medium.com/@readability/the-readability-bookmarking-service-will-shut-down-on-september-30-2016-1641cc18e02b): the service `readability-verification` is named for closed.

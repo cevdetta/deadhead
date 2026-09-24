@@ -24,7 +24,7 @@ The `referrer` directive set a page's referrer policy from inside its Content Se
 
 The directive moved out. The W3C Working Draft of CSP 1.1 from 11 February 2014 defined `referrer` as "a referrer policy that the user agent applies" to requests from the page. In October 2015 the CSP editor, Mike West, proposed dropping it: CSP "is simpler to conceptualize as a purely restrictive mechanism", so the policy should become "a distinct header". The feature left CSP for its own specification: Referrer Policy delivers the same policy through the `Referrer-Policy` header, a `<meta name="referrer">` element or a `referrerpolicy` attribute. The current CSP Level 3 Editor's Draft parses any directive name into the policy and gives behaviour only to the directives it defines; `referrer` is not among them.
 
-The engines followed. Chrome supported the directive from Chrome 33 and removed it in Chrome 56; its status entry says it "has been removed from the spec and replaced with the Referrer-Policy header". Gecko's directive list does not contain the name, so Firefox logs "Couldn't process unknown directive" and drops it. WebKit's directive list does not contain it either.
+The engines followed. Chrome supported the directive from Chrome 33 and removed it in Chrome 56; its status entry says it "has been removed from the spec and replaced with the Referrer-Policy header". Gecko's directive list does not contain the name, so Firefox logs "Couldn’t process unknown directive" and drops it. WebKit's directive list does not contain it either.
 
 This directive has a visible cost. A page that relies on `referrer no-referrer` inside its policy gets the default policy, `strict-origin-when-cross-origin`, instead: its origin goes to every other site it requests from, and its full URLs go to its own origin. The severity stays `deprecated` because the page itself works; the leak is a policy the author believes is in force and is not.
 
@@ -44,7 +44,7 @@ Referrer-Policy: strict-origin-when-cross-origin
 
 ## Detectability
 
-Detectable with a selector plus logic. The selector pre-filters meta CSP; the logic in `packages/rules/logic/meta/csp-referrer.ts` reports the element when one `;` part of `content` names `referrer`, with ASCII case folded. A URL path that holds the string never trips it: `directiveNames` in `packages/rules/lib/csp.ts` reads the first token of each part, never a value. The CLI, the bookmarklet and the ESLint plugin all report. A page with a meta policy also trips `meta/http-equiv-content-security-policy`, which covers what a meta policy cannot do; this rule covers what the policy says.
+Detectable with a selector plus logic. The selector pre-filters meta CSP; the logic in `packages/rules/logic/meta/csp-referrer.ts` reports the element when one `;` part of `content` names `referrer`, with ASCII case folded. A URL path that holds the string never trips it: `hasDirective` in `packages/rules/lib/csp.ts` reads the first token of each part, never a value. The CLI, the bookmarklet and the ESLint plugin all report. A page with a meta policy also trips `meta/http-equiv-content-security-policy`, which covers what a meta policy cannot do; this rule covers what the policy says.
 
 There is no autofix. The repair edits one `;` part inside `content` and adds a `<meta name="referrer">`, and a fix only removes. Deleting the tag would drop live directives such as `default-src` next to the dead one.
 
@@ -56,5 +56,6 @@ There is no autofix. The repair edits one `;` part inside `content` and adds a `
 - [Chrome Platform Status: CSP 'referrer' directive](https://chromestatus.com/feature/5680800376815616): added in Chrome 33, removed in Chrome 56, "replaced with the Referrer-Policy header".
 - [W3C: Referrer Policy, default referrer policy](https://w3c.github.io/webappsec-referrer-policy/#default-referrer-policy): "The default referrer policy is \"strict-origin-when-cross-origin\"."
 - [Firefox: `nsCSPUtils.h`](https://github.com/mozilla-firefox/firefox/blob/main/dom/security/nsCSPUtils.h): Gecko's directive list, without `referrer`.
+- [Firefox: `csp.properties`](https://github.com/mozilla-firefox/firefox/blob/main/dom/locales/en-US/chrome/security/csp.properties): `couldNotProcessUnknownDirective`, "Couldn’t process unknown directive", the warning for a name outside the directive list.
 - [WebKit: `ContentSecurityPolicyDirectiveNames.cpp`](https://github.com/WebKit/WebKit/blob/main/Source/WebCore/page/csp/ContentSecurityPolicyDirectiveNames.cpp): WebKit's directive names, without `referrer`.
 - [CSP Level 3 (Editor's Draft) §2.2.1](https://w3c.github.io/webappsec-csp/#parse-serialized-policy): the parse algorithm, and a directive list without `referrer`.

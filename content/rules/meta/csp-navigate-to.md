@@ -34,7 +34,7 @@ Delete the directive. No directive replaces it, and no engine shipped it, so del
 
 ## Detectability
 
-Detectable with a selector plus logic. The selector pre-filters meta CSP; the logic in `packages/rules/logic/meta/csp-navigate-to.ts` reports the element when one `;` part of `content` names `navigate-to`, with ASCII case folded. A URL path that holds the string never trips it: `directiveNames` in `packages/rules/lib/csp.ts` reads the first token of each part, never a value. The CLI, the bookmarklet and the ESLint plugin all report. A page with a meta policy also trips `meta/http-equiv-content-security-policy`, which covers what a meta policy cannot do; this rule covers what the policy says.
+Detectable with a selector plus logic. The selector pre-filters meta CSP; the logic in `packages/rules/logic/meta/csp-navigate-to.ts` reports the element when one `;` part of `content` names `navigate-to`, with ASCII case folded. A URL path that holds the string never trips it: `hasDirective` in `packages/rules/lib/csp.ts` reads the first token of each part, never a value. The CLI, the bookmarklet and the ESLint plugin all report. A page with a meta policy also trips `meta/http-equiv-content-security-policy`, which covers what a meta policy cannot do; this rule covers what the policy says.
 
 There is no autofix. The repair edits one `;` part inside `content`, which no fix op expresses. Deleting the tag would drop live directives such as `default-src` next to the dead one.
 
