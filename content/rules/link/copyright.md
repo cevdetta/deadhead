@@ -14,7 +14,7 @@ fix: { op: "none" }
 replacement: "Rename the keyword to license when the target states license terms: <link rel=\"license\" href=\"/license\">. For a bare copyright notice, drop the link and keep the notice in the footer."
 tags: ["hyperlinks"]
 impacts: ["maintainability"]
-related: ["link/obsolete-rel", "link/rel-html4-navigation"]
+related: ["link/document-info-keywords", "link/navigation-keywords"]
 ---
 
 HTML 4 named the page's copyright terms with `<link rel="copyright">`. The living HTML

@@ -14,7 +14,7 @@ fix: { op: "remove-tokens", attr: "rel" }
 replacement: "Delete the keyword from <link>. For a crawler hint, put it on the <a> it describes, or use <meta name=\"robots\" content=\"nofollow\"> for the whole page."
 tags: ["hyperlinks", "search"]
 impacts: ["seo", "maintainability"]
-related: ["link/obsolete-rel", "link/rel-dead-vendor", "link/rel-dropped-hierarchy"]
+related: ["link/navigation-keywords", "link/vendor-keywords", "link/document-info-keywords"]
 ---
 
 Some `rel` keywords describe a hyperlink the reader follows: `nofollow` tells a crawler

@@ -323,9 +323,13 @@ test("a dead keyword next to a live one loses the keyword, never the link", () =
   for (const rule of relRules.filter((r) => r.meta.fix.op === "remove-tokens")) {
     const parsed = parseSelector(rule.meta.selector!);
     assert.ok(parsed.ok);
-    const [dead] = tokenTests(parsed.ast, "rel");
-    assert.ok(dead, `${rule.meta.ruleId} has a rel keyword`);
-    const html = relPage(`<link rel="alternate ${dead.value}" href="/feed.xml">`);
+    // A keyword the rule's fixable() vetoes keeps the whole rel by design.
+    const page = (value: string) => relPage(`<link rel="alternate ${value}" href="/feed.xml">`);
+    const dead = tokenTests(parsed.ast, "rel").find(
+      (t) => rule.fixable?.(parseHtml(page(t.value)).doc.querySelector("link")!) ?? true,
+    );
+    assert.ok(dead, `${rule.meta.ruleId} has a fixable rel keyword`);
+    const html = page(dead.value);
     const out = applyFixes(html, run([rule], parseHtml(html), { fix: true }).flatMap((f) => (f.fix ? [f.fix] : []))).output;
     assert.match(out, /<link rel="alternate" href="\/feed\.xml">/, rule.meta.ruleId);
   }
@@ -334,7 +338,7 @@ test("a dead keyword next to a live one loses the keyword, never the link", () =
 test("--fix converges when two rules strip keywords from the same link", async () => {
   await sandbox(async (dir) => {
     const file = join(dir, "page.html");
-    // sitemap (link/sitemap) and pavatar (link/rel-dead-vendor) share one rel.
+    // sitemap (link/sitemap) and pavatar (link/vendor-keywords) share one rel.
     await writeFile(file, relPage('<link rel="alternate sitemap pavatar" href="/feed.xml">'));
     deadhead("--fix", "--fail-on=none", file);
     assert.match(await readFile(file, "utf8"), /<link rel="alternate" href="\/feed\.xml">/);

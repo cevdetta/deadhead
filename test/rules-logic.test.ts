@@ -100,16 +100,34 @@ test("name-obsolete: fixable on option, and on an a whose id is its name", async
   assert.equal(await on('<img src="c.png" alt="" name="c">', "img"), false);
 });
 
-test("obsolete-rel: fixable unless rel holds self, edituri or previous", async () => {
-  const on = (rel: string) => fixableOn("link/obsolete-rel", `<link rel="${rel}" href="/">`, "link");
+test("navigation-keywords: fixable unless rel holds previous", async () => {
+  const on = (rel: string) => fixableOn("link/navigation-keywords", `<link rel="${rel}" href="/">`, "link");
   assert.equal(await on("archives"), true);
   assert.equal(await on("alternate first"), true);
-  assert.equal(await on("self"), false);
-  assert.equal(await on("hub\tSELF"), false);
-  assert.equal(await on("EditURI"), false);
-  assert.equal(await on("index edituri"), false);
+  assert.equal(await on("self edituri"), true);
   assert.equal(await on("previous"), false);
   assert.equal(await on("archives PREVIOUS"), false);
+  assert.equal(await on("index\tPrevious"), false);
+});
+
+test("vendor-keywords: fixable unless rel holds edituri", async () => {
+  const on = (rel: string) => fixableOn("link/vendor-keywords", `<link rel="${rel}" href="/">`, "link");
+  assert.equal(await on("pavatar"), true);
+  assert.equal(await on("alternate publisher"), true);
+  assert.equal(await on("self previous"), true);
+  assert.equal(await on("EditURI"), false);
+  assert.equal(await on("p3pv1 edituri"), false);
+  assert.equal(await on("fluid-icon\nEDITURI"), false);
+});
+
+test("document-info-keywords: fixable unless rel holds self", async () => {
+  const on = (rel: string) => fixableOn("link/document-info-keywords", `<link rel="${rel}" href="/">`, "link");
+  assert.equal(await on("logo"), true);
+  assert.equal(await on("alternate translation"), true);
+  assert.equal(await on("edituri previous"), true);
+  assert.equal(await on("self"), false);
+  assert.equal(await on("hub\tSELF"), false);
+  assert.equal(await on("profile self"), false);
 });
 
 test("obsolete-name: fixable unless the name is verify-v1", async () => {

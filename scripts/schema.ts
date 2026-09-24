@@ -59,8 +59,7 @@ export const VERDICT_WORDS = [
  * set must be empty when that phase merges, and nothing is ever added to it.
  */
 export const LEGACY_IDS: ReadonlySet<string> = new Set([
-  "attr/svg-xlink-removed", "element/svg-removed", "link/obsolete-rel", "link/rel-dead-vendor",
-  "link/rel-dropped-hierarchy", "meta/obsolete-name", "meta/csp-removed-directive",
+  "attr/svg-xlink-removed", "element/svg-removed", "meta/obsolete-name", "meta/csp-removed-directive",
   "attr/iframe-allow-retired-feature",
 ]);
 
