@@ -9,23 +9,14 @@ import { parseSuppressions } from "../packages/core/suppressions.ts";
 import { loadRules } from "../packages/rules/load.ts";
 
 /**
- * Rules whose one-attribute fix cannot clear every finding on their own
- * fixture. Phase 2 adds `remove-attributes` and empties this set; a new entry
- * needs a reason in the PR. attr/script-event-for: removing `event` from a
- * `for="window" event="onload"` pair leaves a `for`-only finding.
+ * Rules whose fix cannot clear every finding on their own fixture. Phase 2's
+ * `remove-attributes` op empties this set down to one: `attr/script-event-for`
+ * exports `match()`, and `remove-attributes` cannot pair with a module that
+ * decides findings (schema forbids it), so it stays on `remove-attribute` and
+ * removing `event` from a `for="window" event="onload"` pair leaves a
+ * `for`-only finding. A new entry needs a reason in the PR.
  */
-const KNOWN_PARTIAL: ReadonlySet<string> = new Set([
-  "attr/a-coords-shape",
-  "attr/area-obsolete",
-  "attr/data-binding",
-  "attr/global-contextmenu",
-  "attr/input-ismap-usemap",
-  "attr/input-number-size",
-  "attr/menu-obsolete",
-  "attr/object-obsolete",
-  "attr/rev-urn",
-  "attr/script-event-for",
-]);
+const KNOWN_PARTIAL: ReadonlySet<string> = new Set(["attr/script-event-for"]);
 
 /**
  * Rules whose removal changes behaviour with no provably safe subset; see the

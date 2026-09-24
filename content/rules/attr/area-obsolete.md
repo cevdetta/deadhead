@@ -10,7 +10,7 @@ detectability: "yes"
 kind: "element"
 scope: "body"
 selector: "area[hreflang], area[type], area[nohref]"
-fix: { op: "remove-attribute", attr: "hreflang" }
+fix: { op: "remove-attributes" }
 replacement: "Delete the attributes. Omit href where the region links nowhere: <area shape=\"rect\" coords=\"0,0,10,10\">."
 tags: ["hyperlinks", "media"]
 impacts: ["maintainability"]
@@ -45,7 +45,7 @@ A dead region with no link at all:
 
 ## Detectability
 
-Complete detection. The rule matches `area[hreflang]`, `area[type]` or `area[nohref]`: presence of any of the three is the whole verdict, so no logic module exists. Autofix drops `hreflang`; a lone `type` or `nohref`, or the remainder of a set, needs a hand edit, since one rule carries one fix attribute.
+Complete detection. The rule matches `area[hreflang]`, `area[type]` or `area[nohref]`: presence of any of the three is the whole verdict, so no logic module exists. The autofix removes every attribute the rule names that is present on the element, and leaves every other attribute as written.
 
 ## Resources
 

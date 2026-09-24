@@ -10,7 +10,7 @@ detectability: "yes"
 kind: "element"
 scope: "body"
 selector: 'input[type="number" i][maxlength], input[type="number" i][size]'
-fix: { op: "remove-attribute", attr: "maxlength" }
+fix: { op: "remove-attributes" }
 replacement: "Delete the hints and bound the control with min and max: <input type=\"number\" name=\"qty\" min=\"0\" max=\"100\">. Size it with CSS width where the layout needs it."
 tags: ["forms"]
 impacts: ["maintainability"]
@@ -39,7 +39,7 @@ input[name="qty"] { width: 4em; }
 
 ## Detectability
 
-Complete detection. The rule matches `input[type="number"][maxlength]` or `input[type="number"][size]`: presence of either attribute on a number input is the whole verdict, so no logic module exists. The `i` flag folds ASCII case on the `type` value. Autofix drops `maxlength`; a lone `size` or the remainder of a pair needs a hand edit, since one rule carries one fix attribute.
+Complete detection. The rule matches `input[type="number"][maxlength]` or `input[type="number"][size]`: presence of either attribute on a number input is the whole verdict, so no logic module exists. The `i` flag folds ASCII case on the `type` value. The autofix removes every attribute the rule names that is present on the element, and leaves every other attribute as written.
 
 ## Resources
 

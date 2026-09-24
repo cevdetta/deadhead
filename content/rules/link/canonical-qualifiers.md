@@ -10,7 +10,7 @@ detectability: "yes"
 kind: "element"
 scope: "head"
 selector: 'link[rel~="canonical" i][hreflang], link[rel~="canonical" i][lang], link[rel~="canonical" i][media], link[rel~="canonical" i][type]'
-fix: { op: "remove-attribute", attr: "hreflang" }
+fix: { op: "remove-attributes" }
 replacement: "Strip the qualifier and keep a plain canonical: <link rel=\"canonical\" href=\"https://example.com/post\">. For a genuine alternate version use <link rel=\"alternate\" hreflang=\"fr\" href=\"https://example.com/fr/post\">."
 tags: ["search"]
 impacts: ["seo"]
@@ -38,7 +38,7 @@ Keep the canonical plain, and declare alternates with a separate annotation:
 
 ## Detectability
 
-Detectable with the selector alone. `rel` matches with `~=` because it is a space-separated token set, and the comma lists one branch per qualifier. The autofix strips `hreflang`; a tag qualified without it reports without a fix and needs a hand.
+Detectable with the selector alone. `rel` matches with `~=` because it is a space-separated token set, and the comma lists one branch per qualifier. The autofix removes every attribute the rule names that is present on the element, and leaves every other attribute as written.
 
 ## Resources
 

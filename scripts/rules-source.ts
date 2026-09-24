@@ -236,8 +236,9 @@ function logicExports(text: string): Map<string, { line: number; col: number }> 
  * What a rule's module must export, given the rule's frontmatter. An element
  * rule exports `match`, `fixable` or both; a document rule exports `check`.
  * `fixable` vetoes a fix per element, so it needs a fix to veto and an element
- * to judge. `remove-tokens` deletes what the selector tested, so the selector
- * must own the match: its module may veto fixes but never decide findings.
+ * to judge. `remove-tokens` and `remove-attributes` delete what the selector
+ * tested, so the selector must own the match: their module may veto fixes but
+ * never decide findings.
  */
 function checkLogicExports(rule: LoadedRule, module: string, text: string): Diagnostic[] {
   const file = `packages/rules/logic/${module}`;
@@ -271,6 +272,14 @@ function checkLogicExports(rule: LoadedRule, module: string, text: string): Diag
       at(
         "match",
         "`remove-tokens` cannot pair with match(): the logic may decide a finding on a live keyword the selector only pre-filters on. Export `fixable` alone",
+      ),
+    );
+  }
+  if (exports.has("match") && fix.op === "remove-attributes") {
+    diagnostics.push(
+      at(
+        "match",
+        "`remove-attributes` cannot pair with match(): the logic may decide a finding on a live attribute the selector only pre-filters on. Export `fixable` alone",
       ),
     );
   }

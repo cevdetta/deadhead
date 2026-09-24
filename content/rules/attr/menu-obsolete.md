@@ -10,7 +10,7 @@ detectability: "yes"
 kind: "element"
 scope: "body"
 selector: "menu[type], menu[label]"
-fix: { op: "remove-attribute", attr: "type" }
+fix: { op: "remove-attributes" }
 replacement: "Delete the attributes. For custom menus handle contextmenu in script; for toolbars drop the attributes."
 tags: ["scripting"]
 impacts: ["maintainability"]
@@ -43,7 +43,7 @@ target.addEventListener("contextmenu", (event) => showMenu(event));
 
 ## Detectability
 
-Complete detection. The rule matches `menu[type]` or `menu[label]`: presence of either attribute is the whole verdict, so no logic module exists. Autofix drops `type`; a lone `label` or the remainder of a pair needs a hand edit, since one rule carries one fix attribute.
+Complete detection. The rule matches `menu[type]` or `menu[label]`: presence of either attribute is the whole verdict, so no logic module exists. The autofix removes every attribute the rule names that is present on the element, and leaves every other attribute as written.
 
 ## Resources
 

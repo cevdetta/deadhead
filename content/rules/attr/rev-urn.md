@@ -10,7 +10,7 @@ detectability: "yes"
 kind: "element"
 scope: "any"
 selector: "a[rev], link[rev], a[urn], link[urn]"
-fix: { op: "remove-attribute", attr: "rev" }
+fix: { op: "remove-attributes" }
 replacement: "Delete the attributes. State the relationship with rel and the identifier with href: <a href=\"doc.html\" rel=\"author\">doc</a>."
 tags: ["hyperlinks"]
 impacts: ["maintainability"]
@@ -41,7 +41,7 @@ Name the identifier with `href` and drop `urn`:
 
 ## Detectability
 
-Complete detection. The rule matches `a[rev]`, `link[rev]`, `a[urn]` or `link[urn]`: presence of either attribute is the whole verdict, so no logic module exists. Autofix drops `rev`; a lone `urn` or the remainder of a pair needs a hand edit, since one rule carries one fix attribute.
+Complete detection. The rule matches `a[rev]`, `link[rev]`, `a[urn]` or `link[urn]`: presence of either attribute is the whole verdict, so no logic module exists. The autofix removes every attribute the rule names that is present on the element, and leaves every other attribute as written.
 
 ## Resources
 

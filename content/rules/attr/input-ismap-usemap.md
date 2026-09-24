@@ -10,7 +10,7 @@ detectability: "yes"
 kind: "element"
 scope: "body"
 selector: "input[ismap], input[usemap]"
-fix: { op: "remove-attribute", attr: "ismap" }
+fix: { op: "remove-attributes" }
 replacement: "Delete the attributes. For a server-side map keep <input type=\"image\" src=\"go.png\" alt=\"Go\">; for a client-side map use img with usemap."
 tags: ["forms", "media"]
 impacts: ["maintainability"]
@@ -44,7 +44,7 @@ A client-side map belongs on `img`:
 
 ## Detectability
 
-Complete detection. The rule matches `input[ismap]` or `input[usemap]`: presence of either attribute is the whole verdict, so no logic module exists. Autofix drops `ismap`; a lone `usemap` or the remainder of a pair needs a hand edit, since one rule carries one fix attribute.
+Complete detection. The rule matches `input[ismap]` or `input[usemap]`: presence of either attribute is the whole verdict, so no logic module exists. The autofix removes every attribute the rule names that is present on the element, and leaves every other attribute as written.
 
 ## Resources
 

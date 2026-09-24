@@ -10,7 +10,7 @@ detectability: "yes"
 kind: "element"
 scope: "any"
 selector: "[contextmenu], [onshow]"
-fix: { op: "remove-attribute", attr: "contextmenu" }
+fix: { op: "remove-attributes" }
 replacement: "Delete the attributes. Handle the contextmenu event in script: target.addEventListener(\"contextmenu\", show)."
 tags: ["scripting"]
 impacts: ["maintainability"]
@@ -37,7 +37,7 @@ target.addEventListener("contextmenu", (event) => showMenu(event));
 
 ## Detectability
 
-Complete detection. The rule matches `[contextmenu]` or `[onshow]`: presence of either attribute is the whole verdict, so no logic module exists. Neither alternative leads with a tag, so the rule dispatches from the wildcard bucket like any document-wide check. Autofix drops `contextmenu`; a lone `onshow` or the remainder of a pair needs a hand edit, since one rule carries one fix attribute.
+Complete detection. The rule matches `[contextmenu]` or `[onshow]`: presence of either attribute is the whole verdict, so no logic module exists. Neither alternative leads with a tag, so the rule dispatches from the wildcard bucket like any document-wide check. The autofix removes every attribute the rule names that is present on the element, and leaves every other attribute as written.
 
 ## Resources
 

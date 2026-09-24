@@ -10,7 +10,7 @@ detectability: "yes"
 kind: "element"
 scope: "any"
 selector: "[datasrc], [datafld], [dataformatas]"
-fix: { op: "remove-attribute", attr: "datasrc" }
+fix: { op: "remove-attributes" }
 replacement: "Populate the page with script and XHR, then delete the hooks: <span id=\"name\"></span>."
 tags: ["microsoft", "scripting"]
 impacts: ["maintainability"]
@@ -36,7 +36,7 @@ Populate the page with script and fetch the data where it lives:
 
 ## Detectability
 
-Complete detection. The rule matches `[datasrc]`, `[datafld]` or `[dataformatas]`: presence of any of the three is the whole verdict, so no logic module exists. No alternative names a tag, so the rule lands in the wildcard dispatch bucket. Autofix drops `datasrc`; a lone `datafld` or `dataformatas`, or the remainder of a set, needs a hand edit, since one rule carries one fix attribute.
+Complete detection. The rule matches `[datasrc]`, `[datafld]` or `[dataformatas]`: presence of any of the three is the whole verdict, so no logic module exists. No alternative names a tag, so the rule lands in the wildcard dispatch bucket. The autofix removes every attribute the rule names that is present on the element, and leaves every other attribute as written.
 
 ## Resources
 

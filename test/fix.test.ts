@@ -3,7 +3,7 @@ import test from "node:test";
 
 import { parseHtml } from "../packages/cli/adapter.ts";
 import { type Rule, run } from "../packages/core/engine.ts";
-import { type Fix, applyFixes } from "../packages/core/fix.ts";
+import { type Fix, applyFixes, computeFix } from "../packages/core/fix.ts";
 import type { RuleMeta } from "../packages/core/vocabulary.ts";
 
 const meta = (overrides: Partial<RuleMeta> & { ruleId: string }): RuleMeta => ({
@@ -359,6 +359,75 @@ test("attr/script-event-for never fixes a pair the browser skips: deleting event
   assert.equal(findings[0]?.fix, null);
   assert.ok(findings[1]?.fix);
   assert.equal(html.slice(...findings[1].fix.range), ' event="onload"');
+});
+
+// --- remove-attributes -------------------------------------------------------
+
+test("remove-attributes deletes every named attribute present, and keeps value tests", () => {
+  const source = '<input type="number" maxlength="3" size="4" name="n">';
+  const el = parseHtml(source).doc.querySelector("input");
+  assert.ok(el);
+  const rule: RuleMeta = meta({
+    ruleId: "attr/t",
+    selector: 'input[type="number" i][maxlength], input[type="number" i][size]',
+    fix: { op: "remove-attributes", attr: null, token: null },
+  });
+  const fix = computeFix(rule, el, source);
+  assert.ok(fix);
+  assert.equal(applyFixes(source, [fix]).output, '<input type="number" name="n">');
+});
+
+test("remove-attributes drops only the attributes present on this element", () => {
+  const source = '<a href="x" coords="1,1,2,2">text</a>';
+  const el = parseHtml(source).doc.querySelector("a");
+  assert.ok(el);
+  const rule: RuleMeta = meta({
+    ruleId: "attr/a",
+    selector: "a[coords], a[shape]",
+    fix: { op: "remove-attributes", attr: null, token: null },
+  });
+  const fix = computeFix(rule, el, source);
+  assert.ok(fix);
+  assert.equal(applyFixes(source, [fix]).output, '<a href="x">text</a>');
+});
+
+test("remove-attributes declines when none of its attributes are present", () => {
+  const source = '<a href="x">text</a>';
+  const el = parseHtml(source).doc.querySelector("a");
+  assert.ok(el);
+  const rule: RuleMeta = meta({
+    ruleId: "attr/a",
+    selector: "a[coords], a[shape]",
+    fix: { op: "remove-attributes", attr: null, token: null },
+  });
+  assert.equal(computeFix(rule, el, source), null);
+});
+
+test("remove-attributes declines with no selector", () => {
+  const source = '<a href="x" coords="1,1,2,2">text</a>';
+  const el = parseHtml(source).doc.querySelector("a");
+  assert.ok(el);
+  const rule: RuleMeta = meta({
+    ruleId: "attr/a",
+    selector: null,
+    fix: { op: "remove-attributes", attr: null, token: null },
+  });
+  assert.equal(computeFix(rule, el, source), null);
+});
+
+test("remove-attributes never touches an attribute the selector only value-tests", () => {
+  // presenceTests skips [type="number" i]: it is a condition, not a target.
+  const source = '<input type="number" maxlength="3" name="n">';
+  const el = parseHtml(source).doc.querySelector("input");
+  assert.ok(el);
+  const rule: RuleMeta = meta({
+    ruleId: "attr/t",
+    selector: 'input[type="number" i][maxlength]',
+    fix: { op: "remove-attributes", attr: null, token: null },
+  });
+  const fix = computeFix(rule, el, source);
+  assert.ok(fix);
+  assert.equal(applyFixes(source, [fix]).output, '<input type="number" name="n">');
 });
 
 // --- performance --------------------------------------------------------

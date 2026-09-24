@@ -331,3 +331,22 @@ export function tokenTests(list: Compound[], attr: string): TokenTest[] {
   }
   return out;
 }
+
+/**
+ * The attributes a selector requires by presence alone: every positive bare
+ * `[attr]` test, lowercased, deduplicated, in source order. This is what a
+ * `remove-attributes` fix deletes. Tests with a value or an operator are
+ * conditions on the element (`[type="number"]`), and tests inside `:not()`
+ * exclude, so neither is a target.
+ */
+export function presenceTests(list: Compound[]): string[] {
+  const out: string[] = [];
+  for (const compound of list) {
+    for (const simple of compound) {
+      if (simple.type !== "attr" || simple.op !== "exists") continue;
+      const name = simple.name.toLowerCase();
+      if (!out.includes(name)) out.push(name);
+    }
+  }
+  return out;
+}

@@ -10,7 +10,7 @@
  * ESLint fixer is exactly a range and a replacement string.
  */
 
-import { parseSelector, type TokenTest, tokenTests } from "./selector.ts";
+import { parseSelector, presenceTests, type TokenTest, tokenTests } from "./selector.ts";
 import type { ElementPort, Range } from "./types.ts";
 import type { RuleMeta } from "./vocabulary.ts";
 
@@ -90,6 +90,19 @@ function deadTokens(selector: string, attr: string): TokenTest[] {
   return tests;
 }
 
+/** Parsed once per selector: computeFix runs once per finding. */
+const PRESENCE_TESTS = new Map<string, string[]>();
+
+function presentAttrs(selector: string): string[] {
+  let names = PRESENCE_TESTS.get(selector);
+  if (names === undefined) {
+    const parsed = parseSelector(selector);
+    names = parsed.ok ? presenceTests(parsed.ast) : [];
+    PRESENCE_TESTS.set(selector, names);
+  }
+  return names;
+}
+
 /**
  * The fix for one finding, or `null` when there is not one.
  *
@@ -103,6 +116,8 @@ function deadTokens(selector: string, attr: string): TokenTest[] {
  *   from what the author wrote.
  * - `remove-tokens` found none of its keywords in the attribute (a
  *   `match: "logic"` rule matched on something else).
+ * - `remove-attributes` found none of its selector's `[attr]` tests present
+ *   on this element (a `match: "logic"` rule matched on something else).
  */
 export function computeFix(
   meta: RuleMeta,
@@ -118,6 +133,28 @@ export function computeFix(
     const range = element.range();
     if (range === null) return null;
     return { ruleId: meta.ruleId, range: wholeLineIfAlone(source, range), text: "" };
+  }
+
+  if (meta.fix.op === "remove-attributes") {
+    if (meta.selector === null) return null;
+    // One fix for all of them: several fixes on one element would overlap
+    // once widened to their leading space, and applyFixes would skip all but one.
+    const ranges = presentAttrs(meta.selector)
+      .map((name) => element.attrRange(name))
+      .filter((range): range is Range => range !== null)
+      .map((range) => withLeadingSpace(source, range))
+      .sort((a, b) => a[0] - b[0]);
+    const first = ranges[0];
+    if (first === undefined) return null;
+    const last = ranges[ranges.length - 1]!;
+    // Rebuild the span between the first and last attribute without them.
+    let text = "";
+    let at = first[0];
+    for (const [start, end] of ranges) {
+      text += source.slice(at, start);
+      at = end;
+    }
+    return { ruleId: meta.ruleId, range: [first[0], last[1]], text };
   }
 
   const attr = meta.fix.attr;

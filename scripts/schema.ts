@@ -36,7 +36,7 @@ import {
   type Status,
   type Tag,
 } from "../packages/core/vocabulary.ts";
-import { parseSelector, tokenTests } from "../packages/core/selector.ts";
+import { parseSelector, presenceTests, tokenTests } from "../packages/core/selector.ts";
 
 // The vocabulary and the selector grammar live in core because the engine
 // needs them too, and a validator that disagrees with the engine is worse
@@ -512,6 +512,33 @@ export function validateFrontmatter(data: unknown): FrontmatterResult {
             );
           }
         }
+      }
+    }
+  }
+
+  // remove-attributes deletes what the selector requires with bare `[attr]`
+  // presence tests, and it has to own that requirement outright: with no
+  // selector, there is no `[attr]` test to read the deleted names from.
+  // `match: "logic"` is allowed only for a module that vetoes fixes and never
+  // decides findings; `checkLogicModules` rejects a `match` export there,
+  // since logic could decide on a live attribute the selector only pre-filters on.
+  if (fixOp === "remove-attributes") {
+    if (selector === null) {
+      issues.push(
+        field(
+          ["fix", "op"],
+          "`remove-attributes` needs a selector: it reads the deleted attributes from the bare `[attr]` tests in it",
+        ),
+      );
+    } else {
+      const parsed = parseSelector(selector);
+      if (parsed.ok && presenceTests(parsed.ast).length === 0) {
+        issues.push(
+          field(
+            ["fix", "op"],
+            "`remove-attributes` deletes the attributes the selector tests with `[attr]`, but this selector has no bare `[attr]` test",
+          ),
+        );
       }
     }
   }

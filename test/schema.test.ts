@@ -285,6 +285,47 @@ test("remove-tokens rejects a compound testing the same attribute twice", () => 
   );
 });
 
+test("remove-attributes takes no attr or token, and needs a bare [attr] test", () => {
+  const coords = { selector: "a[coords], a[shape]" };
+  assert.deepEqual(messages({ ...coords, fix: { op: "remove-attributes" } }), []);
+  assert.match(
+    messages({ ...coords, fix: { op: "remove-attributes", attr: "coords" } }).join("\n"),
+    /take an `attr`/,
+  );
+  assert.match(
+    messages({ ...coords, fix: { op: "remove-attributes", token: "x" } }).join("\n"),
+    /only `remove-token` takes a `token`/,
+  );
+  assert.match(
+    messages({ selector: 'a[href="x"]', fix: { op: "remove-attributes" } }).join("\n"),
+    /no bare `\[attr\]` test/,
+  );
+});
+
+test("remove-attributes allows match: logic; checkLogicModules rejects a match() export there", () => {
+  assert.deepEqual(
+    messages({
+      selector: "a[coords], a[shape]",
+      match: "logic",
+      fix: { op: "remove-attributes" },
+    }),
+    [],
+  );
+});
+
+test("remove-attributes rejects a missing selector", () => {
+  const withoutSelector = base();
+  delete withoutSelector["selector"];
+  assert.match(
+    messages({
+      ...withoutSelector,
+      selector: undefined,
+      fix: { op: "remove-attributes" },
+    }).join("\n"),
+    /needs a selector/,
+  );
+});
+
 test("match only accepts \"logic\"", () => {
   assert.match(messages({ match: "regex" }).join("\n"), /only supported value is "logic"/);
 });

@@ -295,6 +295,19 @@ test("a remove-tokens rule's module may veto fixes but not decide findings", asy
   });
 });
 
+test("a remove-attributes rule's module may veto fixes but not decide findings", async () => {
+  const rule = logicRule(
+    ["selector: 'meta[name=example]'", "selector: 'a[coords], a[shape]'"],
+    ['fix: { op: "remove-element" }', 'fix: { op: "remove-attributes" }'],
+  );
+  await withLogicDir({ "meta/example.ts": "export const fixable = () => true;\n" }, async (dir) => {
+    assert.equal(format(await checkLogicModules([rule], dir)), "");
+  });
+  await withLogicDir({ "meta/example.ts": "export const match = () => true;\n" }, async (dir) => {
+    assert.match(format(await checkLogicModules([rule], dir)), /^packages\/rules\/logic\/meta\/example\.ts:1:14 {2}`remove-attributes` cannot pair with match\(\)/);
+  });
+});
+
 test("every packages/rules/lib export is used by a logic module", async () => {
   const { checkLibModules } = await import("../scripts/rules-source.ts");
   assert.deepEqual(await checkLibModules(), []);

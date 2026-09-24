@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { leadingTag, matches, parseSelector, tokenTests } from "../packages/core/selector.ts";
+import { leadingTag, matches, parseSelector, presenceTests, tokenTests } from "../packages/core/selector.ts";
 import type { Compound } from "../packages/core/selector.ts";
 import type { ElementPort } from "../packages/core/types.ts";
 
@@ -191,4 +191,18 @@ test("tokenTests lists the positive ~= tests on one attribute", () => {
     { value: "Logo", insensitive: false },
   ]);
   assert.deepEqual(tokenTests(parsed.ast, "type"), []);
+});
+
+test("presenceTests lists bare [attr] tests only, never values, tokens or :not()", () => {
+  const parsed = parseSelector(
+    'input[type="number" i][maxlength], input[type="number" i][size], a:not([href])[rel~="x"][rev]',
+  );
+  assert.ok(parsed.ok);
+  assert.deepEqual(presenceTests(parsed.ast), ["maxlength", "size", "rev"]);
+});
+
+test("presenceTests lowercases names and deduplicates across alternatives", () => {
+  const parsed = parseSelector("meta[Name], meta[name], meta[content]");
+  assert.ok(parsed.ok);
+  assert.deepEqual(presenceTests(parsed.ast), ["name", "content"]);
 });

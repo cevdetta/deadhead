@@ -23,6 +23,7 @@ export const SCOPE = ["head", "body", "any"] as const;
 export const FIX_OP = [
   "remove-element",
   "remove-attribute",
+  "remove-attributes",
   "remove-token",
   "remove-tokens",
   "none",
@@ -122,7 +123,8 @@ export type RuleMeta = {
    * selector), and `token` the whitespace-separated keyword `remove-token`
    * deletes from it. Both are `null` for the ops that do not take them.
    * Without them the op is not actionable: knowing a rule removes *an*
-   * attribute says nothing about which one.
+   * attribute says nothing about which one. `remove-attributes` takes none:
+   * it reads bare `[attr]` tests from the selector.
    */
   fix: { op: FixOp; attr: string | null; token: string | null };
   replacement: string;
