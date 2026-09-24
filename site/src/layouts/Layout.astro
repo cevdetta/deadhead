@@ -39,8 +39,11 @@ const nav = [
 // the built output, so anything added here has to survive every rule in
 // content/rules — charset in the first 1024 bytes, no X-UA-Compatible, no
 // keywords, no `shortcut` in a rel, no type attribute on a classic script.
+// The doctype is written out: Astro 7.3.4 skips its own when the head quotes
+// `<!doctype html>`, as the document/doctype page's description does.
 ---
 
+<Fragment set:html="<!doctype html>" />
 <html lang="en">
   <head>
     <meta charset="utf-8" />

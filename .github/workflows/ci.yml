@@ -27,20 +27,17 @@ jobs:
       # the Node floor. This replaces pnpm/action-setup (npm-based: ~12s of
       # self-installer + version switch, and it left a stale v11 store path
       # behind) followed by setup-node (~5s, mostly a cache lookup that
-      # missed anyway). The install stays an explicit step below: the
-      # action's auto-install is unpinned (`pnpm install`), and only
-      # --frozen-lockfile fails on a missing or out-of-date lockfile.
+      # missed anyway). `require-lockfile` installs with --frozen-lockfile,
+      # which fails on a missing or out-of-date lockfile.
       # No store cache: a cold install is ~2.5s for 368 packages, cheaper
       # than restoring + uploading a ~94MB cache on every run.
-      - uses: pnpm/setup@84cb39b217b10273981911c288cd62326dc7c6d2 # v2
+      - uses: pnpm/setup@fbda4c85fc2e1e08721cd8763afea8f48d60f024 # v3
         with:
           # Single version: 24 is the floor declared in engines. If it passes
           # on the floor it passes above; a second runner doubles minutes
           # for no signal on this codebase.
           runtime: node@24
-          install: false
-
-      - run: pnpm install --frozen-lockfile
+          require-lockfile: true
 
       # Rules first: a malformed frontmatter field should fail in two seconds,
       # not after the whole suite has run.
@@ -58,14 +55,6 @@ jobs:
       # findings, so pointing this at the whole tree could only ever fail.
       - run: pnpm check:self
 
-      # The documentation site is built from the same content/rules markdown,
-      # so a rule that breaks the linter breaks the site too. Building it here
-      # also typechecks the .astro files, and check:site then runs the CLI over
-      # the rendered output: the head this project ships is held to the rules
-      # this project ships.
-      - run: pnpm site:check
-      - run: pnpm check:site
-
       # Folded into this job instead of a second runner: one checkout, one
       # install. A linter about shipping things you do not need should hold
       # itself to it. Pinned exact in devDependencies rather than `dlx`
@@ -80,3 +69,24 @@ jobs:
       # ours to fix. They still print. Revisit when the packages are published
       # and the analysis has real output to judge.
       - run: pnpm lint:deps
+
+  site:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: pnpm/setup@fbda4c85fc2e1e08721cd8763afea8f48d60f024 # v3
+        with:
+          runtime: node@24
+          require-lockfile: true
+
+      # The documentation site is built from the same content/rules markdown,
+      # so a rule that breaks the linter breaks the site too. Building it here
+      # also typechecks the .astro files, and check:site then runs the CLI over
+      # the rendered output: the head this project ships is held to the rules
+      # this project ships.
+      - run: pnpm build
+      - run: pnpm site:check
+      - run: pnpm check:site
