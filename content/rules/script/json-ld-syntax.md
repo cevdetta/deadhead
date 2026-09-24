@@ -14,7 +14,7 @@ fix: { op: "none" }
 replacement: "Make the block valid JSON: double-quoted keys and strings, no trailing commas, no comments. Serialise it with JSON.stringify instead of a string template."
 tags: ["structured-data"]
 impacts: ["seo"]
-related: ["script/type-javascript-mime"]
+related: ["attr/script-type-javascript"]
 ---
 
 One stray comma discards the whole JSON-LD block. Structured data in a `<script type="application/ld+json">`

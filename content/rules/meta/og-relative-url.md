@@ -15,7 +15,7 @@ fix: { op: "none" }
 replacement: "Write the full URL: <meta property=\"og:image\" content=\"https://example.com/cover.jpg\">, not /cover.jpg or //cdn.example.com/cover.jpg."
 tags: ["social"]
 impacts: ["seo"]
-related: ["head/canonical-multiple", "meta/twitter"]
+related: ["head/canonical-multiple", "meta/twitter-card-names"]
 ---
 
 A relative `og:image` points nowhere. `<meta property="og:image" content="/images/cover.jpg">`

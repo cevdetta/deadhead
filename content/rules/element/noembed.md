@@ -14,7 +14,7 @@ fix: { op: "none" }
 replacement: "Use <object data=\"…\" type=\"…\"> and put the fallback content between its tags; embed has no fallback at all."
 tags: ["embedding"]
 impacts: ["a11y", "maintainability"]
-related: ["element/plugin-embed", "element/applet"]
+related: ["element/object-embed-plugin", "element/applet"]
 ---
 
 `<noembed>` never displays its content. `<noembed>` was meant to sit next to an

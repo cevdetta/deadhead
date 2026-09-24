@@ -76,7 +76,7 @@ test("exit 1 when the --fail-on threshold is met, 0 when it is not", () => {
   assert.equal(deadhead("test/fixtures").status, 1, "default threshold is any finding");
   assert.equal(deadhead("--fail-on=harmful", "test/fixtures/head").status, 1);
   // The type-javascript-mime fixtures are `unnecessary`, which is below a harmful threshold.
-  assert.equal(deadhead("--fail-on=harmful", "test/fixtures/script/type-javascript-mime").status, 0);
+  assert.equal(deadhead("--fail-on=harmful", "test/fixtures/attr/script-type-javascript").status, 0);
   assert.equal(deadhead("--fail-on=none", "test/fixtures").status, 0);
 });
 
@@ -181,7 +181,7 @@ const copyFixture = async (ruleId: string, into: string, as: string): Promise<st
 
 test("--fix rewrites the file and leaves it clean", async () => {
   await sandbox(async (dir) => {
-    const file = await copyFixture("script/type-javascript-mime", dir, "page.html");
+    const file = await copyFixture("attr/script-type-javascript", dir, "page.html");
     const run = deadhead("--fix", file);
     assert.equal(run.status, 0, run.stderr);
     assert.match(run.stdout, /fixed 3 findings/);
@@ -209,7 +209,7 @@ test("--fix does not touch a file it has no fixes for", async () => {
 test("a config file supplies defaults, and flags beat it", async () => {
   await sandbox(async (dir) => {
     await mkdir(join(dir, "site", "vendor"), { recursive: true });
-    await copyFixture("script/type-javascript-mime", join(dir, "site"), "page.html");
+    await copyFixture("attr/script-type-javascript", join(dir, "site"), "page.html");
     await copyFixture("meta/http-equiv-x-ua-compatible", join(dir, "site", "vendor"), "old.html");
     await writeFile(
       join(dir, "deadhead.config.ts"),
@@ -237,7 +237,7 @@ test("a config file supplies defaults, and flags beat it", async () => {
 
 test("head-only mode is announced on stderr, and --no-head-only silences it", async () => {
   await sandbox(async (dir) => {
-    const file = await copyFixture("meta/http-equiv-ie", dir, "page.html");
+    const file = await copyFixture("meta/http-equiv-ie-pragmas", dir, "page.html");
     // Switch off every rule scoped beyond <head>: the body walk has nothing to do.
     const off = rules
       .filter((rule) => rule.meta.kind === "element" && rule.meta.scope !== "head")
@@ -263,7 +263,7 @@ test("head-only mode is announced on stderr, and --no-head-only silences it", as
 
 test("a baseline absorbs the backlog and still fails on anything new", async () => {
   await sandbox(async (dir) => {
-    const file = await copyFixture("script/type-javascript-mime", dir, "page.html");
+    const file = await copyFixture("attr/script-type-javascript", dir, "page.html");
     const base = join(dir, "baseline.json");
 
     assert.equal(deadhead("--baseline", base, "--update-baseline", file).status, 0);
@@ -284,7 +284,7 @@ test("a baseline absorbs the backlog and still fails on anything new", async () 
 
 test("a baseline that is no longer needed says so instead of failing", async () => {
   await sandbox(async (dir) => {
-    const file = await copyFixture("script/type-javascript-mime", dir, "page.html");
+    const file = await copyFixture("attr/script-type-javascript", dir, "page.html");
     const base = join(dir, "baseline.json");
     deadhead("--baseline", base, "--update-baseline", file);
     deadhead("--fix", "--fail-on=none", file);
@@ -297,7 +297,7 @@ test("a baseline that is no longer needed says so instead of failing", async () 
 
 test("config and baseline errors exit 2, like every other usage error", async () => {
   await sandbox(async (dir) => {
-    const file = await copyFixture("script/type-javascript-mime", dir, "page.html");
+    const file = await copyFixture("attr/script-type-javascript", dir, "page.html");
     assert.equal(deadhead("--baseline", join(dir, "missing.json"), file).status, 2);
     assert.equal(deadhead("--config", join(dir, "missing.config.ts"), file).status, 2);
     assert.equal(deadhead("--update-baseline", file).status, 2, "--update-baseline needs a path");

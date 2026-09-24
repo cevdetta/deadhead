@@ -14,7 +14,7 @@ fix: { op: "remove-element" }
 replacement: "Delete the tag. Send Permissions-Policy as a response header and use the allow attribute on iframes for per-frame control."
 tags: ["http-equiv"]
 impacts: ["maintainability"]
-related: ["meta/http-equiv-header-only"]
+related: ["meta/http-equiv-header-only-pragmas"]
 ---
 
 `Feature-Policy` was renamed to `Permissions-Policy` on 26 May 2020, with
@@ -35,7 +35,7 @@ The meta form was never a delivery channel for either name. The WHATWG
 pragma list is a closed set with no entry for policy names, so a policy
 tag in meta does nothing. The successor name is inert in meta as well:
 deadhead flags `Permissions-Policy` in meta as `header-only` under
-`meta/http-equiv-header-only`. A page carrying the retired spelling gets
+`meta/http-equiv-header-only-pragmas`. A page carrying the retired spelling gets
 no policy enforcement while its markup claims a control its authors have no reason to trust.
 
 ## Use instead

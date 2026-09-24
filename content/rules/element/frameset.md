@@ -14,7 +14,7 @@ fix: { op: "none" }
 replacement: "Build one document per page. Use iframe with CSS to embed a separate document, or server-side includes for shared parts like navigation."
 tags: ["embedding"]
 impacts: ["maintainability"]
-related: ["element/plugin-embed"]
+related: ["element/object-embed-plugin"]
 ---
 
 A frameset puts separate documents in one window. A frameset page has no `<body>`. In

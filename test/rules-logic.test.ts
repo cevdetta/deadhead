@@ -15,7 +15,7 @@ export const portOf = (html: string, selector: string): ElementPort => {
 const ctx = { ruleId: "test", report: () => { throw new Error("unused"); } } as unknown as RuleContext;
 
 const robots = async (content: string): Promise<boolean> => {
-  const { match } = await import("../packages/rules/logic/meta/robots-directives.ts");
+  const { match } = await import("../packages/rules/logic/meta/robots-value.ts");
   return match(portOf(`<meta name="robots" content="${content}">`, "meta"), ctx);
 };
 

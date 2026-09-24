@@ -15,7 +15,7 @@ fix: { op: "none" }
 replacement: "Write plain href: <use href=\"#icon\"></use>. Keep xlink:href beside it while old viewers matter; then drop the namespaced spelling."
 tags: ["media", "svg"]
 impacts: ["maintainability"]
-related: ["element/plugin-embed"]
+related: ["element/object-embed-plugin"]
 ---
 
 `xlink:href` names a reference the browser reads through a retired namespace. SVG2 labels the XLink-namespace spelling deprecated in favor of plain `href`, and readers honor the plain value wherever both are present, so the namespaced token is debt on every element that carries it.

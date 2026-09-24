@@ -14,7 +14,7 @@ fix: { op: "remove-element" }
 replacement: "Delete the tag. For page-level indexing use <meta name=\"robots\" content=\"noindex\">; for non-HTML resources send X-Robots-Tag as a response header."
 tags: ["http-equiv", "search"]
 impacts: ["seo"]
-related: ["meta/http-equiv-robots", "meta/http-equiv-header-only"]
+related: ["meta/http-equiv-robots", "meta/http-equiv-header-only-pragmas"]
 ---
 
 `X-Robots-Tag` names an HTTP response header. Placed in `http-equiv`,

@@ -15,7 +15,7 @@ fix: { op: "none" }
 replacement: "Persist the opt-in in the Accept-CH/Delegate-CH response headers, which apply pre-parse and stick across navigations; then delete the tag."
 tags: ["http-equiv"]
 impacts: ["performance", "interop"]
-related: ["meta/http-equiv-name-misuse", "meta/http-equiv-content-type"]
+related: ["meta/http-equiv-metadata-names", "meta/http-equiv-content-type"]
 ---
 
 The `<meta http-equiv>` form of Client Hints works only in Chromium and never persists.

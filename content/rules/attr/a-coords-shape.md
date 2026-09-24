@@ -14,7 +14,7 @@ fix: { op: "remove-attributes" }
 replacement: "Delete the attributes: <a href=\"page.html\">text</a>. For image maps use area elements with shape and coords inside map."
 tags: ["hyperlinks"]
 impacts: ["maintainability"]
-related: ["attr/area-obsolete"]
+related: ["attr/area-hreflang-type-nohref"]
 ---
 
 `coords` and `shape` do nothing on anchors. WHATWG lists both as obsolete on `a` with one direction, use `area` for image maps, so the attributes are dead weight on every anchor that carries them.

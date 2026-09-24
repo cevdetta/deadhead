@@ -26,9 +26,9 @@ const KNOWN_PARTIAL: ReadonlySet<string> = new Set(["attr/script-event-for"]);
  */
 const MUST_NOT_FIX: ReadonlySet<string> = new Set([
   "attr/longdesc-lowsrc",
-  "link/rel-prerender",
+  "link/prerender",
   "meta/http-equiv-x-ua-compatible",
-  "meta/msapplication",
+  "meta/msapplication-names",
 ]);
 
 const rules = await loadRules();

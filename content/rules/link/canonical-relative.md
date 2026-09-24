@@ -39,7 +39,7 @@ The host comes from site configuration, never from the request: a canonical buil
 
 ## Detectability
 
-Detectable with the selector alone. `rel` matches with `~=` because it is a space-separated token set, and each `:not` pins the `href` to an absolute http(s) form; the `i` flag folds case. A tag with no `href` also trips the rule, matching `meta/og-relative-url`; the future `link/missing-href` owns that case.
+Detectable with the selector alone. `rel` matches with `~=` because it is a space-separated token set, and each `:not` pins the `href` to an absolute http(s) form; the `i` flag folds case. A tag with no `href` also trips the rule, matching `meta/og-relative-url`; the future `link/href-missing` owns that case.
 
 ## Resources
 

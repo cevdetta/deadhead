@@ -14,7 +14,7 @@ fix: { op: "none" }
 replacement: "Set the resource directly on <object> with its data attribute: <object data=\"clip.mp4\" type=\"video/mp4\">."
 tags: ["embedding"]
 impacts: ["interop", "maintainability"]
-related: ["element/applet", "element/plugin-embed"]
+related: ["element/applet", "element/object-embed-plugin"]
 ---
 
 `<param>` feeds nothing. `<param>` passed name/value pairs to the plug-in loaded by

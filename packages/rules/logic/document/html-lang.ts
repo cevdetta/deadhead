@@ -10,7 +10,7 @@ const BLANK = /^[\t\n\f\r ]*$/;
  *   unknown. That is the W3C ACT rule's expectation, and the whitespace case is
  *   why this is logic rather than `html:not([lang]), html[lang=""]`. `xml:lang`
  *   on its own does not count.
- * - It follows the "missing" pattern from `head/viewport`: nothing is reported
+ * - It follows the "missing" pattern from `head/viewport-missing`: nothing is reported
  *   unless there is a `<head>` with at least one element. parse5 wraps a
  *   fragment or partial in an implied `<html>` that never had a `lang` to give,
  *   and the html-eslint AST has no `html` element for it at all.

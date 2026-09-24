@@ -15,7 +15,7 @@ fix: { op: "none" }
 replacement: "Drop the report-uri directive from the meta content. Send reporting with report-to plus Reporting-Endpoints response headers."
 tags: ["csp", "http-equiv"]
 impacts: ["security", "maintainability"]
-related: ["meta/http-equiv-content-security-policy", "meta/http-equiv-header-only", "meta/csp-block-all-mixed-content"]
+related: ["meta/http-equiv-content-security-policy", "meta/http-equiv-header-only-pragmas", "meta/csp-block-all-mixed-content"]
 ---
 
 `report-uri` in a meta CSP policy reports nothing. CSP3 labels the directive deprecated in favor of `report-to`, and the meta form ignores it in each browser, so the markup claims coverage it never sends.

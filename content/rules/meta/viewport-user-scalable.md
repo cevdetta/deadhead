@@ -15,7 +15,7 @@ fix: { op: "none" }
 replacement: "Allow zoom: <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">. Drop user-scalable=no and any maximum-scale below 2."
 tags: ["mobile"]
 impacts: ["a11y"]
-related: ["head/viewport"]
+related: ["head/viewport-missing"]
 ---
 
 Disabling zoom takes reading away from the people who need it.

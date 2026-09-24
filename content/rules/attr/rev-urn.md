@@ -14,7 +14,7 @@ fix: { op: "remove-attributes" }
 replacement: "Delete the attributes. State the relationship with rel and the identifier with href: <a href=\"doc.html\" rel=\"author\">doc</a>."
 tags: ["hyperlinks"]
 impacts: ["maintainability"]
-related: ["attr/methods-obsolete"]
+related: ["attr/methods"]
 ---
 
 `rev` and `urn` on `a` and `link` describe nothing browsers act on. WHATWG lists both attributes as obsolete on both elements with one replacement each, opposite-term `rel` for `rev` and `href` for `urn`, so the pair is dead weight on every link that carries it.

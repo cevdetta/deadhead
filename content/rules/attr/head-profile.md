@@ -14,7 +14,7 @@ fix: { op: "remove-attribute", attr: "profile" }
 replacement: "Delete the attribute: <head>. Register metadata names instead, and use link elements to trigger behaviors."
 tags: ["structured-data"]
 impacts: ["maintainability"]
-related: ["attr/area-obsolete"]
+related: ["attr/area-hreflang-type-nohref"]
 ---
 
 `profile` on `head` points at nothing that reads it. WHATWG calls the attribute unnecessary with its IDL "intentionally omitted", so no implementation supports it, and the W3C version splits the replacement by intent: registered names for meta terms, `link` elements for behaviors.

@@ -106,7 +106,7 @@ test("suppression comments work through ESLint too", () => {
 });
 
 test("only the enabled rule runs, so severity stays the user's to configure", async () => {
-  const source = await readFile("test/fixtures/script/type-javascript-mime/invalid.html", "utf8");
+  const source = await readFile("test/fixtures/attr/script-type-javascript/invalid.html", "utf8");
   const only = { "deadhead/meta/http-equiv-x-ua-compatible": "error" as const };
   assert.deepEqual(lint(source, only), []);
   assert.equal(lint(source).length, 3);

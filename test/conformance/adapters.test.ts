@@ -163,7 +163,7 @@ test("the source-dependent list is honest in both directions", () => {
 });
 
 test("the DOM adapter offers no positions, and says so rather than guessing", () => {
-  const dom = of("test/fixtures/script/type-javascript-mime/invalid.html", "dom");
+  const dom = of("test/fixtures/attr/script-type-javascript/invalid.html", "dom");
   assert.ok(dom.length > 0);
   for (const finding of dom) {
     assert.equal(finding.range, null);
@@ -294,7 +294,7 @@ test("every adapter steps into a <template>", () => {
   for (const adapter of ADAPTERS) {
     assert.deepEqual(
       run(rules, adapter.parse(html)).map((f) => f.ruleId),
-      ["script/type-javascript-mime"],
+      ["attr/script-type-javascript"],
       adapter.name,
     );
   }

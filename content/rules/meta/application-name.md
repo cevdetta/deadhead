@@ -14,7 +14,7 @@ fix: { op: "remove-element" }
 replacement: "Delete it. Name an installable app with name and short_name in the web app manifest; a page that isn't an app is already named by <title>."
 tags: ["web-app"]
 impacts: ["maintainability"]
-related: ["meta/msapplication", "link/apple-touch-icon-precomposed"]
+related: ["meta/msapplication-names", "link/apple-touch-icon-precomposed"]
 ---
 
 Most pages carrying `application-name` are not applications. `<meta name="application-name" content="Example Mail">`
@@ -45,7 +45,7 @@ drift.
 Who still reads it: Chromium's renderer extracts `application-name` into page metadata,
 alongside `description` and `mobile-web-app-capable`, which the browser can draw on when a
 page is installed or saved as a shortcut without a manifest. Internet Explorer 11 used it
-for pinned-site tiles, a feature with no reader left (see `meta/msapplication`). Nothing
+for pinned-site tiles, a feature with no reader left (see `meta/msapplication-names`). Nothing
 else was found.
 
 It isn't the same thing as `application-title`, a newer Chromium and Edge metadata name

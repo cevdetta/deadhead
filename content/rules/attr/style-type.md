@@ -15,7 +15,7 @@ fix: { op: "remove-attribute", attr: "type" }
 replacement: "Delete the attribute: <style>p { color: red; }</style>. For data blocks use script: <script type=\"application/json\">."
 tags: ["defaults"]
 impacts: ["maintainability"]
-related: ["script/type-javascript-mime"]
+related: ["attr/script-type-javascript"]
 ---
 
 `type` on `style` selects nothing. WHATWG lists the attribute as obsolete with a split replacement, omission for CSS and `script` for data blocks, since CSS is the sole style language and the label restates the default.

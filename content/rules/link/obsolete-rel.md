@@ -14,7 +14,7 @@ match: "logic"
 fix: { op: "remove-tokens", attr: "rel" }
 replacement: "Keep self and edituri where WebSub or WordPress's XML-RPC discovery still applies, and delete the other dead keywords. Write previous as prev: <link rel=\"prev\" href=\"/page/1\">, though Google no longer reads the pair."
 impacts: ["maintainability"]
-related: ["link/rel-subresource"]
+related: ["link/subresource"]
 ---
 
 A `link` relation outside the living table creates no HTML link, but two of the fifteen values here still feed a non-browser reader: WebSub subscribers parse `self`, and WordPress's own apps parse `edituri`. The other thirteen have no such reader. Living types and registered extensions stay quiet.

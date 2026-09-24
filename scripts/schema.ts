@@ -59,12 +59,9 @@ export const VERDICT_WORDS = [
  * set must be empty when that phase merges, and nothing is ever added to it.
  */
 export const LEGACY_IDS: ReadonlySet<string> = new Set([
-  "attr/area-obsolete", "attr/menu-obsolete", "attr/methods-obsolete",
-  "attr/object-obsolete", "attr/svg-removed", "attr/svg-xlink-removed",
-  "element/svg-removed", "link/obsolete-rel", "link/rel-dead-vendor", "link/rel-dropped-hierarchy",
-  "meta/obsolete-name", "meta/og-retired", "meta/csp-removed-directive", "meta/http-equiv-legacy-security",
-  "meta/http-equiv-name-misuse", "meta/og-name-misuse", "meta/referrer-invalid",
-  "script/json-ld-retired-rich-result", "attr/iframe-allow-retired-feature",
+  "attr/svg-xlink-removed", "element/svg-removed", "link/obsolete-rel", "link/rel-dead-vendor",
+  "link/rel-dropped-hierarchy", "meta/obsolete-name", "meta/csp-removed-directive",
+  "attr/iframe-allow-retired-feature",
 ]);
 
 /**
@@ -73,12 +70,14 @@ export const LEGACY_IDS: ReadonlySet<string> = new Set([
  * ever added to it.
  */
 export const LONG_DESCRIPTION_IDS: ReadonlySet<string> = new Set([
-  "attr/iframe-allowpaymentrequest", "attr/xmlns-prefix", "document/main-multiple",
-  "element/applet", "element/basefont", "element/big", "element/center", "element/isindex",
-  "element/keygen", "element/multicol", "element/nextid", "element/noembed", "element/strike",
-  "element/xmp", "link/preload-as", "link/rel-prerender", "meta/csp-report-uri",
-  "meta/http-equiv-cache", "meta/http-equiv-description", "meta/http-equiv-dns-prefetch-control",
-  "meta/http-equiv-header-only", "meta/og-relative-url", "script/json-ld-syntax",
+  "attr/iframe-allowpaymentrequest", "attr/svg-1-1-attributes", "attr/xmlns-prefix",
+  "document/main-multiple", "element/applet", "element/basefont", "element/big",
+  "element/center", "element/isindex", "element/keygen", "element/multicol", "element/nextid",
+  "element/noembed", "element/strike", "element/xmp", "link/preload-as-missing", "link/prerender",
+  "meta/csp-report-uri", "meta/http-equiv-cache-pragmas", "meta/http-equiv-description",
+  "meta/http-equiv-x-dns-prefetch-control", "meta/http-equiv-header-only-pragmas",
+  "meta/http-equiv-x-security-pragmas", "meta/og-relative-url", "script/json-ld-howto-faq-announcement",
+  "script/json-ld-syntax",
 ]);
 
 /**

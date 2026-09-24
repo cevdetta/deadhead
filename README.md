@@ -110,7 +110,7 @@ export default {
   ignore: ["**/vendor/**"],
   rules: {
     "meta/http-equiv-x-ua-compatible": "off",
-    "script/type-javascript-mime": "harmful",   // or re-severity it
+    "attr/script-type-javascript": "harmful",   // or re-severity it
   },
   failOn: "deprecated",
   baseline: ".deadhead-baseline.json",

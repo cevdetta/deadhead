@@ -13,7 +13,7 @@ selector: 'link[rel~="apple-touch-startup-image" i], link[rel~="component" i], l
 fix: { op: "remove-tokens", attr: "rel" }
 replacement: "Delete the tag, or only the keyword when rel also holds live ones. Ship splash screens through the Web App Manifest, components through ES modules, and sign-in through OpenID Connect Discovery."
 impacts: ["maintainability"]
-related: ["link/obsolete-rel", "link/rel-import", "link/rel-sidebar", "meta/apple-mobile-web-app-capable"]
+related: ["link/obsolete-rel", "link/import", "link/sidebar", "meta/apple-mobile-web-app-capable"]
 ---
 
 Eight `link` tokens promise work no HTML5 engine performs. The set spans an iOS launch image and a Web Components v0 import, an IE Web Slice source and an OpenID discovery endpoint, plus a rejected avatar hook. The living link table defines none of them, so the element fetches nothing and navigates nowhere.

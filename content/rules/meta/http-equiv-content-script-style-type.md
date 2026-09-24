@@ -14,7 +14,7 @@ fix: { op: "remove-element" }
 replacement: "Delete the tag. JavaScript and CSS are the default languages; declare type per element only for non-default uses."
 tags: ["defaults", "http-equiv"]
 impacts: ["maintainability"]
-related: ["script/type-javascript-mime"]
+related: ["attr/script-type-javascript"]
 ---
 
 Delete `content-script-type` and `content-style-type`: JavaScript and CSS are the

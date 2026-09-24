@@ -14,7 +14,7 @@ fix: { op: "remove-tokens", attr: "rel" }
 replacement: "Delete the keyword; a link left with no keyword goes. Link the contents, glossary and chapters from visible navigation, and keep rel=\"next\" and rel=\"prev\" for sequences."
 tags: ["hyperlinks"]
 impacts: ["maintainability"]
-related: ["link/obsolete-rel", "link/rel-dropped-hierarchy", "link/rel-anchor-only"]
+related: ["link/obsolete-rel", "link/rel-dropped-hierarchy", "link/anchor-keywords"]
 ---
 
 HTML 4 let a document describe its place in a book: `<link rel="contents">` for the

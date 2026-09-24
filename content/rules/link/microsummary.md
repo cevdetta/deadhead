@@ -14,7 +14,7 @@ fix: { op: "remove-tokens", attr: "rel" }
 replacement: "Delete the tag, or only the keyword when rel also holds live ones. Live bookmark titles no longer exist anywhere to point at."
 tags: ["mozilla"]
 impacts: ["maintainability"]
-related: ["link/rel-subresource"]
+related: ["link/subresource"]
 ---
 
 A `link rel=microsummary` names a generator for live bookmark titles. Firefox dropped the feature in version 6 as seldom used, undiscoverable and unmaintained; no other engine ever carried it.

@@ -14,7 +14,7 @@ fix: { op: "none" }
 replacement: "Delete the element and move its job to current markup: the text itself for tref, a web font for altGlyph and SVG fonts, CSS cursor: url(…) for cursor, a CSS custom property for solidcolor."
 tags: ["svg"]
 impacts: ["maintainability"]
-related: ["element/font", "attr/svg-removed", "attr/svg-xlink-removed", "attr/svg-enable-background"]
+related: ["element/font", "attr/svg-1-1-attributes", "attr/svg-xlink-removed", "attr/svg-enable-background"]
 ---
 
 SVG 1.1 could reference text from elsewhere in the document (`<tref>`), swap in alternate
