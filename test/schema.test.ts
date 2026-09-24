@@ -137,6 +137,10 @@ test("ruleId must be lowercase namespace/name", () => {
   assert.deepEqual(messages({ ruleId: "meta/http-equiv-x-ua-compatible" }), []);
 });
 
+test("a ruleId with a verdict word is rejected", () => {
+  assert.match(messages({ ruleId: "attr/foo-obsolete" }).join("\n"), /verdict word `obsolete`/);
+});
+
 test("pubDate must be a real ISO calendar date", () => {
   assert.match(messages({ pubDate: "12/07/2026" }).join("\n"), /not an ISO date/);
   assert.match(messages({ pubDate: "2026-02-30" }).join("\n"), /not a real calendar date/);
@@ -144,10 +148,10 @@ test("pubDate must be a real ISO calendar date", () => {
   assert.match(messages({ pubDate: 20260102 }).join("\n"), /quoted ISO date/);
 });
 
-test("description must fit 160 chars for search results", () => {
-  assert.deepEqual(messages({ description: "x".repeat(160) }), []);
-  assert.match(messages({ description: "x".repeat(161) }).join("\n"), /must fit 160 chars/);
-  assert.ok(paths({ description: "x".repeat(161) }).includes("description"));
+test("description must be at most 140 characters", () => {
+  assert.deepEqual(messages({ description: "x".repeat(140) }), []);
+  assert.match(messages({ description: "x".repeat(141) }).join("\n"), /at most 140 characters/);
+  assert.ok(paths({ description: "x".repeat(141) }).includes("description"));
 });
 
 test("an unsupported selector fails the rule, with the offset of the offending token", () => {

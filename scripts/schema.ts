@@ -43,6 +43,52 @@ import { parseSelector, tokenTests } from "../packages/core/selector.ts";
 // than no validator: it green-lights rules that silently match nothing.
 export type { RuleMeta, Status, Severity, Kind, Scope };
 
+/**
+ * A ruleId names the construct or what is checked, never a judgement
+ * (CONTRIBUTING § Naming a rule, rule 5). One exception: `attr/<attribute>-obsolete`,
+ * where `obsolete` is HTML §16's own category for an attribute that stays valid on
+ * some other element; those ids are listed in `OBSOLETE_ATTRIBUTE_IDS` below.
+ */
+export const VERDICT_WORDS = [
+  "obsolete", "deprecated", "removed", "retired", "dead", "dropped",
+  "legacy", "invalid", "misuse", "old", "bad", "broken",
+] as const;
+
+/**
+ * Ids that predate the naming convention. Taxonomy v2 renames every one; the
+ * set must be empty when that phase merges, and nothing is ever added to it.
+ */
+export const LEGACY_IDS: ReadonlySet<string> = new Set([
+  "attr/area-obsolete", "attr/menu-obsolete", "attr/methods-obsolete",
+  "attr/object-obsolete", "attr/svg-removed", "attr/svg-xlink-removed",
+  "element/svg-removed", "link/obsolete-rel", "link/rel-dead-vendor", "link/rel-dropped-hierarchy",
+  "meta/obsolete-name", "meta/og-retired", "meta/csp-removed-directive", "meta/http-equiv-legacy-security",
+  "meta/http-equiv-name-misuse", "meta/og-name-misuse", "meta/referrer-invalid",
+  "script/json-ld-retired-rich-result", "attr/iframe-allow-retired-feature",
+]);
+
+/**
+ * Descriptions over 140 characters that predate the naming convention.
+ * Task 9 rewrites every one; the set must be empty by Task 10, and nothing is
+ * ever added to it.
+ */
+export const LONG_DESCRIPTION_IDS: ReadonlySet<string> = new Set([
+  "attr/iframe-allowpaymentrequest", "attr/xmlns-prefix", "document/main-multiple",
+  "element/applet", "element/basefont", "element/big", "element/center", "element/isindex",
+  "element/keygen", "element/multicol", "element/nextid", "element/noembed", "element/strike",
+  "element/xmp", "link/preload-as", "link/rel-prerender", "meta/csp-report-uri",
+  "meta/http-equiv-cache", "meta/http-equiv-description", "meta/http-equiv-dns-prefetch-control",
+  "meta/http-equiv-header-only", "meta/og-relative-url", "script/json-ld-syntax",
+]);
+
+/**
+ * `attr/<attribute>-obsolete`: the attribute on every element where HTML §16
+ * marks it obsolete, while it stays valid on another element. `obsolete` is
+ * the spec's category here, not a judgement. An id joins only with that
+ * justification in its PR.
+ */
+export const OBSOLETE_ATTRIBUTE_IDS: ReadonlySet<string> = new Set(["attr/charset-obsolete", "attr/name-obsolete"]);
+
 /** Field order in `rules.json`. Fixed so the generated file diffs cleanly. */
 export const META_KEYS = [
   "ruleId",
@@ -259,14 +305,30 @@ export function validateFrontmatter(data: unknown): FrontmatterResult {
       ),
     );
   }
+  if (ruleId !== null && !LEGACY_IDS.has(ruleId) && !OBSOLETE_ATTRIBUTE_IDS.has(ruleId)) {
+    const words = ruleId.split(/[/-]/);
+    const verdict = VERDICT_WORDS.find((w) => words.includes(w));
+    if (verdict !== undefined) {
+      issues.push(
+        field(
+          ["ruleId"],
+          `contains the verdict word \`${verdict}\`: name the construct or what is checked, not a judgement (CONTRIBUTING § Naming a rule)`,
+        ),
+      );
+    }
+  }
 
   const title = nonEmptyString(data["title"], ["title"], issues);
   const description = nonEmptyString(data["description"], ["description"], issues);
-  if (description !== null && description.length > 160) {
+  if (
+    typeof description === "string" &&
+    description.length > 140 &&
+    !(ruleId !== null && (LEGACY_IDS.has(ruleId) || LONG_DESCRIPTION_IDS.has(ruleId)))
+  ) {
     issues.push(
       field(
         ["description"],
-        `must fit 160 chars for search results (found ${description.length})`,
+        `must be at most 140 characters (has ${description.length}): it is the one line reporters print`,
       ),
     );
   }
