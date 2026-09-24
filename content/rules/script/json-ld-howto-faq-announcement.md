@@ -1,6 +1,6 @@
 ---
 ruleId: "script/json-ld-howto-faq-announcement"
-title: "Structured data for a retired Google rich result"
+title: "<script type=\"application/ld+json\"> HowTo, FAQ and SpecialAnnouncement structured data"
 description: "Google Search no longer shows HowTo, FAQ or special-announcement rich results; the markup feeds no Google Search feature, and other uses are unaffected."
 pubDate: "2026-09-23"
 status: "situational"

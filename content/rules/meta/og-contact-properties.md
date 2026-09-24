@@ -1,7 +1,7 @@
 ---
 ruleId: "meta/og-contact-properties"
-title: "retired Open Graph properties"
-description: "Eleven retired properties absent from the protocol; no parser reads them."
+title: "<meta property=\"og:*\"> contact properties"
+description: "Eleven contact properties absent from the protocol; no parser reads them."
 pubDate: "2026-09-21"
 status: "avoid"
 severity: "unnecessary"
@@ -17,7 +17,7 @@ impacts: ["seo"]
 related: ["meta/og-name-attribute"]
 ---
 
-A `property` from the retired Open Graph set feeds no parser. Eleven such properties trip this rule; live properties stay quiet.
+A `property` from the Open Graph contact set feeds no parser. Eleven such properties trip this rule; live properties stay quiet.
 
 ## Why avoid
 
@@ -35,7 +35,7 @@ Delete the tag. There is no protocol successor for these fields; publish locatio
 
 ## Detectability
 
-Detectable with the selector alone. Each branch pins one retired value with `=`, and the `i` flag folds case. Anything unlisted stays quiet by construction.
+Detectable with the selector alone. Each branch pins one property value with `=`, and the `i` flag folds case. Anything unlisted stays quiet by construction.
 
 ## Resources
 

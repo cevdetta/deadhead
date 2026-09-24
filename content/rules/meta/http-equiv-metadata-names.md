@@ -66,7 +66,7 @@ Move each value where it belongs:
 
 Fully detectable, but the rule does not work by selector alone. `meta[http-equiv]` is only a
 pre-filter: the verdict depends on whether the value is one of seventeen
-misused names, matched ASCII case-insensitively, which the selector subset cannot
+metadata names, matched ASCII case-insensitively, which the selector subset cannot
 enumerate. The decision therefore lives in
 `packages/rules/logic/meta/http-equiv-metadata-names.ts`.
 

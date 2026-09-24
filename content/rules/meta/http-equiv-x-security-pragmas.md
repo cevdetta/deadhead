@@ -1,6 +1,6 @@
 ---
 ruleId: "meta/http-equiv-x-security-pragmas"
-title: "meta http-equiv with retired security values"
+title: "<meta http-equiv> X-security pragmas"
 description: "x-xss-protection, x-webkit-csp, and x-content-security-policy name defenses that no longer exist even as headers; delete the tags and use a CSP response header."
 pubDate: "2026-09-14"
 status: "avoid"
@@ -42,7 +42,7 @@ Content-Security-Policy: default-src 'self'
 
 The rule pre-filters with `meta[http-equiv]`: the verdict depends
 on whether the trimmed value, compared ASCII case-insensitively, is one of
-the three retired keywords. The decision therefore lives in
+the three prefixed security keywords. The decision therefore lives in
 `packages/rules/logic/meta/http-equiv-x-security-pragmas.ts`. The fix removes
 the element: nothing reads these values, and there is no header to move
 them to.

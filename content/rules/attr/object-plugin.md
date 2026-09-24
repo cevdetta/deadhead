@@ -1,6 +1,6 @@
 ---
 ruleId: "attr/object-plugin"
-title: "object legacy attributes"
+title: "<object> plugin attributes"
 description: "seven plugin-era attributes on object are obsolete; data and type invoke resources now."
 pubDate: "2026-09-19"
 status: "avoid"
