@@ -1,5 +1,6 @@
 import type { MatchFn } from "../../types.ts";
 import { stripAsciiWhitespace } from "../../lib/text.ts";
+import { IE_ONLY } from "../../lib/http-equiv.ts";
 
 /**
  * Internet Explorer-only http-equiv values. Documented in Microsoft's
@@ -10,15 +11,10 @@ import { stripAsciiWhitespace } from "../../lib/text.ts";
  * http-equiv cleartype switch surfaced — only validator/SEO lore placing
  * it on IE Mobile 6/7-era phones — so it stays unclaimed rather than
  * guessed. If a primary source turns up, add it here.
+ *
+ * The set itself lives in `lib/http-equiv.ts`, shared with
+ * `meta/http-equiv-unregistered-pragmas` so the two cannot drift.
  */
-const IE_ONLY: ReadonlySet<string> = new Set([
-  "imagetoolbar",
-  "msthemecompatible",
-  "page-enter",
-  "page-exit",
-  "site-enter",
-  "site-exit",
-]);
 
 /**
  * The `meta[http-equiv]` selector is only a pre-filter. A tag is claimed

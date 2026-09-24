@@ -1,5 +1,6 @@
 import type { MatchFn } from "../../types.ts";
 import { stripAsciiWhitespace } from "../../lib/text.ts";
+import { MISUSED_NAMES } from "../../lib/http-equiv.ts";
 
 /**
  * `http-equiv` values that are metadata names wearing a pragma's clothes.
@@ -15,31 +16,10 @@ import { stripAsciiWhitespace } from "../../lib/text.ts";
  * `robots` and `description` are deliberately absent: own rules
  * (`meta/http-equiv-robots`, `meta/http-equiv-description`) cover them, so
  * each element is reported exactly once.
+ *
+ * The set itself lives in `lib/http-equiv.ts`, shared with
+ * `meta/http-equiv-unregistered-pragmas` so the two cannot drift.
  */
-const MISUSED_NAMES: ReadonlySet<string> = new Set([
-  // Standard metadata names — belong in `<meta name>`.
-  "author",
-  "generator",
-  "keywords",
-  "theme-color",
-  // Registered name extensions — belong in `<meta name>`.
-  "audience",
-  "apple-mobile-web-app-capable",
-  "format-detection",
-  "revisit-after",
-  // Charset territory — belongs in `<meta charset>`.
-  "charset",
-  "encoding",
-  // Language territory — belongs in `<html lang>`.
-  "lang",
-  "language",
-  // No home anywhere — delete.
-  "classification",
-  "copyright",
-  "distribution",
-  "resource-type",
-  "title",
-]);
 
 /**
  * The `meta[http-equiv]` selector is only a pre-filter. A pragma is misused

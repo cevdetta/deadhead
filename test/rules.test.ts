@@ -402,3 +402,15 @@ test("lib/script isClassicScript is a JavaScript MIME type essence match", async
   // ASCII case-insensitive only: U+0130 does not fold to "i".
   assert.equal(isJavaScriptMimeEssence("text/javascrİpt"), false);
 });
+
+test("every http-equiv value a rule selector tests is in OWNED_HTTP_EQUIV", async () => {
+  const { OWNED_HTTP_EQUIV } = await import("../packages/rules/lib/http-equiv.ts");
+  const missing: string[] = [];
+  for (const rule of rules) {
+    for (const m of (rule.meta.selector ?? "").matchAll(/http-equiv="([^"]+)"/gi)) {
+      const value = m[1]!.toLowerCase();
+      if (!OWNED_HTTP_EQUIV.has(value)) missing.push(`${rule.meta.ruleId}: ${value}`);
+    }
+  }
+  assert.equal(missing.join(", "), "");
+});

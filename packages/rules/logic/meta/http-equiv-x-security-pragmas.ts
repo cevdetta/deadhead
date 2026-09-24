@@ -1,5 +1,6 @@
 import type { MatchFn } from "../../types.ts";
 import { stripAsciiWhitespace } from "../../lib/text.ts";
+import { RETIRED_SECURITY } from "../../lib/http-equiv.ts";
 
 /**
  * Retired security mechanisms: nothing enforces them anymore, not even as
@@ -11,12 +12,10 @@ import { stripAsciiWhitespace } from "../../lib/text.ts";
  * - x-content-security-policy: Firefox 4–22 era prefixed CSP, with a
  *   different directive vocabulary (`allow` instead of `default-src`).
  * Modern browsers take only the unprefixed Content-Security-Policy header.
+ *
+ * The set itself lives in `lib/http-equiv.ts`, shared with
+ * `meta/http-equiv-unregistered-pragmas` so the two cannot drift.
  */
-const RETIRED_SECURITY: ReadonlySet<string> = new Set([
-  "x-xss-protection",
-  "x-webkit-csp",
-  "x-content-security-policy",
-]);
 
 /**
  * The `meta[http-equiv]` selector is only a pre-filter. A tag is claimed

@@ -1,10 +1,14 @@
 import type { MatchFn } from "../../types.ts";
 import { stripAsciiWhitespace } from "../../lib/text.ts";
+import { HEADER_ONLY } from "../../lib/http-equiv.ts";
 
 /**
  * Security and CORS headers that browsers only honour as HTTP response
  * headers. None of them is an HTML pragma-table keyword, so in http-equiv
  * they all map to no state and do nothing while looking like protection.
+ *
+ * The set itself lives in `lib/http-equiv.ts`, shared with
+ * `meta/http-equiv-unregistered-pragmas` so the two cannot drift.
  *
  * - x-frame-options: RFC 7034, "explicitly ignored by user agents when
  *   declared with a meta http-equiv tag".
@@ -19,16 +23,6 @@ import { stripAsciiWhitespace } from "../../lib/text.ts";
  *   2020, https://developer.chrome.com/blog/feature-policy); the HTML
  *   pragma table never listed either name, so removal is inert.
  */
-const HEADER_ONLY: ReadonlySet<string> = new Set([
-  "x-frame-options",
-  "strict-transport-security",
-  "content-security-policy-report-only",
-  "x-content-type-options",
-  "permissions-policy",
-  "access-control-allow-origin",
-  "referrer-policy",
-  "feature-policy",
-]);
 
 /**
  * The `meta[http-equiv]` selector is only a pre-filter. A tag is claimed

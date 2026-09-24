@@ -187,3 +187,11 @@ test("apple-mobile-web-app-status-bar-style: fixable only for default or a missi
   assert.equal(await on(' content="black-translucent"'), false);
   assert.equal(await on(' content=""'), false);
 });
+
+test("http-equiv-unregistered-pragmas leaves every value another rule owns to that rule", async () => {
+  const { match } = await import("../packages/rules/logic/meta/http-equiv-unregistered-pragmas.ts");
+  for (const value of ["robots", "x-robots-tag", "cache-control", "x-ua-compatible", "permissions-policy", "feature-policy", "set-cookie", "x-dns-prefetch-control", "description", "pics-label", "content-script-type"]) {
+    assert.equal(match(portOf(`<meta http-equiv="${value}" content="x">`, "meta"), ctx), false, value);
+  }
+  assert.equal(match(portOf('<meta http-equiv="x-made-up" content="x">', "meta"), ctx), true);
+});

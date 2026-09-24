@@ -1,5 +1,6 @@
 import type { MatchFn } from "../../types.ts";
 import { stripAsciiWhitespace } from "../../lib/text.ts";
+import { OWNED_HTTP_EQUIV } from "../../lib/http-equiv.ts";
 
 /**
  * The WHATWG pragma keywords, and nothing else.
@@ -22,12 +23,15 @@ const ALLOWED: ReadonlySet<string> = new Set([
 
 /**
  * The `meta[http-equiv]` selector is only a pre-filter. A tag trips the rule
- * exactly when its value falls outside the allowlist above: such a value is
- * no registered pragma keyword. The rule reports without autofixing, since
- * `origin-trial` still enrolls trials in some engines today.
+ * exactly when its value is neither a WHATWG pragma-table keyword nor a
+ * value some other rule already owns (`OWNED_HTTP_EQUIV`, `lib/http-equiv.ts`):
+ * such a value is no registered pragma, and no other rule reports it. The
+ * rule reports without autofixing, since `origin-trial` still enrolls
+ * trials in some engines today.
  */
 export const match: MatchFn = (element) => {
   const value = element.attr("http-equiv");
   if (value === undefined) return false;
-  return !ALLOWED.has(stripAsciiWhitespace(value).toLowerCase());
+  const normalized = stripAsciiWhitespace(value).toLowerCase();
+  return !ALLOWED.has(normalized) && !OWNED_HTTP_EQUIV.has(normalized);
 };

@@ -1,19 +1,16 @@
 import type { MatchFn } from "../../types.ts";
 import { stripAsciiWhitespace } from "../../lib/text.ts";
+import { CACHE_KEYWORDS } from "../../lib/http-equiv.ts";
 
 /**
  * Cache-related values that are not HTML pragma-table keywords, so in
  * http-equiv they map to no state. HTTP caching (RFC 9111) is driven by
  * response header fields; no browser or common proxy reads cache pragmas
  * out of markup.
+ *
+ * The set itself lives in `lib/http-equiv.ts`, shared with
+ * `meta/http-equiv-unregistered-pragmas` so the two cannot drift.
  */
-const CACHE_KEYWORDS: ReadonlySet<string> = new Set([
-  "cache-control",
-  "pragma",
-  "expires",
-  "etag",
-  "last-modified",
-]);
 
 /**
  * The `meta[http-equiv]` selector is only a pre-filter. A tag is claimed
