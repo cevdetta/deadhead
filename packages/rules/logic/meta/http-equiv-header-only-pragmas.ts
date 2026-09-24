@@ -15,6 +15,9 @@ import { stripAsciiWhitespace } from "../../lib/text.ts";
  * - permissions-policy, access-control-allow-origin: documented HTTP
  *   response headers (ACAO needs server-side Origin logic).
  * - referrer-policy: the in-document form is <meta name="referrer">.
+ * - feature-policy: the retired name of Permissions-Policy (renamed 26 May
+ *   2020, https://developer.chrome.com/blog/feature-policy); the HTML
+ *   pragma table never listed either name, so removal is inert.
  */
 const HEADER_ONLY: ReadonlySet<string> = new Set([
   "x-frame-options",
@@ -24,6 +27,7 @@ const HEADER_ONLY: ReadonlySet<string> = new Set([
   "permissions-policy",
   "access-control-allow-origin",
   "referrer-policy",
+  "feature-policy",
 ]);
 
 /**

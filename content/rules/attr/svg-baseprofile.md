@@ -14,7 +14,7 @@ fix: { op: "remove-attribute", attr: "baseprofile" }
 replacement: "Delete the attribute: <svg viewBox=\"0 0 24 24\">."
 tags: ["svg"]
 impacts: ["maintainability"]
-related: ["attr/svg-version", "attr/svg-xlink-href", "attr/html-version"]
+related: ["attr/svg-version", "attr/svg-xlink", "attr/html-version"]
 ---
 
 `<svg baseProfile="full">` names the SVG 1.1 profile a drawing needs: `full`, `basic` or

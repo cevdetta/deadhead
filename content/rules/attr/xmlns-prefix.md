@@ -15,7 +15,7 @@ fix: { op: "none" }
 replacement: "Delete declarations for prefixes the RDFa initial context predefines (og, dc, v, schema) or the page never uses; move the rest into prefix, as in <html prefix=\"fb: http://ogp.me/ns/fb#\">."
 tags: ["social", "structured-data"]
 impacts: ["maintainability"]
-related: ["attr/data-vocabulary", "attr/svg-xlink-href", "attr/microdata-without-itemscope", "attr/head-profile"]
+related: ["attr/data-vocabulary", "attr/svg-xlink", "attr/microdata-without-itemscope", "attr/head-profile"]
 ---
 
 `xmlns:og` and `xmlns:fb` on `<html>` come from the XHTML era, when RDFa 1.0 borrowed XML
@@ -64,7 +64,7 @@ none skips. A declaration on an element outside the tag list goes unreported.
 
 `xmlns:xlink` is exempt. The HTML syntax expresses it on foreign elements, SVG 2 governs
 its conformance, and a standalone copy of the SVG still needs it while it uses
-`xlink:href`, which `attr/svg-xlink-href` covers. The bare `xmlns` attribute is out of
+`xlink:href`, which `attr/svg-xlink` covers. The bare `xmlns` attribute is out of
 scope: the HTML Standard allows it on HTML elements with the value
 `http://www.w3.org/1999/xhtml`.
 

@@ -15,7 +15,7 @@ fix: { op: "none" }
 replacement: "Delete the attribute. Use CSS font-kerning in place of kerning, and absolute URLs in place of xml:base."
 tags: ["svg"]
 impacts: ["maintainability"]
-related: ["attr/svg-version", "attr/svg-baseprofile", "attr/svg-enable-background", "attr/svg-xlink-removed"]
+related: ["attr/svg-version", "attr/svg-baseprofile", "attr/svg-enable-background", "attr/svg-xlink"]
 ---
 
 SVG 1.1 carried attributes for jobs that never took hold on the web: declaring a

@@ -12,5 +12,12 @@
       <image xlink:href="cover.png" width="10" height="10"></image>
     </svg>
     <p>Both references use the retired XLink namespace.</p>
+    <svg viewBox="0 0 24 24" width="24" height="24">
+      <circle id="ring" cx="12" cy="12" r="4"/>
+      <a href="https://example.com/" xlink:show="new" xlink:title="Example">
+        <path d="M4 12h16"/>
+      </a>
+      <use href="#ring" xlink:type="simple" xlink:actuate="onLoad" x="6"/>
+    </svg>
   </body>
 </html>

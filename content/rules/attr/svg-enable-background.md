@@ -14,7 +14,7 @@ fix: { op: "remove-attribute", attr: "enable-background" }
 replacement: "Delete the attribute. To blend against what sits behind, use isolation: isolate with mix-blend-mode; to filter the backdrop, backdrop-filter."
 tags: ["svg"]
 impacts: ["maintainability"]
-related: ["attr/svg-version", "attr/svg-baseprofile", "attr/svg-xlink-href"]
+related: ["attr/svg-version", "attr/svg-baseprofile", "attr/svg-xlink"]
 ---
 
 `enable-background="new 0 0 24 24"` sits on the root of icons exported from Illustrator

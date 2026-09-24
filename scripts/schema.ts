@@ -59,7 +59,7 @@ export const VERDICT_WORDS = [
  * set must be empty when that phase merges, and nothing is ever added to it.
  */
 export const LEGACY_IDS: ReadonlySet<string> = new Set([
-  "attr/svg-xlink-removed", "element/svg-removed", "meta/obsolete-name", "meta/csp-removed-directive",
+  "element/svg-removed", "meta/obsolete-name", "meta/csp-removed-directive",
   "attr/iframe-allow-retired-feature",
 ]);
 
@@ -74,9 +74,8 @@ export const LONG_DESCRIPTION_IDS: ReadonlySet<string> = new Set([
   "element/center", "element/isindex", "element/keygen", "element/multicol", "element/nextid",
   "element/noembed", "element/strike", "element/xmp", "link/preload-as-missing", "link/prerender",
   "meta/csp-report-uri", "meta/http-equiv-cache-pragmas", "meta/http-equiv-description",
-  "meta/http-equiv-x-dns-prefetch-control", "meta/http-equiv-header-only-pragmas",
-  "meta/http-equiv-x-security-pragmas", "meta/og-relative-url", "script/json-ld-howto-faq-announcement",
-  "script/json-ld-syntax",
+  "meta/http-equiv-x-dns-prefetch-control", "meta/http-equiv-x-security-pragmas", "meta/og-relative-url",
+  "script/json-ld-howto-faq-announcement", "script/json-ld-syntax",
 ]);
 
 /**

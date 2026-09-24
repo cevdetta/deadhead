@@ -8,7 +8,7 @@ import type { MatchFn } from "../../types.ts";
  *
  * `xmlns:xlink` is exempt: the HTML syntax expresses it on foreign elements,
  * SVG 2 governs it, and a standalone copy of the SVG still needs it while it
- * uses `xlink:href`. `attr/svg-xlink-href` covers that usage. All three
+ * uses `xlink:href`. `attr/svg-xlink` covers that usage. All three
  * adapters report the qualified, lowercased name.
  */
 export const match: MatchFn = (element) =>

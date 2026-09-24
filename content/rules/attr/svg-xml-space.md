@@ -15,7 +15,7 @@ fix: { op: "none" }
 replacement: "Move the behaviour to CSS, then delete the attribute: xml:space=\"preserve\" becomes style=\"white-space: pre\" on the <text>."
 tags: ["svg"]
 impacts: ["maintainability"]
-related: ["attr/svg-1-1-attributes", "attr/svg-xlink-removed", "attr/svg-version"]
+related: ["attr/svg-1-1-attributes", "attr/svg-xlink", "attr/svg-version"]
 ---
 
 `xml:space="preserve"` is how SVG 1.1 kept the spaces inside `<text>`. SVG 2 moved that

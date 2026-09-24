@@ -14,7 +14,7 @@ fix: { op: "remove-attribute", attr: "version" }
 replacement: "Delete the attribute: <svg viewBox=\"0 0 24 24\">."
 tags: ["svg"]
 impacts: ["maintainability"]
-related: ["attr/svg-baseprofile", "attr/html-version", "attr/svg-xlink-href", "attr/xmlns-prefix"]
+related: ["attr/svg-baseprofile", "attr/html-version", "attr/svg-xlink", "attr/xmlns-prefix"]
 ---
 
 `<svg version="1.1">` states which edition of SVG the drawing conforms to. SVG 2 removed

@@ -77,8 +77,13 @@ test("script-language: fixable when type overrides it or it already names JavaSc
   assert.equal(await on('language=" javascript"'), false);
 });
 
-test("script-charset: fixable unless it decodes an external classic script", async () => {
-  const on = (attrs: string) => fixableOn("attr/script-charset", `<script charset="iso-8859-1" ${attrs}></script>`, "script");
+test("charset-obsolete: fixable on a and link", async () => {
+  assert.equal(await fixableOn("attr/charset-obsolete", '<a href="page.html" charset="iso-8859-1">x</a>', "a"), true);
+  assert.equal(await fixableOn("attr/charset-obsolete", '<link rel="stylesheet" href="a.css" charset="iso-8859-1">', "link"), true);
+});
+
+test("charset-obsolete: fixable on script unless it decodes an external classic script", async () => {
+  const on = (attrs: string) => fixableOn("attr/charset-obsolete", `<script charset="iso-8859-1" ${attrs}></script>`, "script");
   assert.equal(await on(""), true);
   assert.equal(await on('type="module" src="a.js"'), true);
   assert.equal(await on('type="application/json" src="a.json"'), true);
