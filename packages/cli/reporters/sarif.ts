@@ -9,7 +9,7 @@
  */
 
 import { SITE_URL, type Severity } from "../../core/vocabulary.ts";
-import type { Reporter } from "./index.ts";
+import type { FileResult } from "./index.ts";
 
 /** SARIF has three useful levels; the severity ladder maps onto them directly. */
 const LEVEL: Record<Severity, string> = {
@@ -18,7 +18,7 @@ const LEVEL: Record<Severity, string> = {
   unnecessary: "note",
 };
 
-export const sarif: Reporter = (results) => {
+export const sarif = (results: FileResult[], version: string): string => {
   const rules = new Map<string, Record<string, unknown>>();
   const sarifResults: Record<string, unknown>[] = [];
 
@@ -75,6 +75,7 @@ export const sarif: Reporter = (results) => {
           tool: {
             driver: {
               name: "deadhead",
+              version,
               informationUri: SITE_URL,
               rules: [...rules.values()],
             },

@@ -29,10 +29,12 @@ type Block = { from: number; to: number; all: boolean; ids: Set<string> };
 export type Suppressions = {
   /** A finding with no line (the DOM adapter) can never be suppressed. */
   isSuppressed(ruleId: string, line: number | null): boolean;
+  /** Every rule id named in a directive, with the directive's own line. */
+  ids(): { line: number; id: string }[];
 };
 
 /** Nothing is suppressed. Used where there is no source text to read. */
-export const NO_SUPPRESSIONS: Suppressions = { isSuppressed: () => false };
+export const NO_SUPPRESSIONS: Suppressions = { isSuppressed: () => false, ids: () => [] };
 
 export function parseSuppressions(source: string): Suppressions {
   const blocks: Block[] = [];
@@ -42,6 +44,8 @@ export function parseSuppressions(source: string): Suppressions {
   // can overlap without either swallowing the other.
   let openAll: number | null = null;
   const openIds = new Map<string, number>();
+  // Every id named in a directive, for the unknown-id warning.
+  const seen: { line: number; id: string }[] = [];
 
   const closeAll = (to: number): void => {
     if (openAll !== null) {
@@ -73,14 +77,20 @@ export function parseSuppressions(source: string): Suppressions {
       const target = line + 1;
       const existing = nextLine.get(target) ?? { all: false, ids: new Set<string>() };
       if (ids.length === 0) existing.all = true;
-      for (const id of ids) existing.ids.add(id);
+      for (const id of ids) {
+        existing.ids.add(id);
+        seen.push({ line, id });
+      }
       nextLine.set(target, existing);
       continue;
     }
 
     if (kind === "disable") {
       if (ids.length === 0) openAll ??= line;
-      for (const id of ids) if (!openIds.has(id)) openIds.set(id, line);
+      for (const id of ids) {
+        if (!openIds.has(id)) openIds.set(id, line);
+        seen.push({ line, id });
+      }
       continue;
     }
 
@@ -91,6 +101,7 @@ export function parseSuppressions(source: string): Suppressions {
       closeAll(line);
     } else {
       for (const id of ids) {
+        seen.push({ line, id });
         const from = openIds.get(id);
         if (from !== undefined) {
           blocks.push({ from, to: line, all: false, ids: new Set([id]) });
@@ -110,6 +121,9 @@ export function parseSuppressions(source: string): Suppressions {
       return blocks.some(
         (b) => line >= b.from && line <= b.to && (b.all || b.ids.has(ruleId)),
       );
+    },
+    ids() {
+      return [...seen];
     },
   };
 }

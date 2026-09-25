@@ -121,6 +121,7 @@ const result = (file: string, ...ruleIds: string[]): FileResult => ({
   file,
   findings: ruleIds.map(finding),
   fixed: 0,
+  warnings: [],
 });
 
 test("a baseline counts findings per file per rule", () => {

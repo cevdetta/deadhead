@@ -11,6 +11,7 @@
  * the same to a build script, and findings must never look like a crash.
  */
 
+import { readFile, writeFile } from "node:fs/promises";
 import { matchesGlob } from "node:path";
 import { parseArgs, styleText } from "node:util";
 import { enableCompileCache } from "node:module";
@@ -19,7 +20,7 @@ import { enableCompileCache } from "node:module";
 // cache directory is not writable; never affects results.
 enableCompileCache?.();
 
-import { SEVERITY, SEVERITY_RANK, SITE_URL } from "../../core/vocabulary.ts";
+import { SEVERITY, SEVERITY_RANK, SITE_URL, ruleUrl } from "../../core/vocabulary.ts";
 import { RulesNotBuiltError, loadRules } from "../../rules/load.ts";
 import {
   BaselineError,
@@ -29,13 +30,20 @@ import {
   writeBaseline,
 } from "../baseline.ts";
 import { ConfigError, applySettings, fromConfigDir, loadConfig } from "../config.ts";
-import { UsageError, collectFiles, defaultJobs, lintFiles, lintFilesParallel } from "../lint.ts";
-import { type Reporter, tally, total, totalFixed } from "../reporters/index.ts";
+import { UsageError, collectFiles, compileForRun, defaultJobs, lintFiles, lintFilesParallel, lintSource } from "../lint.ts";
+import { type FileResult, type Reporter, tally, total, totalFixed } from "../reporters/index.ts";
 import { json } from "../reporters/json.ts";
 import { sarif } from "../reporters/sarif.ts";
 import { stylish } from "../reporters/stylish.ts";
 
-const REPORTERS: Record<string, Reporter> = { stylish, json, sarif };
+const REPORTERS: Record<string, Reporter> = { stylish, json };
+
+const readVersion = async (): Promise<string> => {
+  const pkg: { version?: string } = JSON.parse(
+    await readFile(new URL("../../../package.json", import.meta.url), "utf8"),
+  );
+  return pkg.version ?? "0.0.0";
+};
 const FAIL_ON = [...SEVERITY, "none"] as const;
 type Threshold = (typeof FAIL_ON)[number];
 
@@ -59,6 +67,10 @@ ${styleText("bold", "deadhead")} — lint HTML <head> for deprecated, unnecessar
       --baseline <path>   ignore findings the baseline already accounts for
       --update-baseline   rewrite the baseline from this run, then exit 0
   -j, --jobs <n>          lint files in <n> worker threads (large trees only)
+  -o, --output-file <path> write the report to <path> instead of stdout
+  -q, --quiet             report only findings at or above --fail-on
+      --list-rules        print every rule, then exit 0
+      --stdin-filename <name> name stdin (-) in the report
   -h, --help              show this
   -v, --version           show the version
 
@@ -84,6 +96,10 @@ try {
       baseline: { type: "string" },
       "update-baseline": { type: "boolean", default: false },
       jobs: { type: "string", short: "j" },
+      "output-file": { type: "string", short: "o" },
+      quiet: { type: "boolean", short: "q", default: false },
+      "list-rules": { type: "boolean", default: false },
+      "stdin-filename": { type: "string" },
       help: { type: "boolean", short: "h", default: false },
       version: { type: "boolean", short: "v", default: false },
     },
@@ -99,17 +115,14 @@ if (values.help) {
 }
 
 if (values.version) {
-  const { readFile } = await import("node:fs/promises");
-  const pkg: { version?: string } = JSON.parse(
-    await readFile(new URL("../../../package.json", import.meta.url), "utf8"),
-  );
-  process.stdout.write(`${pkg.version ?? "0.0.0"}\n`);
+  process.stdout.write(`${await readVersion()}\n`);
   process.exit(0);
 }
 
-const reporter = REPORTERS[values.format];
-if (reporter === undefined) {
-  fail(`unknown --format ${JSON.stringify(values.format)} (expected ${Object.keys(REPORTERS).join(", ")})`);
+const isSarif = values.format === "sarif";
+const reporter = isSarif ? undefined : REPORTERS[values.format];
+if (reporter === undefined && !isSarif) {
+  fail(`unknown --format ${JSON.stringify(values.format)} (expected ${[...Object.keys(REPORTERS), "sarif"].join(", ")})`);
 }
 
 /** Config supplies defaults; an explicit flag always wins. */
@@ -132,78 +145,123 @@ try {
   const settings = config.rules ?? {};
   const rules = applySettings(allRules, settings);
 
-  const targets = positionals.length > 0 ? positionals : (config.include ?? []);
-  if (targets.length === 0) {
-    process.stderr.write(USAGE);
-    process.exit(2);
-  }
-
-  const ignore = config.ignore ?? [];
-  const found = await collectFiles(targets);
-  const files = found.filter((file) => !ignore.some((pattern) => matchesGlob(file, pattern)));
-
-  if (files.length === 0) {
-    fail(
-      found.length === 0
-        ? `no HTML files found in: ${targets.join(", ")}`
-        : `every HTML file in: ${targets.join(", ")} is ignored by config`,
-    );
+  if (values["list-rules"]) {
+    if (values.format === "json") {
+      process.stdout.write(
+        `${JSON.stringify(rules.map((rule) => ({ ruleId: rule.meta.ruleId, severity: rule.meta.severity, description: rule.meta.description, url: ruleUrl(rule.meta.ruleId) })), null, 2)}\n`,
+      );
+    } else {
+      for (const rule of rules) {
+        process.stdout.write(`${rule.meta.ruleId}  ${rule.meta.severity}  ${rule.meta.description}\n`);
+      }
+    }
+    process.exit(0);
   }
 
   const skipTemplates = values["skip-templates"] ?? config.skipTemplates ?? false;
-  let jobs = defaultJobs();
-  if (values.jobs !== undefined) {
-    const parsed = Number(values.jobs);
-    if (!Number.isInteger(parsed) || parsed < 1) fail(`--jobs must be a positive integer (got ${JSON.stringify(values.jobs)})`);
-    jobs = parsed;
-  }
   const lintOptions = {
     skipTemplates,
     fix: values.fix,
     headOnly: !values["no-head-only"],
   };
-  const { results, visitBody } =
-    files.length >= 64 && jobs > 1
-      ? await lintFilesParallel(files, settings, lintOptions, jobs)
-      : await lintFiles(files, rules, lintOptions);
 
-  // Head-only mode is silent by design of the engine — the walk just never
-  // descends — so say so on stderr, where machine-readable stdout stays
-  // clean. It applies only when the active rule set allows it, which with
-  // the shipped rules means the user switched the body-scoped ones off.
-  if (values["no-head-only"] !== true && !visitBody) {
-    process.stderr.write(
-      `${styleText("dim", "head-only mode: no active rule is scoped beyond <head>, so the <body> walk is skipped (pass --no-head-only to walk it anyway)")}\n`,
-    );
+  let results: FileResult[];
+  let resolved = 0;
+  if (positionals.length === 1 && positionals[0] === "-") {
+    if (values.fix === true) fail("--fix needs files; it cannot rewrite stdin");
+    process.stdin.setEncoding("utf8");
+    let source = "";
+    for await (const chunk of process.stdin) source += chunk;
+    const name = values["stdin-filename"] ?? "<stdin>";
+    const linted = lintSource(source, name, compileForRun(rules, { ...lintOptions, fix: false }), { ...lintOptions, fix: false });
+    results = [{ file: linted.file, findings: linted.findings, fixed: linted.fixed, warnings: linted.warnings }];
+  } else {
+    const targets = positionals.length > 0 ? positionals : (config.include ?? []);
+    if (targets.length === 0) {
+      process.stderr.write(USAGE);
+      process.exit(2);
+    }
+
+    const ignore = config.ignore ?? [];
+    const found = await collectFiles(targets);
+    const files = found.filter((file) => !ignore.some((pattern) => matchesGlob(file, pattern)));
+
+    if (files.length === 0) {
+      fail(
+        found.length === 0
+          ? `no HTML files found in: ${targets.join(", ")}`
+          : `every HTML file in: ${targets.join(", ")} is ignored by config`,
+      );
+    }
+
+    let jobs = defaultJobs();
+    if (values.jobs !== undefined) {
+      const parsed = Number(values.jobs);
+      if (!Number.isInteger(parsed) || parsed < 1) fail(`--jobs must be a positive integer (got ${JSON.stringify(values.jobs)})`);
+      jobs = parsed;
+    }
+    const run =
+      files.length >= 64 && jobs > 1
+        ? await lintFilesParallel(files, settings, lintOptions, jobs)
+        : await lintFiles(files, rules, lintOptions);
+    results = run.results;
+
+    // Head-only mode is silent by design of the engine — the walk just never
+    // descends — so say so on stderr, where machine-readable stdout stays
+    // clean. It applies only when the active rule set allows it, which with
+    // the shipped rules means the user switched the body-scoped ones off.
+    if (values["no-head-only"] !== true && !run.visitBody) {
+      process.stderr.write(
+        `${styleText("dim", "head-only mode: no active rule is scoped beyond <head>, so the <body> walk is skipped (pass --no-head-only to walk it anyway)")}\n`,
+      );
+    }
+
+    const baselinePath =
+      values.baseline ??
+      (loaded && config.baseline !== undefined ? fromConfigDir(loaded, config.baseline) : undefined);
+
+    if (values["update-baseline"]) {
+      if (baselinePath === undefined) {
+        fail("--update-baseline needs --baseline <path>, or `baseline` in the config");
+      }
+      const baseline = summarise(results);
+      await writeBaseline(baselinePath, baseline);
+      const count = total(results);
+      process.stdout.write(
+        `${styleText("green", "✓")} baseline written to ${baselinePath} ` +
+          `(${count} finding${count === 1 ? "" : "s"} accepted)\n`,
+      );
+      process.exit(0);
+    }
+
+    if (baselinePath !== undefined) {
+      const applied = applyBaseline(results, await readBaseline(baselinePath));
+      results = applied.results;
+      resolved = applied.resolved;
+    }
   }
 
-  const baselinePath =
-    values.baseline ??
-    (loaded && config.baseline !== undefined ? fromConfigDir(loaded, config.baseline) : undefined);
-
-  if (values["update-baseline"]) {
-    if (baselinePath === undefined) {
-      fail("--update-baseline needs --baseline <path>, or `baseline` in the config");
+  for (const result of results) {
+    for (const warning of result.warnings) {
+      process.stderr.write(`warn ${result.file}:${warning.line}: unknown rule id \`${warning.id}\` in a deadhead comment\n`);
     }
-    const baseline = summarise(results);
-    await writeBaseline(baselinePath, baseline);
-    const count = total(results);
-    process.stdout.write(
-      `${styleText("green", "✓")} baseline written to ${baselinePath} ` +
-        `(${count} finding${count === 1 ? "" : "s"} accepted)\n`,
-    );
-    process.exit(0);
   }
 
   let reported = results;
-  let resolved = 0;
-  if (baselinePath !== undefined) {
-    const applied = applyBaseline(results, await readBaseline(baselinePath));
-    reported = applied.results;
-    resolved = applied.resolved;
+  if (values.quiet === true && threshold !== "none") {
+    const floor = SEVERITY_RANK[threshold];
+    reported = results.map((result) => ({
+      ...result,
+      findings: result.findings.filter((finding) => SEVERITY_RANK[finding.severity] >= floor),
+    }));
   }
 
-  process.stdout.write(reporter(reported));
+  const text = isSarif ? sarif(reported, await readVersion()) : (reporter as Reporter)(reported);
+  if (values["output-file"] !== undefined) {
+    await writeFile(values["output-file"], text, "utf8");
+  } else {
+    process.stdout.write(text);
+  }
 
   const fixed = totalFixed(results);
   if (fixed > 0) {
