@@ -22,6 +22,7 @@ export type AttrSel = {
   name: string;
   op: AttrOp;
   value: string | null;
+  lower: string | null;
   insensitive: boolean;
 };
 export type TagSel = { type: "tag"; name: string };
@@ -37,6 +38,15 @@ export type SelectorParse =
 const IDENT = /[a-zA-Z_-][a-zA-Z0-9_-]*/y;
 const TAG = /[a-z][a-z0-9-]*/y;
 const VALUE = /[a-zA-Z0-9_-]+/y;
+
+/** ASCII lowercase: CSS's case-insensitive. Returns the input untouched when it has no A–Z. */
+export const asciiLower = (value: string): string => {
+  for (let i = 0; i < value.length; i++) {
+    const c = value.charCodeAt(i);
+    if (c >= 65 && c <= 90) return value.replace(/[A-Z]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) + 32));
+  }
+  return value;
+};
 
 /**
  * Parse the supported selector subset: tag names, `[attr]` with `=`, `~=`,
@@ -87,7 +97,7 @@ export function parseSelector(input: string): SelectorParse {
     ws();
     if (input[i] === "]") {
       i++;
-      return { type: "attr", name, op: "exists", value: null, insensitive: false };
+      return { type: "attr", name, op: "exists", value: null, lower: null, insensitive: false };
     }
     if (input[i] === "|" && input[i + 1] === "=") {
       return fail(i, "the `|=` attribute operator is not supported");
@@ -135,7 +145,7 @@ export function parseSelector(input: string): SelectorParse {
       return fail(i, "expected `]` to close the attribute selector");
     }
     i++;
-    return { type: "attr", name, op, value, insensitive };
+    return { type: "attr", name, op, value, lower: insensitive ? asciiLower(value) : value, insensitive };
   };
 
   /** A tag name and/or a run of attribute selectors, with no whitespace inside. */
@@ -239,13 +249,6 @@ export function parseSelector(input: string): SelectorParse {
 
 // --- matching ---------------------------------------------------------------
 
-/**
- * ASCII lowercase, which is what CSS means by case-insensitive. `toLowerCase`
- * is Unicode-aware and would fold characters the spec leaves alone.
- */
-const asciiLower = (value: string): string =>
-  value.replace(/[A-Z]/g, (c) => String.fromCharCode(c.charCodeAt(0) + 32));
-
 /** ASCII whitespace, the separator `~=` splits on. */
 const SPACE = /[\t\n\f\r ]+/;
 
@@ -255,7 +258,7 @@ function matchesAttr(element: ElementPort, sel: AttrSel): boolean {
   if (sel.op === "exists") return true;
 
   const actual = sel.insensitive ? asciiLower(raw) : raw;
-  const expected = sel.insensitive ? asciiLower(sel.value ?? "") : (sel.value ?? "");
+  const expected = sel.lower ?? "";
 
   switch (sel.op) {
     case "=":
@@ -280,14 +283,20 @@ function matchesSimple(element: ElementPort, sel: Simple): boolean {
     case "attr":
       return matchesAttr(element, sel);
     // `:not(a[b])` negates the compound as a whole, not each part of it.
-    case "not":
-      return !sel.inner.every((inner) => matchesSimple(element, inner));
+    case "not": {
+      for (const inner of sel.inner) if (!matchesSimple(element, inner)) return true;
+      return false;
+    }
   }
 }
 
 /** Does this element match any alternative in a parsed selector list? */
 export function matches(element: ElementPort, list: Compound[]): boolean {
-  return list.some((compound) => compound.every((part) => matchesSimple(element, part)));
+  outer: for (const compound of list) {
+    for (const part of compound) if (!matchesSimple(element, part)) continue outer;
+    return true;
+  }
+  return false;
 }
 
 /**

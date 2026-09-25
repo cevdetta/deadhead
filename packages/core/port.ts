@@ -1,12 +1,14 @@
 /**
  * Shared port scaffolding for the three adapters.
  *
- * Only two things live here: the ones that already drifted once.
+ * Three things live here, all of which drifted once.
  *
  * - `withPortCache`: every adapter needs one port per node so `parent()` and
  *   `children()` hand back the same object. Written three times, it drifted.
  * - `makeDoctypePort`: every adapter lowercases the doctype name its own way.
  *   Written three times, linkedom's case leaked through once.
+ * - `makeDocumentQueries`: every source adapter needs cached document queries
+ *   with leading-tag narrowing. Written twice, it drifted.
  *
  * Everything else stays in the adapters. Attribute maps, `parent()`,
  * `children()` and `index()` are one-liners over data only that adapter owns;
@@ -19,7 +21,8 @@
  * bookmarklet.
  */
 
-import type { DoctypePort, ElementPort, Loc, Range } from "./types.ts";
+import type { DocumentPort, DoctypePort, ElementPort, Loc, Range } from "./types.ts";
+import { type Compound, leadingTag, matches, parseSelector } from "./selector.ts";
 
 /**
  * One port per node, so `parent()` and `children()` hand back the same object
@@ -59,5 +62,48 @@ export function makeDoctypePort(options: {
     systemId: options.systemId,
     range: options.range,
     loc: options.loc,
+  };
+}
+
+/**
+ * `querySelector`/`querySelectorAll` over a node list, with core's own
+ * matcher, so a document rule and the engine agree by construction on what
+ * the selector subset means. Selectors are parsed once per document; a
+ * selector whose alternatives all lead with one tag scans only that tag.
+ */
+export function makeDocumentQueries<N extends object>(
+  nodes: N[],
+  byTag: Map<string, N[]>,
+  portFor: (node: N) => ElementPort,
+): Pick<DocumentPort, "querySelector" | "querySelectorAll"> {
+  const compiled = new Map<string, { ast: Compound[]; tag: string | null }>();
+  const candidates = (selector: string): { ast: Compound[]; list: N[] } => {
+    let entry = compiled.get(selector);
+    if (entry === undefined) {
+      const parsed = parseSelector(selector);
+      if (!parsed.ok) throw new Error(`unsupported selector ${JSON.stringify(selector)} — ${parsed.message}`);
+      entry = { ast: parsed.ast, tag: leadingTag(parsed.ast) };
+      compiled.set(selector, entry);
+    }
+    return { ast: entry.ast, list: entry.tag === null ? nodes : (byTag.get(entry.tag) ?? []) };
+  };
+  return {
+    querySelectorAll(selector) {
+      const { ast, list } = candidates(selector);
+      const found: ElementPort[] = [];
+      for (const node of list) {
+        const port = portFor(node);
+        if (matches(port, ast)) found.push(port);
+      }
+      return found;
+    },
+    querySelector(selector) {
+      const { ast, list } = candidates(selector);
+      for (const node of list) {
+        const port = portFor(node);
+        if (matches(port, ast)) return port;
+      }
+      return null;
+    },
   };
 }

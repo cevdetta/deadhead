@@ -414,3 +414,16 @@ test("every http-equiv value a rule selector tests is in OWNED_HTTP_EQUIV", asyn
   }
   assert.equal(missing.join(", "), "");
 });
+
+test("the registry wires every logic entry statically", async () => {
+  const { RULES } = await import("../packages/rules/registry.gen.ts");
+  const text = await readFile(new URL("../packages/rules/registry.gen.ts", import.meta.url), "utf8");
+  assert.doesNotMatch(text, /import\(/);
+  for (const rule of RULES) {
+    if (rule.meta.kind === "document") assert.equal(typeof rule.check, "function", rule.meta.ruleId);
+    else if (rule.meta.match === "logic") {
+      const hasEntry = typeof rule.match === "function" || typeof rule.fixable === "function";
+      assert.equal(hasEntry, true, rule.meta.ruleId);
+    }
+  }
+});

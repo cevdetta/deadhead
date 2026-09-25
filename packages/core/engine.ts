@@ -41,19 +41,20 @@ export type Rule = {
   fixable?: FixableFn;
 };
 
-type Compiled = Rule & { parsed: Compound[] | null };
+type Compiled = Rule & { parsed: Compound[] | null; index: number; stamp: number };
 
 /**
  * One rule as a dispatch bucket sees it: the rule plus the slice of its
- * selector that can match this bucket's tag. `compounds` is `null` for a
+ * selector that can match this bucket. `compounds` is `null` for a
  * selector-less rule, whose logic decides alone, and the whole parse for a
- * wildcard rule, whose alternatives fit no single bucket.
+ * wildcard rule, whose alternatives fit no tag or attribute bucket.
  */
 type Dispatched = { rule: Compiled; compounds: Compound[] | null };
 
 /** Selector parses and dispatch buckets, built once and reused per file and per fix pass. */
 export type CompiledRules = {
   byTag: Map<string, Dispatched[]>;
+  byAttr: Map<string, Dispatched[]>;
   wildcard: Dispatched[];
   documents: Compiled[];
   visitBody: boolean;
@@ -71,6 +72,21 @@ export type RunOptions = {
 };
 
 const MAX_SNIPPET = 90;
+
+/** The first positive attribute an alternative requires, lowercased, or null. */
+const requiredAttr = (compound: Compound): string | null => {
+  for (const simple of compound) if (simple.type === "attr") return simple.name.toLowerCase();
+  return null;
+};
+
+const push = <K>(map: Map<K, Dispatched[]>, key: K, entry: Dispatched): void => {
+  const list = map.get(key);
+  if (list) list.push(entry);
+  else map.set(key, [entry]);
+};
+
+/** Monotonic across runs, so a stamp from an earlier run never matches a later element. */
+let visitCounter = 0;
 
 const isDoctype = (target: ElementPort | DoctypePort): target is DoctypePort => "publicId" in target;
 
@@ -145,20 +161,22 @@ function contextFor(rule: Rule, source: string | null, fix: boolean): RuleContex
  * Parse each selector once and sort rules into dispatch buckets.
  *
  * Bucketing is per comma alternative, not per rule: an alternative can only
- * match elements with its leading tag, so testing it anywhere else is pure
- * waste. A rule lands in wildcard only when one of its alternatives has no
- * leading tag (or it has no selector at all) — then it must see every node.
+ * match elements with its leading tag, or with an attribute it requires, so
+ * testing it anywhere else is pure waste. A rule lands in wildcard only when
+ * one of its alternatives has neither a leading tag nor a required attribute
+ * (or it has no selector at all) — then it must see every node.
  *
  * A selector that fails to parse here is a build failure that escaped
  * `validate-rules`, not user input, so it throws rather than degrading.
  */
 export function compile(rules: Rule[]): CompiledRules {
   const byTag = new Map<string, Dispatched[]>();
+  const byAttr = new Map<string, Dispatched[]>();
   const wildcard: Dispatched[] = [];
   const documents: Compiled[] = [];
   let visitBody = false;
 
-  for (const rule of rules) {
+  rules.forEach((rule, index) => {
     let parsed: Compound[] | null = null;
     if (rule.meta.selector !== null) {
       const result = parseSelector(rule.meta.selector);
@@ -169,45 +187,37 @@ export function compile(rules: Rule[]): CompiledRules {
       }
       parsed = result.ast;
     }
-    const compiled: Compiled = { ...rule, parsed };
+    const compiled: Compiled = { ...rule, parsed, index, stamp: -1 };
 
     if (rule.meta.kind === "document") {
       documents.push(compiled);
-      continue;
+      return;
     }
     if (rule.meta.scope !== "head") visitBody = true;
 
-    // Group this rule's alternatives by leading tag. `leadingTag` on one
-    // alternative is exactly that alternative's tag or null, so dispatch
-    // agrees with the matcher by construction: an element of tag T can only
-    // match alternatives bucketed under T (or tagless ones, via wildcard).
-    const groups = new Map<string, Compound[]>();
-    let tagless = parsed === null;
-    if (parsed !== null) {
-      for (const compound of parsed) {
-        const tag = leadingTag([compound]);
-        if (tag === null) {
-          tagless = true;
-          break;
-        }
-        const group = groups.get(tag);
-        if (group) group.push(compound);
-        else groups.set(tag, [compound]);
-      }
+    if (parsed === null) {
+      wildcard.push({ rule: compiled, compounds: null });
+      return;
     }
-    if (tagless) {
-      wildcard.push({ rule: compiled, compounds: parsed });
-      continue;
+    // Every alternative goes to the one bucket that sees every element it can
+    // match: its leading tag, else an attribute it requires, else everything.
+    const tagGroups = new Map<string, Compound[]>();
+    const attrGroups = new Map<string, Compound[]>();
+    const loose: Compound[] = [];
+    for (const compound of parsed) {
+      const tag = leadingTag([compound]);
+      const attr = tag === null ? requiredAttr(compound) : null;
+      const group = tag !== null ? tagGroups : attr !== null ? attrGroups : null;
+      const key = tag ?? attr;
+      if (group === null || key === null) loose.push(compound);
+      else (group.get(key) ?? group.set(key, []).get(key)!).push(compound);
     }
-    for (const [tag, compounds] of groups) {
-      const entry: Dispatched = { rule: compiled, compounds };
-      const bucket = byTag.get(tag);
-      if (bucket) bucket.push(entry);
-      else byTag.set(tag, [entry]);
-    }
-  }
+    for (const [tag, compounds] of tagGroups) push(byTag, tag, { rule: compiled, compounds });
+    for (const [attr, compounds] of attrGroups) push(byAttr, attr, { rule: compiled, compounds });
+    if (loose.length > 0) wildcard.push({ rule: compiled, compounds: loose });
+  });
 
-  return { byTag, wildcard, documents, visitBody };
+  return { byTag, byAttr, wildcard, documents, visitBody };
 }
 
 /**
@@ -221,7 +231,7 @@ const positionOf = (finding: Finding): [number, number, number] => [
 ];
 
 export function runCompiled(compiled: CompiledRules, parsed: Parsed, options: RunOptions = {}): Finding[] {
-  const { byTag, wildcard, documents, visitBody } = compiled;
+  const { byTag, byAttr, wildcard, documents, visitBody } = compiled;
   const suppressions = options.suppressions ?? NO_SUPPRESSIONS;
   const findings: Finding[] = [];
   const fix = options.fix === true;
@@ -250,29 +260,54 @@ export function runCompiled(compiled: CompiledRules, parsed: Parsed, options: Ru
   walk(
     parsed.root,
     (element, region) => {
+      const visit = ++visitCounter;
+      let local: Finding[] | null = null;
+      let localIndex: number[] | null = null;
+
       const consider = (entry: Dispatched): void => {
-        const scope = entry.rule.meta.scope;
+        const rule = entry.rule;
+        const scope = rule.meta.scope;
         if (scope === "head" && region !== "head") return;
         if (scope === "body" && region !== "body") return;
+        if (rule.stamp === visit) return;
         if (entry.compounds !== null && !matches(element, entry.compounds)) return;
-
-        const ctx = contextOf(entry.rule);
-        if (entry.rule.meta.match === "logic") {
-          if (entry.rule.match) {
-            if (!entry.rule.match(element, ctx)) return;
-          } else if (!entry.rule.fixable) {
+        rule.stamp = visit;
+        const ctx = contextOf(rule);
+        if (rule.meta.match === "logic") {
+          if (rule.match) {
+            if (!rule.match(element, ctx)) return;
+          } else if (!rule.fixable) {
             // A module exporting only `fixable` leaves matching to the selector.
-            throw new Error(`${entry.rule.meta.ruleId}: match "logic" requires a match() or fixable() logic module`);
+            throw new Error(`${rule.meta.ruleId}: match "logic" requires a match() or fixable() logic module`);
           }
         }
-        findings.push(ctx.report(element));
+        (local ??= []).push(ctx.report(element));
+        (localIndex ??= []).push(rule.index);
       };
 
       // Two loops rather than a concatenation: this runs once per node, and
       // building a throwaway array per node is the allocation that shows up.
       const bucket = byTag.get(element.tag);
       if (bucket !== undefined) for (const entry of bucket) consider(entry);
+      if (byAttr.size > 0) {
+        for (const name of element.attrNames()) {
+          const attrBucket = byAttr.get(name);
+          if (attrBucket !== undefined) for (const entry of attrBucket) consider(entry);
+        }
+      }
       for (const entry of wildcard) consider(entry);
+
+      if (local === null || localIndex === null) return;
+      const done = local as Finding[];
+      const doneIdx = localIndex as number[];
+      if (done.length === 1) {
+        findings.push(done[0] as Finding);
+        return;
+      }
+      // One element, several rules: report in rule order, whichever bucket found them.
+      const pairs: [number, number][] = doneIdx.map((idx: number, i: number) => [idx, i]);
+      pairs.sort((a: [number, number], b: [number, number]) => a[0] - b[0]);
+      for (const [, i] of pairs) findings.push(done[i] as Finding);
     },
     walkOptions,
   );

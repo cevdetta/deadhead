@@ -11,8 +11,7 @@
  */
 
 import { type DefaultTreeAdapterTypes, parse } from "parse5";
-import { makeDoctypePort, withPortCache } from "../core/port.ts";
-import { type Compound, leadingTag, matches, parseSelector } from "../core/selector.ts";
+import { makeDocumentQueries, makeDoctypePort, withPortCache } from "../core/port.ts";
 import type { DoctypePort, DocumentPort, ElementPort, Parsed, Range } from "../core/types.ts";
 
 type P5Element = DefaultTreeAdapterTypes.Element;
@@ -205,50 +204,11 @@ export function parseHtml(source: string): Parsed {
 
   const root = elements.find((node) => node.tagName.toLowerCase() === "html") ?? elements[0];
 
-  const compiled = new Map<string, Compound[]>();
-  const astFor = (selector: string): Compound[] => {
-    const cached = compiled.get(selector);
-    if (cached) return cached;
-    const parsed = parseSelector(selector);
-    if (!parsed.ok) {
-      throw new Error(`unsupported selector ${JSON.stringify(selector)} — ${parsed.message}`);
-    }
-    compiled.set(selector, parsed.ast);
-    return parsed.ast;
-  };
-
   const doctype = doctypeOf(document);
-
-  /**
-   * The nodes a document query must test, in document order. A selector whose
-   * every alternative leads with the same tag can only match that tag's
-   * bucket; anything else scans everything, exactly as before.
-   */
-  const candidates = (selector: string): { ast: Compound[]; nodes: P5Element[] } => {
-    const ast = astFor(selector);
-    const tag = leadingTag(ast);
-    return { ast, nodes: tag === null ? elements : (byTag.get(tag) ?? []) };
-  };
 
   const doc: DocumentPort = {
     doctype: () => doctype,
-    querySelectorAll(selector) {
-      const { ast, nodes } = candidates(selector);
-      const found: ElementPort[] = [];
-      for (const node of nodes) {
-        const port = portFor(node);
-        if (matches(port, ast)) found.push(port);
-      }
-      return found;
-    },
-    querySelector(selector) {
-      const { ast, nodes } = candidates(selector);
-      for (const node of nodes) {
-        const port = portFor(node);
-        if (matches(port, ast)) return port;
-      }
-      return null;
-    },
+    ...makeDocumentQueries(elements, byTag, portFor),
   };
 
   return { root: root === undefined ? null : portFor(root), doc, source };

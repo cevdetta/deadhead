@@ -75,6 +75,7 @@ test("a parsed selector keeps enough structure to bucket by leading tag", () => 
         name: "http-equiv",
         op: "=",
         value: "X-UA-Compatible",
+        lower: "x-ua-compatible",
         insensitive: true,
       },
     ],
@@ -205,4 +206,12 @@ test("presenceTests lowercases names and deduplicates across alternatives", () =
   const parsed = parseSelector("meta[Name], meta[name], meta[content]");
   assert.ok(parsed.ok);
   assert.deepEqual(presenceTests(parsed.ast), ["name", "content"]);
+});
+
+test("an insensitive attribute test is lowercased once, at parse time", async () => {
+  const { parseSelector } = await import("../packages/core/selector.ts");
+  const parsed = parseSelector('meta[http-equiv="X-UA-Compatible" i]');
+  assert.ok(parsed.ok);
+  const attr = parsed.ast[0]!.find((s) => s.type === "attr");
+  assert.equal(attr?.type === "attr" ? attr.lower : undefined, "x-ua-compatible");
 });
