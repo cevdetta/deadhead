@@ -55,21 +55,6 @@ export const VERDICT_WORDS = [
 ] as const;
 
 /**
- * Ids that predate the naming convention. Taxonomy v2 renames every one; the
- * set must be empty when that phase merges, and nothing is ever added to it.
- */
-export const LEGACY_IDS: ReadonlySet<string> = new Set([
-  "attr/iframe-allow-retired-feature",
-]);
-
-/**
- * Descriptions over 140 characters that predate the naming convention.
- * Task 9 rewrites every one; the set must be empty by Task 10, and nothing is
- * ever added to it.
- */
-export const LONG_DESCRIPTION_IDS: ReadonlySet<string> = new Set([]);
-
-/**
  * `attr/<attribute>-obsolete`: the attribute on every element where HTML §16
  * marks it obsolete, while it stays valid on another element. `obsolete` is
  * the spec's category here, not a judgement. An id joins only with that
@@ -293,7 +278,7 @@ export function validateFrontmatter(data: unknown): FrontmatterResult {
       ),
     );
   }
-  if (ruleId !== null && !LEGACY_IDS.has(ruleId) && !OBSOLETE_ATTRIBUTE_IDS.has(ruleId)) {
+  if (ruleId !== null && !OBSOLETE_ATTRIBUTE_IDS.has(ruleId)) {
     const words = ruleId.split(/[/-]/);
     const verdict = VERDICT_WORDS.find((w) => words.includes(w));
     if (verdict !== undefined) {
@@ -308,11 +293,7 @@ export function validateFrontmatter(data: unknown): FrontmatterResult {
 
   const title = nonEmptyString(data["title"], ["title"], issues);
   const description = nonEmptyString(data["description"], ["description"], issues);
-  if (
-    typeof description === "string" &&
-    description.length > 140 &&
-    !(ruleId !== null && (LEGACY_IDS.has(ruleId) || LONG_DESCRIPTION_IDS.has(ruleId)))
-  ) {
+  if (typeof description === "string" && description.length > 140) {
     issues.push(
       field(
         ["description"],

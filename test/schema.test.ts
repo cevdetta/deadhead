@@ -141,6 +141,12 @@ test("a ruleId with a verdict word is rejected", () => {
   assert.match(messages({ ruleId: "attr/foo-obsolete" }).join("\n"), /verdict word `obsolete`/);
 });
 
+test("no rule id is exempt from the naming checks", async () => {
+  const schema = await import("../scripts/schema.ts");
+  assert.equal("LEGACY_IDS" in schema, false);
+  assert.equal("LONG_DESCRIPTION_IDS" in schema, false);
+});
+
 test("an element title that does not start with < is rejected", () => {
   assert.match(messages({ title: "meta name example" }).join("\n"), /must start with `<`/);
 });
