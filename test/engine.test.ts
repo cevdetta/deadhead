@@ -58,7 +58,7 @@ test("scope confines a rule to one half of the document", () => {
   assert.equal(lint(html, rules("body"))[0]?.loc?.line, 7);
 });
 
-test("a rule whose selector has no leading tag still matches, via the wildcard bucket", () => {
+test("a rule whose selector has no leading tag still matches, via its attribute bucket", () => {
   const rule: Rule = { meta: meta({ ruleId: "attr/any", selector: "[data-legacy]" }) };
   const findings = lint(doc('<meta data-legacy="1">', '<div data-legacy="1"></div>'), [rule]);
   assert.equal(findings.length, 2);
@@ -198,4 +198,25 @@ test("a logic rule shipping only fixable() matches on its selector alone", () =>
     fixable: () => false,
   };
   assert.equal(lint(doc('<meta name="a"><meta charset="utf-8">'), [rule]).length, 1);
+});
+
+test("a rule with one tag-less alternative only visits elements that alternative can match", async () => {
+  const { compile } = await import("../packages/core/engine.ts");
+  const compiled = compile([{ meta: meta({ ruleId: "script/x", selector: 'script[type="a"], [itemtype$="b"]' }) }]);
+  assert.equal(compiled.wildcard.length, 0);
+  assert.equal(compiled.byTag.get("script")?.length, 1);
+  assert.equal(compiled.byAttr.get("itemtype")?.length, 1);
+});
+
+test("an element matching two alternatives of one rule reports once", () => {
+  const rule: Rule = { meta: meta({ ruleId: "attr/x", selector: "div[a], [a]" }) };
+  assert.equal(lint(doc("", '<div a="1"></div><p a="2"></p>'), [rule]).length, 2);
+});
+
+test("findings on one element come in rule order, whatever bucket found them", () => {
+  const rules: Rule[] = [
+    { meta: meta({ ruleId: "attr/a", selector: "[data-x]" }) },
+    { meta: meta({ ruleId: "attr/b", selector: "div" }) },
+  ];
+  assert.deepEqual(ids(lint(doc("", '<div data-x="1"></div>'), rules)), ["attr/a", "attr/b"]);
 });
