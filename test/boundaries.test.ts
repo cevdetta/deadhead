@@ -46,6 +46,14 @@ test("parse5 appears only in packages/cli/adapter.ts", async () => {
   );
 });
 
+test("@html-eslint/parser appears only in packages/eslint-plugin/", async () => {
+  const all = await specifiers("packages");
+  assert.deepEqual(
+    all.filter(({ spec }) => spec === "@html-eslint/parser" || spec.startsWith("@html-eslint/")).map(({ file }) => file),
+    ["packages/eslint-plugin/index.ts"],
+  );
+});
+
 test("nothing in packages/ imports from site/", async () => {
   assert.deepEqual(bad(await specifiers("packages"), (s) => !s.includes("/site/") && !s.startsWith("site/")), []);
 });
