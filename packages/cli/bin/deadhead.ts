@@ -19,7 +19,6 @@ import { enableCompileCache } from "node:module";
 // cache directory is not writable; never affects results.
 enableCompileCache?.();
 
-import { type Rule } from "../../core/engine.ts";
 import { SEVERITY, SEVERITY_RANK, SITE_URL } from "../../core/vocabulary.ts";
 import { RulesNotBuiltError, loadRules } from "../../rules/load.ts";
 import {
@@ -29,8 +28,8 @@ import {
   summarise,
   writeBaseline,
 } from "../baseline.ts";
-import { ConfigError, fromConfigDir, loadConfig } from "../config.ts";
-import { UsageError, collectFiles, lintFiles } from "../lint.ts";
+import { ConfigError, applySettings, fromConfigDir, loadConfig } from "../config.ts";
+import { UsageError, collectFiles, defaultJobs, lintFiles, lintFilesParallel } from "../lint.ts";
 import { type Reporter, tally, total, totalFixed } from "../reporters/index.ts";
 import { json } from "../reporters/json.ts";
 import { sarif } from "../reporters/sarif.ts";
@@ -59,6 +58,7 @@ ${styleText("bold", "deadhead")} — lint HTML <head> for deprecated, unnecessar
   -c, --config <path>     defaults to ./deadhead.config.ts when present
       --baseline <path>   ignore findings the baseline already accounts for
       --update-baseline   rewrite the baseline from this run, then exit 0
+  -j, --jobs <n>          lint files in <n> worker threads (large trees only)
   -h, --help              show this
   -v, --version           show the version
 
@@ -83,6 +83,7 @@ try {
       config: { type: "string", short: "c" },
       baseline: { type: "string" },
       "update-baseline": { type: "boolean", default: false },
+      jobs: { type: "string", short: "j" },
       help: { type: "boolean", short: "h", default: false },
       version: { type: "boolean", short: "v", default: false },
     },
@@ -129,14 +130,7 @@ try {
   // `off` drops the rule entirely rather than filtering its findings later, so
   // it costs nothing to have it disabled.
   const settings = config.rules ?? {};
-  const rules: Rule[] = allRules
-    .filter((rule) => settings[rule.meta.ruleId] !== "off")
-    .map((rule) => {
-      const override = settings[rule.meta.ruleId];
-      return override === undefined || override === "off"
-        ? rule
-        : { ...rule, meta: { ...rule.meta, severity: override } };
-    });
+  const rules = applySettings(allRules, settings);
 
   const targets = positionals.length > 0 ? positionals : (config.include ?? []);
   if (targets.length === 0) {
@@ -157,11 +151,21 @@ try {
   }
 
   const skipTemplates = values["skip-templates"] ?? config.skipTemplates ?? false;
-  const { results, visitBody } = await lintFiles(files, rules, {
+  let jobs = defaultJobs();
+  if (values.jobs !== undefined) {
+    const parsed = Number(values.jobs);
+    if (!Number.isInteger(parsed) || parsed < 1) fail(`--jobs must be a positive integer (got ${JSON.stringify(values.jobs)})`);
+    jobs = parsed;
+  }
+  const lintOptions = {
     skipTemplates,
     fix: values.fix,
     headOnly: !values["no-head-only"],
-  });
+  };
+  const { results, visitBody } =
+    files.length >= 64 && jobs > 1
+      ? await lintFilesParallel(files, settings, lintOptions, jobs)
+      : await lintFiles(files, rules, lintOptions);
 
   // Head-only mode is silent by design of the engine — the walk just never
   // descends — so say so on stderr, where machine-readable stdout stays

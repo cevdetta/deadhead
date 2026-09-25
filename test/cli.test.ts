@@ -388,3 +388,10 @@ test("a directory with no HTML files is a usage error", async () => {
     await rm(dir, { recursive: true, force: true });
   }
 });
+
+test("--jobs gives the same report as a serial run", async () => {
+  const serial = deadhead("--format=json", "--jobs=1", "test/fixtures");
+  const parallel = deadhead("--format=json", "--jobs=4", "test/fixtures");
+  assert.equal(parallel.status, serial.status);
+  assert.deepEqual(JSON.parse(parallel.stdout), JSON.parse(serial.stdout));
+});

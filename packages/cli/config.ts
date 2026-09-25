@@ -15,6 +15,7 @@ import { stat } from "node:fs/promises";
 import { isAbsolute, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
+import type { Rule } from "../core/engine.ts";
 import { SEVERITY, type Severity } from "../core/vocabulary.ts";
 
 export type RuleSetting = "off" | Severity;
@@ -153,3 +154,19 @@ export async function loadConfig(
 /** Resolve a config-relative path against the config's own directory. */
 export const fromConfigDir = (loaded: LoadedConfig, path: string): string =>
   isAbsolute(path) ? path : resolve(loaded.dir, path);
+
+/**
+ * The bin's rule filter as a function, so the serial path and the lint
+ * workers share it: `off` drops the rule entirely rather than filtering its
+ * findings later, so it costs nothing to have it disabled.
+ */
+export function applySettings(rules: Rule[], settings: Record<string, RuleSetting>): Rule[] {
+  return rules
+    .filter((rule) => settings[rule.meta.ruleId] !== "off")
+    .map((rule) => {
+      const override = settings[rule.meta.ruleId];
+      return override === undefined || override === "off"
+        ? rule
+        : { ...rule, meta: { ...rule.meta, severity: override } };
+    });
+}

@@ -4,7 +4,9 @@
  */
 
 import { glob, readFile, readdir, stat, writeFile } from "node:fs/promises";
+import { availableParallelism } from "node:os";
 import { extname, join, sep } from "node:path";
+import { Worker } from "node:worker_threads";
 
 import {
   type CompiledRules,
@@ -15,6 +17,8 @@ import {
   runCompiled,
 } from "../core/index.ts";
 import { applyFixes } from "../core/fix.ts";
+import { loadRules } from "../rules/load.ts";
+import { applySettings, type RuleSetting } from "./config.ts";
 import { parseHtml } from "./adapter.ts";
 import type { FileResult } from "./reporters/index.ts";
 
@@ -170,6 +174,37 @@ export async function lintFiles(
   const results: FileResult[] = [];
   for (const file of files) results.push(await lintFileCompiled(file, compiled, options));
   return { results, visitBody: compiled.visitBody };
+}
+
+export const defaultJobs = (): number => Math.max(1, Math.min(availableParallelism() - 1, 8));
+
+/** Round-robin files across workers; results are put back in input order. */
+export async function lintFilesParallel(
+  files: string[],
+  settings: Record<string, RuleSetting>,
+  options: LintOptions,
+  jobs: number,
+): Promise<{ results: FileResult[]; visitBody: boolean }> {
+  const slices: string[][] = Array.from({ length: jobs }, () => []);
+  files.forEach((file, i) => slices[i % jobs]!.push(file));
+  const workerUrl = new URL("./worker.ts", import.meta.url);
+  const parts = await Promise.all(
+    slices.filter((s) => s.length > 0).map(
+      (slice) =>
+        new Promise<FileResult[]>((resolve, reject) => {
+          const worker = new Worker(workerUrl);
+          worker.once("message", (results: FileResult[]) => {
+            void worker.terminate();
+            resolve(results);
+          });
+          worker.once("error", reject);
+          worker.postMessage({ files: slice, settings, options });
+        }),
+    ),
+  );
+  const byFile = new Map(parts.flat().map((r) => [r.file, r]));
+  const compiled = compileForRun(applySettings(await loadRules(), settings), options);
+  return { results: files.map((f) => byFile.get(f)!), visitBody: compiled.visitBody };
 }
 
 /**
