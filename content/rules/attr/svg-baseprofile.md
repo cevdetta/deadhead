@@ -1,6 +1,6 @@
 ---
 ruleId: "attr/svg-baseprofile"
-title: "svg baseProfile attribute"
+title: "<svg baseProfile>"
 description: "SVG 2 removed baseProfile from <svg>; it set no processing restriction and was metadata for authoring tools, so delete it."
 pubDate: "2026-09-23"
 status: "avoid"
@@ -14,7 +14,7 @@ fix: { op: "remove-attribute", attr: "baseprofile" }
 replacement: "Delete the attribute: <svg viewBox=\"0 0 24 24\">."
 tags: ["svg"]
 impacts: ["maintainability"]
-related: ["attr/svg-version", "attr/svg-xlink-href", "attr/html-version"]
+related: ["attr/svg-version", "attr/svg-xlink", "attr/html-version"]
 ---
 
 `<svg baseProfile="full">` names the SVG 1.1 profile a drawing needs: `full`, `basic` or

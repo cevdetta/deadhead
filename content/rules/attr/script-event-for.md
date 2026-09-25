@@ -1,11 +1,11 @@
 ---
 ruleId: "attr/script-event-for"
-title: "script event and for"
+title: "<script event, for>"
 description: "event and for on script are obsolete; register listeners with addEventListener instead."
 pubDate: "2026-09-21"
 status: "avoid"
-severity: "unnecessary"
-standardsBasis: "spec"
+severity: "deprecated"
+standardsBasis: "spec-obsolete"
 detectability: "yes"
 kind: "element"
 scope: "any"
@@ -15,7 +15,7 @@ fix: { op: "remove-attribute", attr: "event" }
 replacement: "Move the code into a listener, target.addEventListener(\"click\", run), then delete the script block."
 tags: ["microsoft", "scripting"]
 impacts: ["maintainability"]
-related: ["attr/global-contextmenu"]
+related: ["attr/contextmenu-onshow"]
 ---
 
 `event` and `for` on `script` are IE's way of binding a script block to an element event. HTML keeps one rule for them: a classic script carrying both runs when `for` is `window` and `event` is `onload` or `onload()`, both as ASCII case-insensitive matches once surrounding whitespace is stripped, and is skipped otherwise. So the pair either disables the script or restates what the page already does on load.

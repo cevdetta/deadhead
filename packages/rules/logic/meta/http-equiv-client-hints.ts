@@ -1,5 +1,6 @@
 import type { MatchFn } from "../../types.ts";
 import { stripAsciiWhitespace } from "../../lib/text.ts";
+import { CLIENT_HINT_PRAGMAS } from "../../lib/http-equiv.ts";
 
 /**
  * The two client-hint keywords usable (in Chromium only) as pragma directives.
@@ -10,11 +11,10 @@ import { stripAsciiWhitespace } from "../../lib/text.ts";
  * (no-op after any script/link/style, secure top-level only, never touches
  * the Accept-CH cache). There is no meta-required case: the headers apply
  * earlier and persist, so the header is strictly better.
+ *
+ * The set itself lives in `lib/http-equiv.ts`, shared with
+ * `meta/http-equiv-unregistered-pragmas` so the two cannot drift.
  */
-const CLIENT_HINT_PRAGMAS: ReadonlySet<string> = new Set([
-  "accept-ch",
-  "delegate-ch",
-]);
 
 /**
  * The `meta[http-equiv]` selector is only a pre-filter. A pragma is a

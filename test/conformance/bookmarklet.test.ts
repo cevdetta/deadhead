@@ -61,7 +61,7 @@ test("the bundle carries every rule, including the ones that need code", () => {
   // The logic modules must be inlined too, not merely referenced. Rolldown
   // mangles internal identifiers, so assert on the assembly's stable wiring:
   // the appended call reaching each logic entry through the snippet global.
-  assert.match(bundle, /__deadhead\.match_script_type_javascript_mime/, "script logic missing");
+  assert.match(bundle, /__deadhead\.match_attr_script_type_javascript/, "script logic missing");
   assert.match(bundle, /__deadhead\.check_head_charset_position/, "charset logic missing");
 });
 

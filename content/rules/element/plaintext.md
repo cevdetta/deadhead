@@ -1,6 +1,6 @@
 ---
 ruleId: "element/plaintext"
-title: "plaintext element"
+title: "<plaintext>"
 description: "plaintext never ends: all markup after it becomes text, including closing tags. Serve text/plain or escape content in pre."
 pubDate: "2026-09-14"
 status: "avoid"

@@ -15,7 +15,7 @@ import { ConfigError, loadConfig } from "../packages/cli/config.ts";
 import type { FileResult } from "../packages/cli/reporters/index.ts";
 import type { Finding } from "../packages/core/types.ts";
 
-const KNOWN = new Set(["meta/http-equiv-x-ua-compatible", "script/type-javascript-mime"]);
+const KNOWN = new Set(["meta/http-equiv-x-ua-compatible", "attr/script-type-javascript"]);
 
 const inTempDir = async (run: (dir: string) => Promise<void>): Promise<void> => {
   const dir = await mkdtemp(join(tmpdir(), "deadhead-config-"));
@@ -51,7 +51,7 @@ test("a valid config loads with its options intact", async () => {
     `export default {
        include: ["dist"],
        ignore: ["**/vendor/**"],
-       rules: { "script/type-javascript-mime": "off" },
+       rules: { "attr/script-type-javascript": "off" },
        failOn: "harmful",
        skipTemplates: true,
        baseline: ".baseline.json",
@@ -60,7 +60,7 @@ test("a valid config loads with its options intact", async () => {
       const loaded = await loadConfig(dir, undefined, KNOWN);
       assert.ok(loaded);
       assert.deepEqual(loaded.config.include, ["dist"]);
-      assert.deepEqual(loaded.config.rules, { "script/type-javascript-mime": "off" });
+      assert.deepEqual(loaded.config.rules, { "attr/script-type-javascript": "off" });
       assert.equal(loaded.config.failOn, "harmful");
       assert.equal(loaded.config.skipTemplates, true);
       assert.equal(loaded.config.baseline, ".baseline.json");
@@ -70,10 +70,10 @@ test("a valid config loads with its options intact", async () => {
 
 test("a rule may be re-severitied, not only switched off", async () => {
   await withConfig(
-    'export default { rules: { "script/type-javascript-mime": "harmful" } };',
+    'export default { rules: { "attr/script-type-javascript": "harmful" } };',
     async (dir) => {
       const loaded = await loadConfig(dir, undefined, KNOWN);
-      assert.equal(loaded?.config.rules?.["script/type-javascript-mime"], "harmful");
+      assert.equal(loaded?.config.rules?.["attr/script-type-javascript"], "harmful");
     },
   );
 });

@@ -1,6 +1,6 @@
 ---
 ruleId: "element/menuitem"
-title: "menuitem element"
+title: "<menuitem>"
 description: "`menuitem` is the dead popup-menu command that only Firefox shipped. Firefox removed it in 103. Handle `contextmenu` with script."
 pubDate: "2026-09-14"
 status: "avoid"

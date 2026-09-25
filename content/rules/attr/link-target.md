@@ -1,11 +1,11 @@
 ---
 ruleId: "attr/link-target"
-title: "link target"
+title: "<link target>"
 description: "target on link is unnecessary; links load in the current context by default, so delete it."
 pubDate: "2026-09-19"
 status: "avoid"
-severity: "unnecessary"
-standardsBasis: "spec"
+severity: "deprecated"
+standardsBasis: "spec-obsolete"
 detectability: "yes"
 kind: "element"
 scope: "head"
@@ -14,7 +14,7 @@ fix: { op: "remove-attribute", attr: "target" }
 replacement: "Delete the attribute: <link href=\"main.css\" rel=\"stylesheet\">."
 tags: ["hyperlinks"]
 impacts: ["maintainability"]
-related: ["attr/longdesc-lowsrc"]
+related: ["attr/methods"]
 ---
 
 `target` on `link` selects nothing. WHATWG calls the attribute unnecessary with one direction, omit it altogether, since resource loads never consult a browsing-context name and the link resolves in place.

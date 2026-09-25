@@ -1,6 +1,6 @@
 ---
 ruleId: "attr/data-vocabulary"
-title: "data-vocabulary.org structured data"
+title: "<data-vocabulary.org> structured data"
 description: "Google retired the data-vocabulary.org vocabulary in 2020; its markup earns no rich result."
 pubDate: "2026-09-23"
 status: "avoid"
@@ -14,7 +14,7 @@ fix: { op: "none" }
 replacement: "Describe the same thing with schema.org in one JSON-LD block (BreadcrumbList for breadcrumbs, AggregateRating for review aggregates), then delete the data-vocabulary attributes."
 tags: ["structured-data"]
 impacts: ["seo", "maintainability"]
-related: ["script/json-ld-syntax", "attr/xmlns-prefix", "attr/microdata-without-itemscope", "meta/dublin-core-schema"]
+related: ["script/json-ld-syntax", "attr/xmlns-prefix", "attr/microdata-without-itemscope", "meta/dublin-core-without-schema"]
 ---
 
 data-vocabulary.org was Google's own structured-data vocabulary, the one its Rich Snippets

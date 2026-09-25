@@ -1,6 +1,6 @@
 ---
 ruleId: "attr/svg-enable-background"
-title: "svg enable-background attribute"
+title: "<svg enable-background>"
 description: "enable-background fed SVG 1.1's BackgroundImage filter input; Filter Effects dropped it and browsers never shipped it, so delete it."
 pubDate: "2026-09-23"
 status: "avoid"
@@ -14,7 +14,7 @@ fix: { op: "remove-attribute", attr: "enable-background" }
 replacement: "Delete the attribute. To blend against what sits behind, use isolation: isolate with mix-blend-mode; to filter the backdrop, backdrop-filter."
 tags: ["svg"]
 impacts: ["maintainability"]
-related: ["attr/svg-version", "attr/svg-baseprofile", "attr/svg-xlink-href"]
+related: ["attr/svg-version", "attr/svg-baseprofile", "attr/svg-xlink"]
 ---
 
 `enable-background="new 0 0 24 24"` sits on the root of icons exported from Illustrator

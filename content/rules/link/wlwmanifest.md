@@ -1,6 +1,6 @@
 ---
 ruleId: "link/wlwmanifest"
-title: "link rel=wlwmanifest"
+title: "<link rel=\"wlwmanifest\">"
 description: "A manifest pointer for a writer discontinued in 2017 and dropped from WordPress 6.3."
 pubDate: "2026-09-21"
 status: "avoid"
@@ -14,7 +14,7 @@ fix: { op: "remove-tokens", attr: "rel" }
 replacement: "Delete the tag, or only the keyword when rel also holds live ones."
 tags: ["microsoft"]
 impacts: ["maintainability"]
-related: ["link/rel-subresource"]
+related: ["link/subresource"]
 ---
 
 A `link rel=wlwmanifest` points an editor integration at a manifest file that no longer ships. Windows Live Writer is discontinued, and WordPress 6.3 removed the file with all references.

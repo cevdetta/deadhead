@@ -111,7 +111,7 @@ const doc = (frontmatter: string): string =>
 
 const VALID_FRONTMATTER = [
   'ruleId: "meta/example"\n',
-  'title: "Example"\n',
+  'title: "<meta name=\\"example\\">"\n',
   'description: "One-line summary."\n',
   'pubDate: "2026-01-02"\n',
   'status: "avoid"\n',
@@ -295,6 +295,19 @@ test("a remove-tokens rule's module may veto fixes but not decide findings", asy
   });
 });
 
+test("a remove-attributes rule's module may veto fixes but not decide findings", async () => {
+  const rule = logicRule(
+    ["selector: 'meta[name=example]'", "selector: 'a[coords], a[shape]'"],
+    ['fix: { op: "remove-element" }', 'fix: { op: "remove-attributes" }'],
+  );
+  await withLogicDir({ "meta/example.ts": "export const fixable = () => true;\n" }, async (dir) => {
+    assert.equal(format(await checkLogicModules([rule], dir)), "");
+  });
+  await withLogicDir({ "meta/example.ts": "export const match = () => true;\n" }, async (dir) => {
+    assert.match(format(await checkLogicModules([rule], dir)), /^packages\/rules\/logic\/meta\/example\.ts:1:14 {2}`remove-attributes` cannot pair with match\(\)/);
+  });
+});
+
 test("every packages/rules/lib export is used by a logic module", async () => {
   const { checkLibModules } = await import("../scripts/rules-source.ts");
   assert.deepEqual(await checkLibModules(), []);
@@ -341,13 +354,17 @@ test("lib/json-ld someNode walks an array too long to spread into arguments", as
   assert.equal(someNode(wide, (node) => node["@type"] === "Thing"), false);
 });
 
-test("lib/csp directiveNames reads the first token of each directive, lowercased", async () => {
-  const { directiveNames } = await import("../packages/rules/lib/csp.ts");
-  assert.deepEqual(directiveNames(" default-src 'self' ;REPORT-URI /r; ; img-src https://x/navigate-to/"), [
-    "default-src",
-    "report-uri",
-    "img-src",
-  ]);
+test("lib/csp hasDirective reads the first token of each directive, lowercased", async () => {
+  const { hasDirective } = await import("../packages/rules/lib/csp.ts");
+  const { parseHtml } = await import("../packages/cli/adapter.ts");
+  const content = " default-src 'self' ;REPORT-URI /r; ; img-src https://x/navigate-to/";
+  const meta = parseHtml(`<meta http-equiv=" Content-Security-Policy " content="${content}">`).doc.querySelector("meta");
+  assert.ok(meta);
+  for (const name of ["default-src", "report-uri", "img-src"]) assert.equal(hasDirective(meta, name), true, name);
+  for (const name of ["navigate-to", "self", "r", "https://x/navigate-to/"]) assert.equal(hasDirective(meta, name), false, name);
+  const other = parseHtml(`<meta http-equiv="refresh" content="report-uri /r">`).doc.querySelector("meta");
+  assert.ok(other);
+  assert.equal(hasDirective(other, "report-uri"), false);
 });
 
 /** The `script` element of `<script attrs></script>`, through the CLI adapter. */
@@ -384,4 +401,16 @@ test("lib/script isClassicScript is a JavaScript MIME type essence match", async
   assert.equal(isJavaScriptMimeEssence("application/x-javascript"), true);
   // ASCII case-insensitive only: U+0130 does not fold to "i".
   assert.equal(isJavaScriptMimeEssence("text/javascrİpt"), false);
+});
+
+test("every http-equiv value a rule selector tests is in OWNED_HTTP_EQUIV", async () => {
+  const { OWNED_HTTP_EQUIV } = await import("../packages/rules/lib/http-equiv.ts");
+  const missing: string[] = [];
+  for (const rule of rules) {
+    for (const m of (rule.meta.selector ?? "").matchAll(/http-equiv="([^"]+)"/gi)) {
+      const value = m[1]!.toLowerCase();
+      if (!OWNED_HTTP_EQUIV.has(value)) missing.push(`${rule.meta.ruleId}: ${value}`);
+    }
+  }
+  assert.equal(missing.join(", "), "");
 });

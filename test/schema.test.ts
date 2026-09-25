@@ -44,7 +44,7 @@ test("splitFrontmatter rejects an unterminated fence", () => {
 
 const base = (): Record<string, unknown> => ({
   ruleId: "meta/example",
-  title: "Example",
+  title: '<meta name="example">',
   description: "One-line summary.",
   pubDate: "2026-01-02",
   status: "avoid",
@@ -137,6 +137,28 @@ test("ruleId must be lowercase namespace/name", () => {
   assert.deepEqual(messages({ ruleId: "meta/http-equiv-x-ua-compatible" }), []);
 });
 
+test("a ruleId with a verdict word is rejected", () => {
+  assert.match(messages({ ruleId: "attr/foo-obsolete" }).join("\n"), /verdict word `obsolete`/);
+});
+
+test("no rule id is exempt from the naming checks", async () => {
+  const schema = await import("../scripts/schema.ts");
+  assert.equal("LEGACY_IDS" in schema, false);
+  assert.equal("LONG_DESCRIPTION_IDS" in schema, false);
+});
+
+test("an element title that does not start with < is rejected", () => {
+  assert.match(messages({ title: "meta name example" }).join("\n"), /must start with `<`/);
+});
+
+test("an element title in code shape passes", () => {
+  assert.deepEqual(messages({ title: '<meta name="example">' }), []);
+});
+
+test("a head-namespace title without < passes", () => {
+  assert.deepEqual(messages({ ruleId: "head/title", kind: "document", title: "Head with no title", selector: undefined, match: "logic" }), []);
+});
+
 test("pubDate must be a real ISO calendar date", () => {
   assert.match(messages({ pubDate: "12/07/2026" }).join("\n"), /not an ISO date/);
   assert.match(messages({ pubDate: "2026-02-30" }).join("\n"), /not a real calendar date/);
@@ -144,10 +166,10 @@ test("pubDate must be a real ISO calendar date", () => {
   assert.match(messages({ pubDate: 20260102 }).join("\n"), /quoted ISO date/);
 });
 
-test("description must fit 160 chars for search results", () => {
-  assert.deepEqual(messages({ description: "x".repeat(160) }), []);
-  assert.match(messages({ description: "x".repeat(161) }).join("\n"), /must fit 160 chars/);
-  assert.ok(paths({ description: "x".repeat(161) }).includes("description"));
+test("description must be at most 140 characters", () => {
+  assert.deepEqual(messages({ description: "x".repeat(140) }), []);
+  assert.match(messages({ description: "x".repeat(141) }).join("\n"), /at most 140 characters/);
+  assert.ok(paths({ description: "x".repeat(141) }).includes("description"));
 });
 
 test("an unsupported selector fails the rule, with the offset of the offending token", () => {
@@ -278,6 +300,44 @@ test("remove-tokens rejects a compound testing the same attribute twice", () => 
       fix: { op: "remove-tokens", attr: "rel" },
     }),
     [],
+  );
+});
+
+test("remove-attributes takes no attr or token, and needs a bare [attr] test", () => {
+  const coords = { selector: "a[coords], a[shape]" };
+  assert.deepEqual(messages({ ...coords, fix: { op: "remove-attributes" } }), []);
+  assert.match(
+    messages({ ...coords, fix: { op: "remove-attributes", attr: "coords" } }).join("\n"),
+    /take an `attr`/,
+  );
+  assert.match(
+    messages({ ...coords, fix: { op: "remove-attributes", token: "x" } }).join("\n"),
+    /only `remove-token` takes a `token`/,
+  );
+  assert.match(
+    messages({ selector: 'a[href="x"]', fix: { op: "remove-attributes" } }).join("\n"),
+    /no bare `\[attr\]` test/,
+  );
+});
+
+test("remove-attributes allows match: logic", () => {
+  assert.deepEqual(
+    messages({
+      selector: "a[coords], a[shape]",
+      match: "logic",
+      fix: { op: "remove-attributes" },
+    }),
+    [],
+  );
+});
+
+test("remove-attributes rejects a missing selector", () => {
+  assert.match(
+    messages({
+      selector: undefined,
+      fix: { op: "remove-attributes" },
+    }).join("\n"),
+    /needs a selector/,
   );
 });
 

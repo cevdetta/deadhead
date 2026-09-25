@@ -1,6 +1,6 @@
 ---
 ruleId: "meta/http-equiv-default-style"
-title: "meta http-equiv=default-style"
+title: "<meta http-equiv=\"default-style\">"
 description: "default-style names the preferred alternate stylesheet by its title: a switching mechanism no browser UI exposes anymore."
 pubDate: "2026-09-14"
 status: "avoid"

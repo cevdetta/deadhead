@@ -1,7 +1,7 @@
 ---
 ruleId: "element/xmp"
-title: "xmp element"
-description: "xmp is obsolete; it shows markup as literal text but can't hold character references or its own end tag, so use pre and code with < and & escaped."
+title: "<xmp>"
+description: "xmp cannot hold its own end tag; use pre and code with escaped markup."
 pubDate: "2026-09-14"
 status: "avoid"
 severity: "deprecated"

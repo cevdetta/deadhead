@@ -1,7 +1,7 @@
 ---
 ruleId: "meta/http-equiv-description"
-title: "meta http-equiv=description"
-description: "description is a name value mistakenly put in http-equiv, where it maps to no state; move the content to meta name=\"description\" so search engines can use it."
+title: "<meta http-equiv=\"description\">"
+description: "description in http-equiv maps to nothing; move it to meta name so crawlers read it."
 pubDate: "2026-09-14"
 status: "avoid"
 severity: "unnecessary"

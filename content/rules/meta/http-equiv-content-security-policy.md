@@ -1,6 +1,6 @@
 ---
 ruleId: "meta/http-equiv-content-security-policy"
-title: "meta http-equiv=content-security-policy"
+title: "<meta http-equiv=\"content-security-policy\">"
 description: "A meta policy cannot match a header policy. The spec strips frame-ancestors, report-uri and sandbox, with no report-only mode."
 pubDate: "2026-09-14"
 status: "avoid"
@@ -14,7 +14,7 @@ fix: { op: "none" }
 replacement: "Send the policy as the Content-Security-Policy response header, which supports every directive and both dispositions; then delete the tag."
 tags: ["csp", "http-equiv"]
 impacts: ["security", "performance"]
-related: ["meta/http-equiv-header-only", "meta/http-equiv-content-type", "meta/http-equiv-content-language"]
+related: ["meta/http-equiv-header-only-pragmas", "meta/http-equiv-content-type", "meta/http-equiv-content-language"]
 ---
 
 A meta policy cannot match a header policy. Content Security Policy is delivered two

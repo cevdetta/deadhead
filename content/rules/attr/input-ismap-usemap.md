@@ -1,20 +1,20 @@
 ---
 ruleId: "attr/input-ismap-usemap"
-title: "input ismap and usemap"
+title: "<input ismap, usemap>"
 description: "ismap and usemap do nothing on inputs; image buttons already map server-side and img covers client maps."
 pubDate: "2026-09-19"
 status: "avoid"
-severity: "unnecessary"
-standardsBasis: "spec"
+severity: "deprecated"
+standardsBasis: "spec-obsolete"
 detectability: "yes"
 kind: "element"
 scope: "body"
 selector: "input[ismap], input[usemap]"
-fix: { op: "remove-attribute", attr: "ismap" }
+fix: { op: "remove-attributes" }
 replacement: "Delete the attributes. For a server-side map keep <input type=\"image\" src=\"go.png\" alt=\"Go\">; for a client-side map use img with usemap."
 tags: ["forms", "media"]
 impacts: ["maintainability"]
-related: ["attr/html-version"]
+related: ["attr/object-usemap"]
 ---
 
 `ismap` and `usemap` do nothing on `input`. WHATWG calls the first a restatement of the image-button default and moves the second to `img`, so the pair is dead weight on every image button that carries it.
@@ -44,7 +44,7 @@ A client-side map belongs on `img`:
 
 ## Detectability
 
-Complete detection. The rule matches `input[ismap]` or `input[usemap]`: presence of either attribute is the whole verdict, so no logic module exists. Autofix drops `ismap`; a lone `usemap` or the remainder of a pair needs a hand edit, since one rule carries one fix attribute.
+Complete detection. The rule matches `input[ismap]` or `input[usemap]`: presence of either attribute is the whole verdict, so no logic module exists. The autofix removes every attribute the rule names that is present on the element, and leaves every other attribute as written.
 
 ## Resources
 

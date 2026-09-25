@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SVG with plain references</title>
+  </head>
+  <body>
+    <svg viewBox="0 0 10 10">
+      <defs><circle id="dot" r="4"></circle></defs>
+      <use href="#dot"></use>
+      <image href="cover.png" width="10" height="10"></image>
+    </svg>
+    <p>Both references use plain href.</p>
+    <svg viewBox="0 0 24 24" width="24" height="24">
+      <circle id="ring" cx="12" cy="12" r="4"/>
+      <a href="https://example.com/" target="_blank">
+        <title>Example</title>
+        <path d="M4 12h16"/>
+      </a>
+      <use href="#ring" x="6"/>
+    </svg>
+  </body>
+</html>

@@ -10,7 +10,7 @@ import type { MatchFn } from "../../types.ts";
  * as a data block and never applies it, so deletion would start application
  * of CSS that never applied. Same for a typo like `text/cs` and for empty,
  * which the warning set leaves outside. The guard mirrors sibling
- * `script/type-javascript-mime`, which skips parameter types for the same
+ * `attr/script-type-javascript`, which skips parameter types for the same
  * safe-fix reason.
  */
 export const match: MatchFn = (element) => {

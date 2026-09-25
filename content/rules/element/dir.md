@@ -1,6 +1,6 @@
 ---
 ruleId: "element/dir"
-title: "dir element"
+title: "<dir>"
 description: "The dir element is obsolete; browsers already treat it exactly like ul, so use ul. The global dir attribute is unrelated and current."
 pubDate: "2026-09-14"
 status: "avoid"

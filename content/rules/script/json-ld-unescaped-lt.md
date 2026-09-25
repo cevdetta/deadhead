@@ -1,6 +1,6 @@
 ---
 ruleId: "script/json-ld-unescaped-lt"
-title: "JSON-LD block with a literal <"
+title: "<script type=\"application/ld+json\"> with literal <"
 description: "A literal < in a JSON-LD block shows its serializer does not escape; a value holding </script> ends the block and runs as HTML."
 pubDate: "2026-09-23"
 status: "avoid"

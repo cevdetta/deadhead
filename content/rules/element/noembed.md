@@ -1,7 +1,7 @@
 ---
 ruleId: "element/noembed"
-title: "noembed element"
-description: "noembed is obsolete and its content is never displayed, not even when the embed fails; put fallback content inside an object element instead."
+title: "<noembed>"
+description: "noembed never shows its content; put fallback inside object instead."
 pubDate: "2026-09-14"
 status: "avoid"
 severity: "deprecated"
@@ -14,7 +14,7 @@ fix: { op: "none" }
 replacement: "Use <object data=\"…\" type=\"…\"> and put the fallback content between its tags; embed has no fallback at all."
 tags: ["embedding"]
 impacts: ["a11y", "maintainability"]
-related: ["element/plugin-embed", "element/applet"]
+related: ["element/object-embed-plugin", "element/applet"]
 ---
 
 `<noembed>` never displays its content. `<noembed>` was meant to sit next to an

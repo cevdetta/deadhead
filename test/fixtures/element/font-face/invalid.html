@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SVG font elements</title>
+  </head>
+  <body>
+    <svg viewBox="0 0 120 24" width="120" height="24">
+      <defs>
+        <font-face font-family="Brand">
+          <font-face-src>
+            <font-face-uri href="/fonts/brand.svg#Brand">
+              <font-face-format string="svg"></font-face-format>
+            </font-face-uri>
+            <font-face-name name="Brand"></font-face-name>
+          </font-face-src>
+        </font-face>
+        <glyph unicode="A" d="M0 0h10v10z"></glyph>
+        <missing-glyph d="M0 0h10v10z"></missing-glyph>
+        <hkern u1="A" u2="V" k="10"></hkern>
+        <vkern u1="A" u2="V" k="10"></vkern>
+      </defs>
+      <text x="2" y="16" style="font-family: 'Brand', sans-serif">Label</text>
+    </svg>
+  </body>
+</html>

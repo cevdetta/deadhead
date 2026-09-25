@@ -1,6 +1,6 @@
 ---
 ruleId: "link/sitemap"
-title: "link rel=\"sitemap\""
+title: "<link rel=\"sitemap\">"
 description: "Search engines find sitemaps through robots.txt and their webmaster tools; none documents reading a link to one from HTML."
 pubDate: "2026-09-13"
 status: "avoid"

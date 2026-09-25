@@ -1,6 +1,6 @@
 ---
 ruleId: "attr/iframe-presentational"
-title: "Presentational attributes on iframe"
+title: "<iframe> presentational attributes"
 description: "Presentational attributes on iframe are obsolete. Browsers apply them as low-priority hints. Move styling to CSS."
 pubDate: "2026-09-21"
 status: "avoid"

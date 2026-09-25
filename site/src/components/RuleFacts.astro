@@ -1,5 +1,6 @@
 ---
 import type { CollectionEntry } from "astro:content";
+import { parseSelector, presenceTests } from "../../../packages/core/selector.ts";
 import {
   basisBlurbs,
   basisLabels,
@@ -29,7 +30,12 @@ const fixDetail =
       ? ` from ${data.fix.attr}, and the element once none are left`
       : data.fix.op === "remove-attribute" && data.fix.attr
         ? ` ${data.fix.attr}`
-        : "";
+        : data.fix.op === "remove-attributes" && data.selector
+          ? (() => {
+              const p = parseSelector(data.selector);
+              return p.ok ? ` ${presenceTests(p.ast).join(", ")}` : "";
+            })()
+          : "";
 
 const matcher =
   data.match === "logic" && data.selector

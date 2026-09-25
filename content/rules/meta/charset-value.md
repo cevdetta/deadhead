@@ -1,6 +1,6 @@
 ---
 ruleId: "meta/charset-value"
-title: "meta charset with a non-UTF-8 value"
+title: "<meta charset> with non-UTF-8 value"
 description: "utf-8 is the single valid HTML encoding name; any other label misdescribes the bytes."
 pubDate: "2026-09-21"
 status: "avoid"
@@ -14,7 +14,7 @@ fix: { op: "none" }
 replacement: "Convert the file bytes to UTF-8 first, then declare <meta charset=\"utf-8\">. Never relabel alone."
 tags: ["charset"]
 impacts: ["interop", "security"]
-related: ["head/charset-position", "head/charset-duplicate", "meta/http-equiv-content-type"]
+related: ["head/charset-position", "head/charset-multiple", "meta/http-equiv-content-type"]
 ---
 
 A `meta` charset value outside ASCII case-insensitive `utf-8` mislabels the document bytes. The browser trusts the label, so text decodes into mojibake.

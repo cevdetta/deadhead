@@ -1,6 +1,6 @@
 ---
 ruleId: "meta/revisit-after"
-title: "meta name=\"revisit-after\""
+title: "<meta name=\"revisit-after\">"
 description: "A crawl-schedule hint that search engines ignore; recrawl timing comes from sitemaps, not markup."
 pubDate: "2026-09-19"
 status: "avoid"

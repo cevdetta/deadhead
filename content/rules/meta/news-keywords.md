@@ -1,6 +1,6 @@
 ---
 ruleId: "meta/news-keywords"
-title: "meta name=news_keywords"
+title: "<meta name=\"news_keywords\">"
 description: "A Google News keyword list the crawler stopped reading in 2017."
 pubDate: "2026-09-21"
 status: "avoid"

@@ -1,6 +1,6 @@
 ---
 ruleId: "meta/keywords"
-title: "meta name=\"keywords\""
+title: "<meta name=\"keywords\">"
 description: "A comma-separated topic list that no major search engine ranks on, and that the HTML Standard itself warns against."
 pubDate: "2026-09-10"
 status: "avoid"
@@ -14,7 +14,7 @@ fix: { op: "remove-element" }
 replacement: "Delete it. Topical relevance comes from the page's own content, headings and structured data."
 tags: ["search"]
 impacts: ["seo", "maintainability"]
-related: ["meta/http-equiv-x-ua-compatible"]
+related: ["meta/page-info-names", "meta/title"]
 ---
 
 No major search engine ranks on `<meta name="keywords">`. In the mid-1990s a search

@@ -15,7 +15,7 @@ export const portOf = (html: string, selector: string): ElementPort => {
 const ctx = { ruleId: "test", report: () => { throw new Error("unused"); } } as unknown as RuleContext;
 
 const robots = async (content: string): Promise<boolean> => {
-  const { match } = await import("../packages/rules/logic/meta/robots-directives.ts");
+  const { match } = await import("../packages/rules/logic/meta/robots-value.ts");
   return match(portOf(`<meta name="robots" content="${content}">`, "meta"), ctx);
 };
 
@@ -40,6 +40,21 @@ test("robots: unknown names and bad values still trip", async () => {
   assert.equal(await robots("max-snippet"), true);
   assert.equal(await robots("noindex nofollow"), false);
 });
+
+for (const directive of [
+  "prefetch-src", "plugin-types", "navigate-to", "referrer", "reflected-xss", "report-uri", "block-all-mixed-content",
+]) {
+  test(`csp-${directive}: trips on the directive name, never on a value or another directive`, async () => {
+    const { match } = await import(`../packages/rules/logic/meta/csp-${directive}.ts`);
+    const on = (content: string) =>
+      match(portOf(`<meta http-equiv="Content-Security-Policy" content="${content}">`, "meta"), ctx);
+    assert.equal(await on(`default-src 'self'; ${directive} x`), true);
+    assert.equal(await on(`  ${directive.toUpperCase()}\tx ;`), true);
+    assert.equal(await on(`default-src https://example.com/${directive}/`), false);
+    assert.equal(await on(`default-src 'self'; ${directive}-extra x`), false);
+    assert.equal(await on(""), false);
+  });
+}
 
 // --- fixable(): the autofix runs only where removal is inert -----------------
 
@@ -77,8 +92,20 @@ test("script-language: fixable when type overrides it or it already names JavaSc
   assert.equal(await on('language=" javascript"'), false);
 });
 
-test("script-charset: fixable unless it decodes an external classic script", async () => {
-  const on = (attrs: string) => fixableOn("attr/script-charset", `<script charset="iso-8859-1" ${attrs}></script>`, "script");
+test("charset-obsolete: fixable on a, and on a link that loads no stylesheet", async () => {
+  const link = (attrs: string) => fixableOn("attr/charset-obsolete", `<link charset="iso-8859-1" ${attrs}>`, "link");
+  assert.equal(await fixableOn("attr/charset-obsolete", '<a href="page.html" charset="iso-8859-1">x</a>', "a"), true);
+  assert.equal(await link('rel="alternate" href="feed.xml"'), true);
+  assert.equal(await link('rel="icon" href="favicon.ico"'), true);
+  assert.equal(await link('rel="stylesheet"'), true);
+  // A stylesheet with no BOM, HTTP charset or @charset decodes by the attribute.
+  assert.equal(await link('rel="stylesheet" href="a.css"'), false);
+  assert.equal(await link('rel="alternate STYLESHEET" href="a.css"'), false);
+  assert.equal(await link('rel="\tStyleSheet " href="a.css"'), false);
+});
+
+test("charset-obsolete: fixable on script unless it decodes an external classic script", async () => {
+  const on = (attrs: string) => fixableOn("attr/charset-obsolete", `<script charset="iso-8859-1" ${attrs}></script>`, "script");
   assert.equal(await on(""), true);
   assert.equal(await on('type="module" src="a.js"'), true);
   assert.equal(await on('type="application/json" src="a.json"'), true);
@@ -100,25 +127,55 @@ test("name-obsolete: fixable on option, and on an a whose id is its name", async
   assert.equal(await on('<img src="c.png" alt="" name="c">', "img"), false);
 });
 
-test("obsolete-rel: fixable unless rel holds self, edituri or previous", async () => {
-  const on = (rel: string) => fixableOn("link/obsolete-rel", `<link rel="${rel}" href="/">`, "link");
+test("navigation-keywords: fixable unless rel holds previous", async () => {
+  const on = (rel: string) => fixableOn("link/navigation-keywords", `<link rel="${rel}" href="/">`, "link");
   assert.equal(await on("archives"), true);
   assert.equal(await on("alternate first"), true);
-  assert.equal(await on("self"), false);
-  assert.equal(await on("hub\tSELF"), false);
-  assert.equal(await on("EditURI"), false);
-  assert.equal(await on("index edituri"), false);
+  assert.equal(await on("self edituri"), true);
   assert.equal(await on("previous"), false);
   assert.equal(await on("archives PREVIOUS"), false);
+  assert.equal(await on("index\tPrevious"), false);
 });
 
-test("obsolete-name: fixable unless the name is verify-v1", async () => {
-  const on = (name: string) => fixableOn("meta/obsolete-name", `<meta name="${name}" content="x">`, "meta");
-  assert.equal(await on("subject"), true);
-  assert.equal(await on("ICBM"), true);
+test("vendor-keywords: fixable unless rel holds edituri", async () => {
+  const on = (rel: string) => fixableOn("link/vendor-keywords", `<link rel="${rel}" href="/">`, "link");
+  assert.equal(await on("pavatar"), true);
+  assert.equal(await on("alternate publisher"), true);
+  assert.equal(await on("self previous"), true);
+  assert.equal(await on("EditURI"), false);
+  assert.equal(await on("p3pv1 edituri"), false);
+  assert.equal(await on("fluid-icon\nEDITURI"), false);
+});
+
+test("document-info-keywords: fixable unless rel holds self", async () => {
+  const on = (rel: string) => fixableOn("link/document-info-keywords", `<link rel="${rel}" href="/">`, "link");
+  assert.equal(await on("logo"), true);
+  assert.equal(await on("alternate translation"), true);
+  assert.equal(await on("edituri previous"), true);
+  assert.equal(await on("self"), false);
+  assert.equal(await on("hub\tSELF"), false);
+  assert.equal(await on("profile self"), false);
+});
+
+test("verification-names: fixable unless the name is verify-v1", async () => {
+  const on = (name: string) => fixableOn("meta/verification-names", `<meta name="${name}" content="x">`, "meta");
+  assert.equal(await on("y_key"), true);
+  assert.equal(await on("BlogCatalog"), true);
   assert.equal(await on("verify-v1"), false);
   assert.equal(await on("Verify-V1"), false);
 });
+
+for (const tag of ["cursor", "solidcolor"]) {
+  test(`${tag}: fixable only inside svg and without an id`, async () => {
+    const on = (html: string) => fixableOn(`element/${tag}`, html, tag);
+    assert.equal(await on(`<svg><defs><${tag}></${tag}></defs></svg>`), true);
+    assert.equal(await on(`<svg><g><defs><${tag} x="1"></${tag}></defs></g></svg>`), true);
+    assert.equal(await on(`<svg><defs><${tag} id="a"></${tag}></defs></svg>`), false);
+    assert.equal(await on(`<svg><defs><${tag} id=""></${tag}></defs></svg>`), false);
+    assert.equal(await on(`<p><${tag}>Text</${tag}></p>`), false);
+    assert.equal(await on(`<${tag}></${tag}>`), false);
+  });
+}
 
 test("apple-mobile-web-app-status-bar-style: fixable only for default or a missing content", async () => {
   const on = (attrs: string) =>
@@ -129,4 +186,12 @@ test("apple-mobile-web-app-status-bar-style: fixable only for default or a missi
   assert.equal(await on(' content="black"'), false);
   assert.equal(await on(' content="black-translucent"'), false);
   assert.equal(await on(' content=""'), false);
+});
+
+test("http-equiv-unregistered-pragmas leaves every value another rule owns to that rule", async () => {
+  const { match } = await import("../packages/rules/logic/meta/http-equiv-unregistered-pragmas.ts");
+  for (const value of ["robots", "x-robots-tag", "cache-control", "x-ua-compatible", "permissions-policy", "feature-policy", "set-cookie", "x-dns-prefetch-control", "description", "pics-label", "content-script-type"]) {
+    assert.equal(match(portOf(`<meta http-equiv="${value}" content="x">`, "meta"), ctx), false, value);
+  }
+  assert.equal(match(portOf('<meta http-equiv="x-made-up" content="x">', "meta"), ctx), true);
 });

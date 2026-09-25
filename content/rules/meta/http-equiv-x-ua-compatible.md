@@ -1,6 +1,6 @@
 ---
 ruleId: "meta/http-equiv-x-ua-compatible"
-title: "meta http-equiv=X-UA-Compatible"
+title: "<meta http-equiv=\"X-UA-Compatible\">"
 description: "X-UA-Compatible controlled Internet Explorer document modes; Edge's IE mode and IE11 on Windows 10 LTSC/Server still honour it."
 pubDate: "2026-09-09"
 status: "avoid"
@@ -14,7 +14,7 @@ fix: { op: "none" }
 replacement: "Check first that Edge's IE mode and IE11 on Windows 10 LTSC/Server never open this page. Delete it."
 tags: ["http-equiv", "microsoft"]
 impacts: ["maintainability"]
-related: ["script/type-javascript-mime"]
+related: ["meta/http-equiv-ie-pragmas"]
 ---
 
 Edge's IE mode still reads `X-UA-Compatible`, and IE11 on supported Windows 10 editions

@@ -1,6 +1,6 @@
 ---
 ruleId: "element/font"
-title: "font element"
+title: "<font>"
 description: "font is obsolete presentational markup that still styles text through color, face and size hints; move the styling to CSS."
 pubDate: "2026-09-14"
 status: "avoid"

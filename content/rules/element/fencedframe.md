@@ -1,6 +1,6 @@
 ---
 ruleId: "element/fencedframe"
-title: "fencedframe element"
+title: "<fencedframe>"
 description: "`fencedframe` is Chrome's removed Sandbox embed for cross-site content. Google stubs it in M154 and removes it in M155. Use `iframe`."
 pubDate: "2026-09-14"
 status: "avoid"

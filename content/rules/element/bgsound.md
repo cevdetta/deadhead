@@ -1,6 +1,6 @@
 ---
 ruleId: "element/bgsound"
-title: "bgsound element"
+title: "<bgsound>"
 description: "bgsound was Internet Explorer's background sound. Browsers now treat it as unknown and play nothing. Use audio with controls."
 pubDate: "2026-09-14"
 status: "avoid"

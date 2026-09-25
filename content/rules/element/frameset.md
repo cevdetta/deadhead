@@ -1,6 +1,6 @@
 ---
 ruleId: "element/frameset"
-title: "frameset, frame and noframes"
+title: "<frameset>, <frame>, <noframes>"
 description: "frameset, frame and noframes are obsolete. A frameset is separate documents in one window. Use one document with iframe."
 pubDate: "2026-09-14"
 status: "avoid"
@@ -14,7 +14,7 @@ fix: { op: "none" }
 replacement: "Build one document per page. Use iframe with CSS to embed a separate document, or server-side includes for shared parts like navigation."
 tags: ["embedding"]
 impacts: ["maintainability"]
-related: ["element/plugin-embed"]
+related: ["element/object-embed-plugin"]
 ---
 
 A frameset puts separate documents in one window. A frameset page has no `<body>`. In

@@ -1,11 +1,11 @@
 ---
 ruleId: "attr/head-profile"
-title: "head profile"
+title: "<head profile>"
 description: "profile on head is unnecessary; register meta names instead and trigger behaviors with link elements."
 pubDate: "2026-09-19"
 status: "avoid"
-severity: "unnecessary"
-standardsBasis: "spec"
+severity: "deprecated"
+standardsBasis: "spec-obsolete"
 detectability: "yes"
 kind: "element"
 scope: "head"
@@ -14,7 +14,7 @@ fix: { op: "remove-attribute", attr: "profile" }
 replacement: "Delete the attribute: <head>. Register metadata names instead, and use link elements to trigger behaviors."
 tags: ["structured-data"]
 impacts: ["maintainability"]
-related: ["attr/area-obsolete"]
+related: ["attr/meta-scheme"]
 ---
 
 `profile` on `head` points at nothing that reads it. WHATWG calls the attribute unnecessary with its IDL "intentionally omitted", so no implementation supports it, and the W3C version splits the replacement by intent: registered names for meta terms, `link` elements for behaviors.

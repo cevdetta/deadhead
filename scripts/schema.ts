@@ -36,12 +36,31 @@ import {
   type Status,
   type Tag,
 } from "../packages/core/vocabulary.ts";
-import { parseSelector, tokenTests } from "../packages/core/selector.ts";
+import { parseSelector, presenceTests, tokenTests } from "../packages/core/selector.ts";
 
 // The vocabulary and the selector grammar live in core because the engine
 // needs them too, and a validator that disagrees with the engine is worse
 // than no validator: it green-lights rules that silently match nothing.
 export type { RuleMeta, Status, Severity, Kind, Scope };
+
+/**
+ * A ruleId names the construct or what is checked, never a judgement
+ * (CONTRIBUTING § Naming a rule, rule 5). One exception: `attr/<attribute>-obsolete`,
+ * where `obsolete` is HTML §16's own category for an attribute that stays valid on
+ * some other element; those ids are listed in `OBSOLETE_ATTRIBUTE_IDS` below.
+ */
+export const VERDICT_WORDS = [
+  "obsolete", "deprecated", "removed", "retired", "dead", "dropped",
+  "legacy", "invalid", "misuse", "old", "bad", "broken",
+] as const;
+
+/**
+ * `attr/<attribute>-obsolete`: the attribute on every element where HTML §16
+ * marks it obsolete, while it stays valid on another element. `obsolete` is
+ * the spec's category here, not a judgement. An id joins only with that
+ * justification in its PR.
+ */
+export const OBSOLETE_ATTRIBUTE_IDS: ReadonlySet<string> = new Set(["attr/charset-obsolete", "attr/name-obsolete"]);
 
 /** Field order in `rules.json`. Fixed so the generated file diffs cleanly. */
 export const META_KEYS = [
@@ -259,14 +278,26 @@ export function validateFrontmatter(data: unknown): FrontmatterResult {
       ),
     );
   }
+  if (ruleId !== null && !OBSOLETE_ATTRIBUTE_IDS.has(ruleId)) {
+    const words = ruleId.split(/[/-]/);
+    const verdict = VERDICT_WORDS.find((w) => words.includes(w));
+    if (verdict !== undefined) {
+      issues.push(
+        field(
+          ["ruleId"],
+          `contains the verdict word \`${verdict}\`: name the construct or what is checked, not a judgement (CONTRIBUTING § Naming a rule)`,
+        ),
+      );
+    }
+  }
 
   const title = nonEmptyString(data["title"], ["title"], issues);
   const description = nonEmptyString(data["description"], ["description"], issues);
-  if (description !== null && description.length > 160) {
+  if (typeof description === "string" && description.length > 140) {
     issues.push(
       field(
         ["description"],
-        `must fit 160 chars for search results (found ${description.length})`,
+        `must be at most 140 characters (has ${description.length}): it is the one line reporters print`,
       ),
     );
   }
@@ -306,6 +337,22 @@ export function validateFrontmatter(data: unknown): FrontmatterResult {
   const detectability = oneOf(data["detectability"], DETECTABILITY, ["detectability"], issues);
   const kind = oneOf(data["kind"], KIND, ["kind"], issues);
   const scope = oneOf(data["scope"], SCOPE, ["scope"], issues);
+
+  if (
+    kind === "element" &&
+    typeof title === "string" &&
+    typeof ruleId === "string" &&
+    !ruleId.startsWith("head/") &&
+    !ruleId.startsWith("document/") &&
+    !title.startsWith("<")
+  ) {
+    issues.push(
+      field(
+        ["title"],
+        'must start with `<`: element and attribute titles show the markup (CONTRIBUTING § Naming a rule)',
+      ),
+    );
+  }
 
   const selectorRaw: unknown = data["selector"];
   let selector: string | null = null;
@@ -450,6 +497,33 @@ export function validateFrontmatter(data: unknown): FrontmatterResult {
             );
           }
         }
+      }
+    }
+  }
+
+  // remove-attributes deletes what the selector requires with bare `[attr]`
+  // presence tests, and it has to own that requirement outright: with no
+  // selector, there is no `[attr]` test to read the deleted names from.
+  // `match: "logic"` is allowed only for a module that vetoes fixes and never
+  // decides findings; `checkLogicModules` rejects a `match` export there,
+  // since logic could decide on a live attribute the selector only pre-filters on.
+  if (fixOp === "remove-attributes") {
+    if (selector === null) {
+      issues.push(
+        field(
+          ["fix", "op"],
+          "`remove-attributes` needs a selector: it reads the deleted attributes from the bare `[attr]` tests in it",
+        ),
+      );
+    } else {
+      const parsed = parseSelector(selector);
+      if (parsed.ok && presenceTests(parsed.ast).length === 0) {
+        issues.push(
+          field(
+            ["fix", "op"],
+            "`remove-attributes` deletes the attributes the selector tests with `[attr]`, but this selector has no bare `[attr]` test",
+          ),
+        );
       }
     }
   }

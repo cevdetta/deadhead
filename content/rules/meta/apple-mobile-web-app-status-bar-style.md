@@ -1,6 +1,6 @@
 ---
 ruleId: "meta/apple-mobile-web-app-status-bar-style"
-title: "meta name=\"apple-mobile-web-app-status-bar-style\""
+title: "<meta name=\"apple-mobile-web-app-status-bar-style\">"
 description: "Apple switch for the status bar of full-screen Home Screen apps; theme-color styles a different surface and does not replace it."
 pubDate: "2026-09-19"
 status: "avoid"

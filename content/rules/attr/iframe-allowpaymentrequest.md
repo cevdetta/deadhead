@@ -1,7 +1,7 @@
 ---
 ruleId: "attr/iframe-allowpaymentrequest"
-title: "iframe allowpaymentrequest"
-description: "HTML removed allowpaymentrequest in 2020 for allow=\"payment\"; Firefox and Safari never shipped it, and Chrome still maps it to a grant for every origin."
+title: "<iframe allowpaymentrequest>"
+description: "allowpaymentrequest is removed; write allow=\"payment\" instead, or Chrome grants payment to every origin."
 pubDate: "2026-09-23"
 status: "avoid"
 severity: "deprecated"

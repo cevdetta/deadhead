@@ -1,6 +1,6 @@
 ---
 ruleId: "script/json-ld-search-action"
-title: "SearchAction for the sitelinks search box"
+title: "<script type=\"application/ld+json\">, microdata SearchAction"
 description: "Google removed the sitelinks search box in November 2024; the SearchAction that fed it drives nothing now."
 pubDate: "2026-09-23"
 status: "avoid"

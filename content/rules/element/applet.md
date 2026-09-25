@@ -1,7 +1,7 @@
 ---
 ruleId: "element/applet"
-title: "applet element"
-description: "applet is obsolete and nothing can run it: no browser loads Java applets, and the JDK itself removed the Applet API; only the fallback text shows."
+title: "<applet>"
+description: "No browser runs Java applets; delete the element and keep the fallback text."
 pubDate: "2026-09-14"
 status: "avoid"
 severity: "deprecated"

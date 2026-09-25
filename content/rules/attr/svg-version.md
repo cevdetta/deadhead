@@ -1,6 +1,6 @@
 ---
 ruleId: "attr/svg-version"
-title: "svg version attribute"
+title: "<svg version>"
 description: "SVG 2 removed version from <svg>; it never influenced rendering or processing, so delete it."
 pubDate: "2026-09-23"
 status: "avoid"
@@ -14,7 +14,7 @@ fix: { op: "remove-attribute", attr: "version" }
 replacement: "Delete the attribute: <svg viewBox=\"0 0 24 24\">."
 tags: ["svg"]
 impacts: ["maintainability"]
-related: ["attr/svg-baseprofile", "attr/html-version", "attr/svg-xlink-href", "attr/xmlns-prefix"]
+related: ["attr/svg-baseprofile", "attr/html-version", "attr/svg-xlink", "attr/xmlns-prefix"]
 ---
 
 `<svg version="1.1">` states which edition of SVG the drawing conforms to. SVG 2 removed

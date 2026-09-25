@@ -1,20 +1,20 @@
 ---
 ruleId: "attr/a-coords-shape"
-title: "a coords and shape"
+title: "<a coords, shape>"
 description: "coords and shape do nothing on anchors; delete them and use area elements for image maps."
 pubDate: "2026-09-19"
 status: "avoid"
-severity: "unnecessary"
-standardsBasis: "spec"
+severity: "deprecated"
+standardsBasis: "spec-obsolete"
 detectability: "yes"
 kind: "element"
 scope: "body"
 selector: "a[coords], a[shape]"
-fix: { op: "remove-attribute", attr: "coords" }
+fix: { op: "remove-attributes" }
 replacement: "Delete the attributes: <a href=\"page.html\">text</a>. For image maps use area elements with shape and coords inside map."
 tags: ["hyperlinks"]
 impacts: ["maintainability"]
-related: ["attr/area-obsolete"]
+related: ["attr/area-hreflang-type-nohref"]
 ---
 
 `coords` and `shape` do nothing on anchors. WHATWG lists both as obsolete on `a` with one direction, use `area` for image maps, so the attributes are dead weight on every anchor that carries them.
@@ -46,7 +46,7 @@ MDN documents the same shape with runnable map examples: `shape` selects the reg
 
 ## Detectability
 
-Complete detection. The rule matches `a[coords]` or `a[shape]`: presence of either attribute is the whole verdict, so no logic module exists. Autofix drops `coords`; a lone `shape` or the remainder of a pair needs a hand edit, since one rule carries one fix attribute.
+Complete detection. The rule matches `a[coords]` or `a[shape]`: presence of either attribute is the whole verdict, so no logic module exists. The autofix removes every attribute the rule names that is present on the element, and leaves every other attribute as written.
 
 ## Resources
 

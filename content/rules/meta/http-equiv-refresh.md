@@ -1,6 +1,6 @@
 ---
 ruleId: "meta/http-equiv-refresh"
-title: "meta http-equiv=refresh"
+title: "<meta http-equiv=\"refresh\">"
 description: "http-equiv=refresh moves the reader on a timer, which WCAG names as a failure and the back button cannot undo."
 pubDate: "2026-09-09"
 status: "avoid"
@@ -14,7 +14,7 @@ fix: { op: "none" }
 replacement: "Send a 301 or 302 from the server to move a page, or offer a visible <a href> link. Never move the reader on a timer."
 tags: ["http-equiv"]
 impacts: ["a11y", "seo", "security"]
-related: ["meta/http-equiv-x-ua-compatible"]
+related: []
 ---
 
 `http-equiv="refresh"` moves the reader on a timer. It is a pragma directive that

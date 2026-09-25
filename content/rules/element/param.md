@@ -1,6 +1,6 @@
 ---
 ruleId: "element/param"
-title: "param element"
+title: "<param>"
 description: "A plug-in parameter element that is entirely obsolete and no longer read by anything."
 pubDate: "2026-09-14"
 status: "avoid"
@@ -14,7 +14,7 @@ fix: { op: "none" }
 replacement: "Set the resource directly on <object> with its data attribute: <object data=\"clip.mp4\" type=\"video/mp4\">."
 tags: ["embedding"]
 impacts: ["interop", "maintainability"]
-related: ["element/applet", "element/plugin-embed"]
+related: ["element/applet", "element/object-embed-plugin"]
 ---
 
 `<param>` feeds nothing. `<param>` passed name/value pairs to the plug-in loaded by

@@ -81,6 +81,7 @@ export const scopeLabels: Record<Scope, string> = {
 export const fixLabels: Record<FixOp, string> = {
   "remove-element": "Removes the element",
   "remove-attribute": "Removes the attribute",
+  "remove-attributes": "Removes the attributes",
   "remove-token": "Removes the keyword",
   "remove-tokens": "Removes the dead keywords",
   none: "None — reports only",

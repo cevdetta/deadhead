@@ -1,7 +1,7 @@
 ---
 ruleId: "element/multicol"
-title: "multicol element"
-description: "multicol is obsolete; it was a single-vendor experiment for multi-column layout that no browser implements, so use CSS multi-column layout instead."
+title: "<multicol>"
+description: "No browser lays out multicol; use CSS multi-column layout instead."
 pubDate: "2026-09-14"
 status: "avoid"
 severity: "deprecated"

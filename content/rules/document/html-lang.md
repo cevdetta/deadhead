@@ -15,7 +15,7 @@ fix: { op: "none" }
 replacement: "Declare the page's language on the root element with a BCP 47 tag: <html lang=\"en\">."
 tags: ["i18n"]
 impacts: ["a11y", "seo"]
-related: ["head/viewport"]
+related: ["head/viewport-missing"]
 ---
 
 `<html>` with no `lang`, or with `lang=""`, doesn't say what language the page is written
@@ -59,7 +59,7 @@ Fully detectable. The selector finds `<html>`, and the logic reports it when `la
 missing, empty or only whitespace. A selector alone can't express the whitespace case.
 The rule does not check whether a present value is a *valid* language tag.
 
-Like `head/viewport`, nothing is reported unless the document has a `<head>` with at least
+Like `head/viewport-missing`, nothing is reported unless the document has a `<head>` with at least
 one element in it, so fragments, partials and component templates don't fire. The rule
 still reports a document
 that only ever loads inside an `<iframe>`, because a file on disk can't

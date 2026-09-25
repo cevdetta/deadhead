@@ -1,7 +1,7 @@
 ---
 ruleId: "element/big"
-title: "big element"
-description: "big is obsolete: it only makes text one size larger, with no meaning attached. Use CSS font-size, or the element that says why the text matters."
+title: "<big>"
+description: "big adds no meaning; use CSS font-size or the element that names the reason."
 pubDate: "2026-09-14"
 status: "avoid"
 severity: "deprecated"

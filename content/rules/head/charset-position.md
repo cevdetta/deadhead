@@ -14,7 +14,7 @@ fix: { op: "none" }
 replacement: "Move <meta charset=\"utf-8\"> to the first line inside <head>, before <title> and before any other meta or link."
 tags: ["charset"]
 impacts: ["interop", "security"]
-related: ["meta/http-equiv-x-ua-compatible"]
+related: ["head/charset-multiple", "meta/charset-value"]
 ---
 
 An encoding declaration past the first 1024 bytes does not exist as far as the parser is

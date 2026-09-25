@@ -1,6 +1,6 @@
 ---
 ruleId: "meta/http-equiv-pics-p3p"
-title: "meta http-equiv=pics-label / p3p"
+title: "<meta http-equiv=\"pics-label\">, <meta http-equiv=\"p3p\">"
 description: "PICS labels and P3P policies are retired vocabularies whose only consumer was Internet Explorer; the tags do nothing, so delete them."
 pubDate: "2026-09-14"
 status: "avoid"
@@ -14,7 +14,7 @@ fix: { op: "remove-element" }
 replacement: "Delete the tag. Publish a human-readable privacy policy instead; content descriptions belong in linked Description Resources, not markup."
 tags: ["http-equiv"]
 impacts: ["maintainability"]
-related: ["meta/http-equiv-x-ua-compatible"]
+related: ["meta/http-equiv-set-cookie"]
 ---
 
 Two retired W3C vocabularies linger in `<meta>` tags. PICS labels rated
