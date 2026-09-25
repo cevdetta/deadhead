@@ -220,3 +220,17 @@ test("findings on one element come in rule order, whatever bucket found them", (
   ];
   assert.deepEqual(ids(lint(doc("", '<div data-x="1"></div>'), rules)), ["attr/a", "attr/b"]);
 });
+
+test("makeDocumentQueries narrows by leading tag and keeps document order", async () => {
+  const { makeDocumentQueries } = await import("../packages/core/port.ts");
+  const nodes = [{ t: "meta", a: "x" }, { t: "link", a: "y" }, { t: "meta", a: "z" }];
+  const byTag = new Map([["meta", [nodes[0]!, nodes[2]!]], ["link", [nodes[1]!]]]);
+  let ported = 0;
+  const portFor = (n: { t: string; a: string }) => {
+    ported++;
+    return { tag: n.t, attr: (k: string) => (k === "name" ? n.a : undefined), hasAttr: (k: string) => k === "name", attrNames: () => ["name"] } as never;
+  };
+  const q = makeDocumentQueries(nodes, byTag, portFor);
+  assert.deepEqual(q.querySelectorAll("meta[name]").map((p) => p.attr("name")), ["x", "z"]);
+  assert.equal(ported, 2);
+});

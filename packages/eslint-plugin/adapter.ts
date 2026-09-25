@@ -21,8 +21,7 @@
  * one this package declares.
  */
 
-import { makeDoctypePort, withPortCache } from "../core/port.ts";
-import { type Compound, matches, parseSelector } from "../core/selector.ts";
+import { makeDoctypePort, makeDocumentQueries, withPortCache } from "../core/port.ts";
 import type { DoctypePort, DocumentPort, ElementPort, Parsed, Range } from "../core/types.ts";
 
 type Node = {
@@ -78,9 +77,11 @@ function textOf(node: Node): string {
   return out;
 }
 
-function makePorts(parents: WeakMap<Node, Node>): (node: Node) => ElementPort {
-  const elementChildren = (node: Node): Node[] =>
-    childrenOf(node).filter((child) => ELEMENT_TAG(child) !== null);
+function makePorts(
+  parents: WeakMap<Node, Node>,
+  elementChildren: WeakMap<Node, Node[]>,
+): (node: Node) => ElementPort {
+  const childPorts = new WeakMap<Node, ElementPort[]>();
 
   return withPortCache<Node>((node, portFor) => {
     const attrs = new Map<string, string>();
@@ -104,10 +105,17 @@ function makePorts(parents: WeakMap<Node, Node>): (node: Node) => ElementPort {
         const parent = parents.get(node);
         return parent === undefined ? null : portFor(parent);
       },
-      children: () => elementChildren(node).map(portFor),
+      children: () => {
+        let ports = childPorts.get(node);
+        if (ports === undefined) {
+          ports = (elementChildren.get(node) ?? []).map(portFor);
+          childPorts.set(node, ports);
+        }
+        return ports;
+      },
       index: () => {
         const parent = parents.get(node);
-        return parent === undefined ? 0 : elementChildren(parent).indexOf(node);
+        return parent === undefined ? 0 : (elementChildren.get(parent) ?? []).indexOf(node);
       },
       range: (): Range | null => (node.range ? [node.range[0], node.range[1]] : null),
       // ESLint columns are 0-based; the port and parse5 are 1-based.
@@ -204,6 +212,8 @@ export function fromProgram(program: unknown, source: string): Parsed {
   assertProgramNode(program);
   const elements: Node[] = [];
   const parents = new WeakMap<Node, Node>();
+  const elementChildren = new WeakMap<Node, Node[]>();
+  const byTag = new Map<string, Node[]>();
 
   // An explicit stack: markup nested thousands deep is legal HTML, and a
   // recursive walk dies on it. Children are pushed in reverse so they pop in
@@ -211,42 +221,31 @@ export function fromProgram(program: unknown, source: string): Parsed {
   const stack: [Node, Node | null][] = [[program, null]];
   while (stack.length > 0) {
     const [node, parent] = stack.pop()!;
-    const isElement = ELEMENT_TAG(node) !== null;
-    if (isElement) {
+    const tag = ELEMENT_TAG(node);
+    if (tag !== null) {
       elements.push(node);
-      if (parent !== null) parents.set(node, parent);
+      const bucket = byTag.get(tag);
+      if (bucket === undefined) byTag.set(tag, [node]);
+      else bucket.push(node);
+      if (parent !== null) {
+        parents.set(node, parent);
+        const siblings = elementChildren.get(parent);
+        if (siblings === undefined) elementChildren.set(parent, [node]);
+        else siblings.push(node);
+      }
     }
     const children = childrenOf(node);
-    for (let i = children.length - 1; i >= 0; i--) stack.push([children[i]!, isElement ? node : parent]);
+    for (let i = children.length - 1; i >= 0; i--) stack.push([children[i]!, tag !== null ? node : parent]);
   }
 
-  const portFor = makePorts(parents);
+  const portFor = makePorts(parents, elementChildren);
   const root = elements.find((node) => ELEMENT_TAG(node) === "html") ?? elements[0];
-
-  const compiled = new Map<string, Compound[]>();
-  const astFor = (selector: string): Compound[] => {
-    const cached = compiled.get(selector);
-    if (cached) return cached;
-    const parsed = parseSelector(selector);
-    if (!parsed.ok) {
-      throw new Error(`unsupported selector ${JSON.stringify(selector)} — ${parsed.message}`);
-    }
-    compiled.set(selector, parsed.ast);
-    return parsed.ast;
-  };
 
   const doctype = doctypeOf(program);
 
   const doc: DocumentPort = {
     doctype: () => doctype,
-    querySelectorAll(selector) {
-      const ast = astFor(selector);
-      return elements.map(portFor).filter((port) => matches(port, ast));
-    },
-    querySelector(selector) {
-      const ast = astFor(selector);
-      return elements.map(portFor).find((port) => matches(port, ast)) ?? null;
-    },
+    ...makeDocumentQueries(elements, byTag, portFor),
   };
 
   return { root: root === undefined ? null : portFor(root), doc, source };
