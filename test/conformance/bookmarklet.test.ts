@@ -29,9 +29,11 @@ const bundle = await bundleBookmarklet(rulesJson.rules);
 const rules = await loadRules();
 
 /** Run the built artifact against a document, the way a bookmarklet would. */
-const viaBundle = (source: string): { findings: Finding[]; panel: boolean } => {
+const viaBundle = async (source: string): Promise<{ findings: Finding[]; panel: boolean }> => {
   const { window, document } = parseHTML(source);
-  const findings = [...(vm.runInNewContext(bundle, { document, window }) as Finding[])];
+  const findings = [
+    ...(await vm.runInNewContext(bundle, { document, window, DecompressionStream, Blob, Response, atob, TextDecoder }) as Finding[]),
+  ];
   return { findings, panel: document.querySelector("deadhead-panel") !== null };
 };
 
@@ -44,25 +46,29 @@ test("the bundle finds exactly what the modules find, on every fixture", async (
   for (const file of files) {
     const source = await readFile(file, "utf8");
     assert.deepEqual(
-      viaBundle(source).findings.map((f) => f.ruleId),
+      (await viaBundle(source)).findings.map((f) => f.ruleId),
       viaModules(source).map((f) => f.ruleId),
       file,
     );
   }
 });
 
-test("the bundle carries every rule, including the ones that need code", () => {
-  for (const rule of rules) {
-    assert.ok(
-      bundle.includes(JSON.stringify(rule.meta.ruleId)),
-      `${rule.meta.ruleId} is not inlined in the bundle`,
-    );
-  }
+test("the bundle carries every rule, including the ones that need code", async () => {
+  // The metadata rides gzipped, so rule ids are not plain text in the bundle
+  // outside the logic map. Inflate the payload and compare the id sets.
+  const payload = bundle.match(/\.start\("([^"]+)",/)?.[1];
+  assert.ok(payload, "no start payload in the bundle");
+  const { gunzipSync } = await import("node:zlib");
+  const metas = JSON.parse(gunzipSync(Buffer.from(payload, "base64")).toString("utf8"));
+  assert.deepEqual(
+    metas.map((m: { ruleId: string }) => m.ruleId).sort(),
+    rules.map((r) => r.meta.ruleId).sort(),
+  );
   // The logic modules must be inlined too, not merely referenced. Rolldown
-  // mangles internal identifiers, so assert on the assembly's stable wiring:
-  // the appended call reaching each logic entry through the snippet global.
-  assert.match(bundle, /__deadhead\.match_attr_script_type_javascript/, "script logic missing");
-  assert.match(bundle, /__deadhead\.check_head_charset_position/, "charset logic missing");
+  // minifies internal identifiers, so assert on the assembly's stable wiring:
+  // the logic map reaching each inlined entry by rule id.
+  assert.ok(bundle.includes(JSON.stringify("attr/script-type-javascript")), "script logic missing");
+  assert.ok(bundle.includes(JSON.stringify("head/charset-position")), "charset logic missing");
 });
 
 test("nothing in the bundle can be blocked by a Content-Security-Policy", () => {
@@ -96,23 +102,23 @@ test("the panel lives in a shadow root and adopts a constructed stylesheet", asy
   assert.equal(adopted.length, 1);
 });
 
-test("it renders a panel, and running it twice does not stack panels", () => {
+test("it renders a panel, and running it twice does not stack panels", async () => {
   const source = "<!doctype html><html lang='en'><head><title>t</title><meta name='viewport' content='width=device-width'>" +
     '<meta http-equiv="X-UA-Compatible" content="IE=edge"></head><body></body></html>';
   const { window, document } = parseHTML(source);
-  const context = { document, window };
-  vm.runInNewContext(bundle, context);
-  vm.runInNewContext(bundle, context);
+  const context = { document, window, DecompressionStream, Blob, Response, atob, TextDecoder };
+  await vm.runInNewContext(bundle, context);
+  await vm.runInNewContext(bundle, context);
   assert.equal(document.querySelectorAll("deadhead-panel").length, 1);
   const host = document.querySelector("deadhead-panel") as unknown as { shadowRoot: { innerHTML: string } | null };
   assert.ok(host.shadowRoot, "no shadow root");
   assert.match(host.shadowRoot?.innerHTML ?? "", /1 finding/);
 });
 
-test("a clean document says so rather than showing an empty list", () => {
+test("a clean document says so rather than showing an empty list", async () => {
   const source = '<!doctype html><html lang="en"><head><meta charset="utf-8">' +
     "<title>t</title><meta name='viewport' content='width=device-width'></head><body></body></html>";
-  const { findings, panel } = viaBundle(source);
+  const { findings, panel } = await viaBundle(source);
   // Compare length, not the array: values crossing a vm realm boundary have a
   // different Array prototype and deepStrictEqual compares prototypes.
   assert.equal(findings.length, 0);

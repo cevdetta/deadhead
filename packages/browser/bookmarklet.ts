@@ -2,15 +2,15 @@
  * The bookmarklet's entry point: run the rules against the live document and
  * draw the results over the page.
  *
- * Exported as `boot(rules)` rather than running on import, so the build can
- * append one call with the rule set inlined. That is what keeps the artifact a
+ * Exported as `start(payload, logic)` rather than running on import, so the
+ * build can append one call with the compressed rule set inlined. That is what keeps the artifact a
  * single IIFE with no `fetch` — nothing to load means there is no request for
  * a Content-Security-Policy to block, which is exactly the kind of page most
  * worth pointing this at.
  */
 
 import { type Rule, run } from "../core/index.ts";
-import type { Finding } from "../core/index.ts";
+import type { CheckFn, Finding, MatchFn, RuleMeta } from "../core/index.ts";
 import { fromDocument } from "./adapter.ts";
 
 const HOST = "deadhead-panel";
@@ -98,7 +98,23 @@ function render(findings: Finding[]): HTMLElement {
   return host;
 }
 
-export function boot(rules: Rule[]): Finding[] {
+/** Base64 of gzip of the slim rule metadata: about a fifth of the literal JSON. */
+async function inflate(payload: string): Promise<unknown> {
+  const bytes = Uint8Array.from(atob(payload), (c) => c.charCodeAt(0));
+  const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"));
+  return JSON.parse(await new Response(stream).text());
+}
+
+export async function start(payload: string, logic: Record<string, MatchFn | CheckFn>): Promise<Finding[]> {
+  const metas = (await inflate(payload)) as RuleMeta[];
+  const rules: Rule[] = metas.map((meta) => {
+    const fn = logic[meta.ruleId];
+    // A module exporting only `fixable` inlines nothing: the DOM has no source
+    // text and never fixes, so the rule runs on its selector alone, the way
+    // the literal build nulled `match` for it.
+    if (fn === undefined) return meta.kind === "element" ? { meta: { ...meta, match: null } } : { meta };
+    return meta.kind === "document" ? { meta, check: fn as CheckFn } : { meta, match: fn as MatchFn };
+  });
   const findings = run(rules, fromDocument(document));
   render(findings);
   return findings;
