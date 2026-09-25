@@ -163,13 +163,13 @@ export async function lintFiles(
   files: string[],
   rules: Rule[],
   options: LintOptions = {},
-): Promise<FileResult[]> {
+): Promise<{ results: FileResult[]; visitBody: boolean }> {
   // Compile once for the whole run: selectors and buckets do not depend on
   // the file, and --fix re-analyses the same file up to MAX_FIX_PASSES times.
   const compiled = compileForRun(rules, options);
   const results: FileResult[] = [];
   for (const file of files) results.push(await lintFileCompiled(file, compiled, options));
-  return results;
+  return { results, visitBody: compiled.visitBody };
 }
 
 /**

@@ -45,7 +45,7 @@ test("every rule in content/rules is loaded, with its logic module attached", ()
 test("each invalid.html trips its own rule", async () => {
   for (const rule of rules) {
     const file = `test/fixtures/${rule.meta.ruleId}/invalid.html`;
-    const [result] = await lintFiles(await collectFiles([file]), rules);
+    const [result] = (await lintFiles(await collectFiles([file]), rules)).results;
     const own = result?.findings.filter((f) => f.ruleId === rule.meta.ruleId) ?? [];
     assert.ok(own.length > 0, `${file} produced no ${rule.meta.ruleId} finding`);
     for (const finding of own) {
@@ -59,7 +59,7 @@ test("each invalid.html trips its own rule", async () => {
 test("each valid.html is clean, and clean of every rule, not just its own", async () => {
   const files = await collectFiles(["test/fixtures/*/*/valid.html"]);
   assert.equal(files.length, rules.length);
-  const results = await lintFiles(files, rules);
+  const results = (await lintFiles(files, rules)).results;
   const findings = results.flatMap((r) => r.findings.map((f) => `${r.file}: ${f.ruleId}`));
   assert.deepEqual(findings, []);
 });

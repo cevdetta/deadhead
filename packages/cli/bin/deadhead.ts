@@ -13,8 +13,13 @@
 
 import { matchesGlob } from "node:path";
 import { parseArgs, styleText } from "node:util";
+import { enableCompileCache } from "node:module";
 
-import { type Rule, compile } from "../../core/engine.ts";
+// Caches compiled module code between runs (Node ≥22.1). A no-op when the
+// cache directory is not writable; never affects results.
+enableCompileCache?.();
+
+import { type Rule } from "../../core/engine.ts";
 import { SEVERITY, SEVERITY_RANK, SITE_URL } from "../../core/vocabulary.ts";
 import { RulesNotBuiltError, loadRules } from "../../rules/load.ts";
 import {
@@ -152,7 +157,7 @@ try {
   }
 
   const skipTemplates = values["skip-templates"] ?? config.skipTemplates ?? false;
-  const results = await lintFiles(files, rules, {
+  const { results, visitBody } = await lintFiles(files, rules, {
     skipTemplates,
     fix: values.fix,
     headOnly: !values["no-head-only"],
@@ -162,7 +167,7 @@ try {
   // descends — so say so on stderr, where machine-readable stdout stays
   // clean. It applies only when the active rule set allows it, which with
   // the shipped rules means the user switched the body-scoped ones off.
-  if (values["no-head-only"] !== true && !compile(rules).visitBody) {
+  if (values["no-head-only"] !== true && !visitBody) {
     process.stderr.write(
       `${styleText("dim", "head-only mode: no active rule is scoped beyond <head>, so the <body> walk is skipped (pass --no-head-only to walk it anyway)")}\n`,
     );

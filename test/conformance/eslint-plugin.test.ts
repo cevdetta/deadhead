@@ -54,7 +54,7 @@ test("every rule id resolves to this plugin", () => {
 
 test("ESLint reports exactly what the CLI reports, at the same positions", async () => {
   const files = await collectFiles(["test/fixtures"]);
-  const results = await lintFiles(files, rules);
+  const results = (await lintFiles(files, rules)).results;
 
   for (const { file, findings } of results) {
     const source = await readFile(file, "utf8");
