@@ -67,6 +67,9 @@ export async function renderRegistry(metas: RuleMeta[]): Promise<string> {
     const file = resolve(ROOT, "packages/rules/logic", `${meta.ruleId}.ts`);
     const module: Record<string, unknown> = await import(pathToFileURL(file).href);
     if (meta.kind === "document") {
+      if (typeof module["check"] !== "function") {
+        throw new Error(`${meta.ruleId}: packages/rules/logic/${meta.ruleId}.ts must export check()`);
+      }
       imports.push(`import { check as l${i} } from "./logic/${meta.ruleId}.ts";`);
       entries.push(`  { meta: ${JSON.stringify(meta)}, check: l${i} },`);
       continue;
@@ -79,6 +82,9 @@ export async function renderRegistry(metas: RuleMeta[]): Promise<string> {
     if (typeof module["fixable"] === "function") {
       imports.push(`import { fixable as l${i}f } from "./logic/${meta.ruleId}.ts";`);
       parts.push(`fixable: l${i}f`);
+    }
+    if (parts.length === 0) {
+      throw new Error(`${meta.ruleId}: packages/rules/logic/${meta.ruleId}.ts must export match() or fixable()`);
     }
     entries.push(`  { meta: ${JSON.stringify(meta)}${parts.length > 0 ? `, ${parts.join(", ")}` : ""} },`);
   }

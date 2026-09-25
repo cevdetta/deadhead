@@ -45,9 +45,9 @@ type Compiled = Rule & { parsed: Compound[] | null; index: number; stamp: number
 
 /**
  * One rule as a dispatch bucket sees it: the rule plus the slice of its
- * selector that can match this bucket's tag. `compounds` is `null` for a
+ * selector that can match this bucket. `compounds` is `null` for a
  * selector-less rule, whose logic decides alone, and the whole parse for a
- * wildcard rule, whose alternatives fit no single bucket.
+ * wildcard rule, whose alternatives fit no tag or attribute bucket.
  */
 type Dispatched = { rule: Compiled; compounds: Compound[] | null };
 
@@ -161,9 +161,10 @@ function contextFor(rule: Rule, source: string | null, fix: boolean): RuleContex
  * Parse each selector once and sort rules into dispatch buckets.
  *
  * Bucketing is per comma alternative, not per rule: an alternative can only
- * match elements with its leading tag, so testing it anywhere else is pure
- * waste. A rule lands in wildcard only when one of its alternatives has no
- * leading tag (or it has no selector at all) — then it must see every node.
+ * match elements with its leading tag, or with an attribute it requires, so
+ * testing it anywhere else is pure waste. A rule lands in wildcard only when
+ * one of its alternatives has neither a leading tag nor a required attribute
+ * (or it has no selector at all) — then it must see every node.
  *
  * A selector that fails to parse here is a build failure that escaped
  * `validate-rules`, not user input, so it throws rather than degrading.
