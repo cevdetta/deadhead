@@ -10,7 +10,7 @@
  * ESLint fixer is exactly a range and a replacement string.
  */
 
-import { parseSelector, presenceTests, type TokenTest, tokenTests } from "./selector.ts";
+import { asciiLower, parseSelector, presenceTests, type TokenTest, tokenTests } from "./selector.ts";
 import type { ElementPort, Range } from "./types.ts";
 import type { RuleMeta } from "./vocabulary.ts";
 
@@ -37,9 +37,6 @@ function wholeLineIfAlone(source: string, [start, end]: Range): Range {
 
 /** ASCII whitespace, which is how HTML splits a token-set attribute. */
 const SPACE = /[\t\n\f\r ]+/;
-
-const asciiLower = (value: string): string =>
-  value.replace(/[A-Z]/g, (c) => String.fromCharCode(c.charCodeAt(0) + 32));
 
 /**
  * The range of an attribute's *value*, inside its quotes.
