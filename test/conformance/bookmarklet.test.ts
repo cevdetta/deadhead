@@ -32,7 +32,7 @@ const rules = await loadRules();
 const viaBundle = (source: string): { findings: Finding[]; panel: boolean } => {
   const { window, document } = parseHTML(source);
   const findings = [...(vm.runInNewContext(bundle, { document, window }) as Finding[])];
-  return { findings, panel: document.getElementById("deadhead-panel") !== null };
+  return { findings, panel: document.querySelector("deadhead-panel") !== null };
 };
 
 const viaModules = (source: string): Finding[] =>
@@ -76,6 +76,26 @@ test("nothing in the bundle can be blocked by a Content-Security-Policy", () => 
   assert.doesNotMatch(bundle, /^\s*(?:import|export)\s/m, "bundle still has module syntax");
 });
 
+test("the bundle contains nothing CSP or Trusted Types can block", () => {
+  for (const banned of ["innerHTML", 'createElement("style")', "createElement('style')", "eval(", "new Function", "fetch(", "import("]) {
+    assert.equal(bundle.includes(banned), false, `bundle contains ${banned}`);
+  }
+});
+
+test("the panel lives in a shadow root and adopts a constructed stylesheet", async () => {
+  const { window, document } = parseHTML("<!doctype html><html lang=en><head><title>x</title></head><body></body></html>");
+  const adopted: unknown[] = [];
+  class CSSStyleSheet { replaceSync(_css: string): void {} }
+  // linkedom has attachShadow but no adoptedStyleSheets; a browser has both.
+  const proto = Object.getPrototypeOf(document.createElement("div").attachShadow({ mode: "open" }));
+  Object.defineProperty(proto, "adoptedStyleSheets", { configurable: true, get: () => adopted, set: (v: unknown[]) => { adopted.splice(0, adopted.length, ...v); } });
+  await vm.runInNewContext(bundle, { document, window, CSSStyleSheet, DecompressionStream, Blob, Response, atob, TextDecoder });
+  const host = document.querySelector("deadhead-panel");
+  assert.ok(host, "no panel host");
+  assert.ok((host as unknown as { shadowRoot: unknown }).shadowRoot, "no shadow root");
+  assert.equal(adopted.length, 1);
+});
+
 test("it renders a panel, and running it twice does not stack panels", () => {
   const source = "<!doctype html><html lang='en'><head><title>t</title><meta name='viewport' content='width=device-width'>" +
     '<meta http-equiv="X-UA-Compatible" content="IE=edge"></head><body></body></html>';
@@ -83,8 +103,10 @@ test("it renders a panel, and running it twice does not stack panels", () => {
   const context = { document, window };
   vm.runInNewContext(bundle, context);
   vm.runInNewContext(bundle, context);
-  assert.equal(document.querySelectorAll("#deadhead-panel").length, 1);
-  assert.match(document.getElementById("deadhead-panel")?.textContent ?? "", /1 finding/);
+  assert.equal(document.querySelectorAll("deadhead-panel").length, 1);
+  const host = document.querySelector("deadhead-panel") as unknown as { shadowRoot: { innerHTML: string } | null };
+  assert.ok(host.shadowRoot, "no shadow root");
+  assert.match(host.shadowRoot?.innerHTML ?? "", /1 finding/);
 });
 
 test("a clean document says so rather than showing an empty list", () => {
