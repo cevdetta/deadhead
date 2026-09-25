@@ -241,8 +241,12 @@ try {
     }
   }
 
+  const knownIds = new Set(allRules.map((rule) => rule.meta.ruleId));
   for (const result of results) {
     for (const warning of result.warnings) {
+      // Disabled by config is not unknown: the id names a real rule that this
+      // run turned off, and disable-plus-suppress is a normal rollout pattern.
+      if (knownIds.has(warning.id)) continue;
       process.stderr.write(`warn ${result.file}:${warning.line}: unknown rule id \`${warning.id}\` in a deadhead comment\n`);
     }
   }

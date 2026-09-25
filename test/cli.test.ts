@@ -435,3 +435,15 @@ test("a suppression naming an unknown rule id warns on stderr", async () => {
     await rm(dir, { recursive: true, force: true });
   }
 });
+
+test("a suppression naming a rule disabled by config does not warn", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "dh-"));
+  try {
+    await writeFile(join(dir, "deadhead.config.ts"), `export default { rules: { "meta/http-equiv-x-ua-compatible": "off" } };\n`);
+    await writeFile(join(dir, "a.html"), '<!doctype html><html lang="en"><head><meta charset="utf-8"><title>x</title>\n<!-- deadhead-disable-next-line meta/http-equiv-x-ua-compatible -->\n<meta http-equiv="X-UA-Compatible" content="IE=edge">\n</head></html>\n');
+    const run = spawnSync(process.execPath, [BIN, join(dir, "a.html")], { cwd: dir, encoding: "utf8" });
+    assert.doesNotMatch(run.stderr, /unknown rule id/);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
