@@ -1,6 +1,6 @@
 ---
 ruleId: "meta/og-contact-properties"
-title: "<meta property=\"og:*\"> contact properties"
+title: "<meta property> contact properties"
 description: "Eleven contact properties absent from the protocol; no parser reads them."
 pubDate: "2026-09-21"
 status: "avoid"

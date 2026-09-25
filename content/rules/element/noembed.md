@@ -1,7 +1,7 @@
 ---
 ruleId: "element/noembed"
-title: "noembed element"
-description: "noembed is obsolete and its content is never displayed, not even when the embed fails; put fallback content inside an object element instead."
+title: "<noembed>"
+description: "noembed never shows its content; put fallback inside object instead."
 pubDate: "2026-09-14"
 status: "avoid"
 severity: "deprecated"

@@ -1,6 +1,6 @@
 ---
 ruleId: "link/href-missing"
-title: "link with neither href nor imagesrcset"
+title: "<link> without href or imagesrcset"
 description: "A link with no href, no imagesrcset and no itemprop defines no link."
 pubDate: "2026-09-21"
 status: "avoid"

@@ -1,7 +1,7 @@
 ---
 ruleId: "link/preload-as-missing"
-title: "link rel=\"preload\" without as"
-description: "A preload with no as has no destination, so the browser fetches nothing and the critical resource loads late, as if the hint were never written."
+title: "<link rel=\"preload\"> without as"
+description: "A preload with no as fetches nothing; add as so the resource loads in time."
 pubDate: "2026-09-13"
 status: "avoid"
 severity: "harmful"

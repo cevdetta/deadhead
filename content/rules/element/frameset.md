@@ -1,6 +1,6 @@
 ---
 ruleId: "element/frameset"
-title: "frameset, frame and noframes"
+title: "<frameset>, <frame>, <noframes>"
 description: "frameset, frame and noframes are obsolete. A frameset is separate documents in one window. Use one document with iframe."
 pubDate: "2026-09-14"
 status: "avoid"

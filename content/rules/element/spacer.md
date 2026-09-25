@@ -1,6 +1,6 @@
 ---
 ruleId: "element/spacer"
-title: "spacer element"
+title: "<spacer>"
 description: "spacer is obsolete and does nothing in any current browser; the gap it was meant to add is gone, so set it with CSS margin or gap."
 pubDate: "2026-09-14"
 status: "avoid"

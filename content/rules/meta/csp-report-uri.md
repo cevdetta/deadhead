@@ -1,7 +1,7 @@
 ---
 ruleId: "meta/csp-report-uri"
-title: "CSP report-uri in meta"
-description: "report-uri is deprecated in favor of report-to and has no effect in a meta tag; strip the directive and send reporting through response headers."
+title: "<meta http-equiv=\"Content-Security-Policy\"> report-uri"
+description: "report-uri has no effect in meta; strip it and send reports through response headers."
 pubDate: "2026-09-19"
 status: "avoid"
 severity: "deprecated"

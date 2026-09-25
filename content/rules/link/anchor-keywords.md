@@ -1,6 +1,6 @@
 ---
 ruleId: "link/anchor-keywords"
-title: "link rel with a keyword that belongs on <a>"
+title: "<link rel> anchor keywords"
 description: "bookmark, external, nofollow, noopener, noreferrer, opener, tag, sponsored and ugc belong on <a>; on <link> they create nothing."
 pubDate: "2026-09-23"
 status: "avoid"

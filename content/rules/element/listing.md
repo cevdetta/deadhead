@@ -1,6 +1,6 @@
 ---
 ruleId: "element/listing"
-title: "listing element"
+title: "<listing>"
 description: "listing is obsolete; it renders like `pre` but carries no code semantics, so use `pre` and `code` instead."
 pubDate: "2026-09-14"
 status: "avoid"

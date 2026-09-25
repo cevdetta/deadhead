@@ -1,7 +1,7 @@
 ---
 ruleId: "element/nextid"
-title: "nextid element"
-description: "nextid is obsolete; it was an early-HTML document identifier that browsers treat as an unknown element, so use unique `id` attributes instead."
+title: "<nextid>"
+description: "nextid is an unknown element; name targets with unique id attributes instead."
 pubDate: "2026-09-14"
 status: "avoid"
 severity: "deprecated"

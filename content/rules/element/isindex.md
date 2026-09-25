@@ -1,7 +1,7 @@
 ---
 ruleId: "element/isindex"
-title: "isindex element"
-description: "isindex is obsolete, and browsers dropped its search-form behaviour in 2016–17 over XSS concerns; it now renders nothing useful. Use a form with a text input."
+title: "<isindex>"
+description: "isindex renders no usable control; use a form with a text input instead."
 pubDate: "2026-09-14"
 status: "avoid"
 severity: "deprecated"

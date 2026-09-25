@@ -1,6 +1,6 @@
 ---
 ruleId: "element/object-embed-plugin"
-title: "object and embed for Flash, Java or Silverlight"
+title: "<object>, <embed> plug-in content"
 description: "This object or embed loads a Flash, Java or Silverlight plug-in. Browsers run no plug-ins, so the content stays blank."
 pubDate: "2026-09-14"
 status: "avoid"

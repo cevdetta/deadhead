@@ -1,6 +1,6 @@
 ---
 ruleId: "meta/abstract"
-title: "meta name=\"abstract\""
+title: "<meta name=\"abstract\">"
 description: "A page-summary hint that no search crawler reads; description carries the summary, not this duplicate."
 pubDate: "2026-09-19"
 status: "avoid"

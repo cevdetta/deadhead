@@ -1,6 +1,6 @@
 ---
 ruleId: "attr/object-usemap"
-title: "object usemap"
+title: "<object usemap>"
 description: "usemap on object is obsolete; img carries client maps, so move the map there."
 pubDate: "2026-09-19"
 status: "avoid"

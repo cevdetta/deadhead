@@ -1,6 +1,6 @@
 ---
 ruleId: "meta/distribution"
-title: "meta name=\"distribution\""
+title: "<meta name=\"distribution\">"
 description: "A distribution-scope hint (global, local, IU) that no search crawler reads; scope comes from targeting tools, not markup."
 pubDate: "2026-09-19"
 status: "avoid"

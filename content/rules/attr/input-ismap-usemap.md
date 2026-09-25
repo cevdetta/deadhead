@@ -1,6 +1,6 @@
 ---
 ruleId: "attr/input-ismap-usemap"
-title: "input ismap and usemap"
+title: "<input ismap, usemap>"
 description: "ismap and usemap do nothing on inputs; image buttons already map server-side and img covers client maps."
 pubDate: "2026-09-19"
 status: "avoid"

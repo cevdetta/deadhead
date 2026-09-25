@@ -1,6 +1,6 @@
 ---
 ruleId: "meta/http-equiv-pics-p3p"
-title: "meta http-equiv=pics-label / p3p"
+title: "<meta http-equiv=\"pics-label\">, <meta http-equiv=\"p3p\">"
 description: "PICS labels and P3P policies are retired vocabularies whose only consumer was Internet Explorer; the tags do nothing, so delete them."
 pubDate: "2026-09-14"
 status: "avoid"

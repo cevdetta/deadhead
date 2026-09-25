@@ -111,7 +111,7 @@ const doc = (frontmatter: string): string =>
 
 const VALID_FRONTMATTER = [
   'ruleId: "meta/example"\n',
-  'title: "Example"\n',
+  'title: "<meta name=\\"example\\">"\n',
   'description: "One-line summary."\n',
   'pubDate: "2026-01-02"\n',
   'status: "avoid"\n',

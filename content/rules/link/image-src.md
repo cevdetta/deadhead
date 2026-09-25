@@ -1,6 +1,6 @@
 ---
 ruleId: "link/image-src"
-title: "link rel=\"image_src\""
+title: "<link rel=\"image_src\">"
 description: "A pre-Open Graph hint for social preview images that was never accepted as a link relation and is no longer read."
 pubDate: "2026-09-09"
 status: "avoid"

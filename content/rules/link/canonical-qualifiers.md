@@ -1,6 +1,6 @@
 ---
 ruleId: "link/canonical-qualifiers"
-title: "link rel=canonical with alternate-version qualifiers"
+title: "<link rel=\"canonical\"> with alternate-version qualifiers"
 description: "A canonical carrying hreflang, lang, media or type describes an alternate version, so Google skips it."
 pubDate: "2026-09-21"
 status: "avoid"

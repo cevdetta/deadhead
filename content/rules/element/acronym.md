@@ -1,6 +1,6 @@
 ---
 ruleId: "element/acronym"
-title: "acronym element"
+title: "<acronym>"
 description: "acronym is obsolete; browsers already treat it exactly like abbr, so use abbr."
 pubDate: "2026-09-14"
 status: "avoid"

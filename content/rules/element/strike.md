@@ -1,7 +1,7 @@
 ---
 ruleId: "element/strike"
-title: "strike element"
-description: "strike is obsolete: it draws a line through text but tells assistive technology nothing; use del for a removal or s for text that is no longer accurate."
+title: "<strike>"
+description: "strike marks no edit; use del for a removal or s for stale text."
 pubDate: "2026-09-14"
 status: "avoid"
 severity: "deprecated"

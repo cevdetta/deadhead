@@ -1,7 +1,7 @@
 ---
 ruleId: "meta/http-equiv-cache-pragmas"
-title: "meta http-equiv with cache values"
-description: "cache-control, pragma, expires, etag, and last-modified are not pragma keywords, so browsers ignore them in meta tags; caching is driven by response headers."
+title: "<meta http-equiv> cache pragmas"
+description: "Cache fields in meta http-equiv do nothing; drive caching with response headers."
 pubDate: "2026-09-14"
 status: "avoid"
 severity: "unnecessary"

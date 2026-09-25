@@ -1,6 +1,6 @@
 ---
 ruleId: "attr/rev-urn"
-title: "a and link rev and urn"
+title: "<a rev, urn>, <link rev, urn>"
 description: "rev and urn on a and link are obsolete; rel with an opposite term replaces rev and href replaces urn, so delete them."
 pubDate: "2026-09-19"
 status: "avoid"

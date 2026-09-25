@@ -1,7 +1,7 @@
 ---
 ruleId: "meta/http-equiv-x-dns-prefetch-control"
-title: "meta http-equiv=x-dns-prefetch-control"
-description: "content=on restates the default and garbage values do nothing; only off opts out, and the rule never reports that. Everything reported is dead weight."
+title: "<meta http-equiv=\"x-dns-prefetch-control\">"
+description: "Reported dns-prefetch values change nothing; delete the tag and let the default stand."
 pubDate: "2026-09-14"
 status: "avoid"
 severity: "unnecessary"

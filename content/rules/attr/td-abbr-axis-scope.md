@@ -1,6 +1,6 @@
 ---
 ruleId: "attr/td-abbr-axis-scope"
-title: "td and th header attributes"
+title: "<td abbr, axis, scope>, <th axis>"
 description: "abbr, axis and scope on the wrong cells are obsolete; use th with scope and terse text instead."
 pubDate: "2026-09-21"
 status: "avoid"

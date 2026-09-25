@@ -1,6 +1,6 @@
 ---
 ruleId: "element/param"
-title: "param element"
+title: "<param>"
 description: "A plug-in parameter element that is entirely obsolete and no longer read by anything."
 pubDate: "2026-09-14"
 status: "avoid"

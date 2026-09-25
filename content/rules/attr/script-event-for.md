@@ -1,6 +1,6 @@
 ---
 ruleId: "attr/script-event-for"
-title: "script event and for"
+title: "<script event, for>"
 description: "event and for on script are obsolete; register listeners with addEventListener instead."
 pubDate: "2026-09-21"
 status: "avoid"

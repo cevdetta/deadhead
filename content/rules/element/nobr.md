@@ -1,6 +1,6 @@
 ---
 ruleId: "element/nobr"
-title: "nobr element"
+title: "<nobr>"
 description: "nobr is obsolete presentational markup that stops text wrapping; set white-space: nowrap in CSS instead."
 pubDate: "2026-09-14"
 status: "avoid"

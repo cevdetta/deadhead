@@ -1,6 +1,6 @@
 ---
 ruleId: "meta/robots-value"
-title: "meta robots with an unknown directive"
+title: "<meta name=\"robots\">, <meta name=\"googlebot\"> with unknown directive"
 description: "An unknown robots token is ignored, so a typo voids indexing intent with no warning."
 pubDate: "2026-09-21"
 status: "avoid"

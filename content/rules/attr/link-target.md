@@ -1,6 +1,6 @@
 ---
 ruleId: "attr/link-target"
-title: "link target"
+title: "<link target>"
 description: "target on link is unnecessary; links load in the current context by default, so delete it."
 pubDate: "2026-09-19"
 status: "avoid"

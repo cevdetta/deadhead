@@ -1,6 +1,6 @@
 ---
 ruleId: "attr/media-presentational"
-title: "Presentational attributes on media"
+title: "<img>, <object>, <embed> presentational attributes"
 description: "Presentational attributes on img, object and embed are obsolete. Browsers apply them as low-priority hints. Move styling to CSS."
 pubDate: "2026-09-21"
 status: "avoid"

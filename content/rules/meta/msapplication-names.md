@@ -1,6 +1,6 @@
 ---
 ruleId: "meta/msapplication-names"
-title: "meta name=\"msapplication-*\""
+title: "<meta name=\"msapplication-*\">"
 description: "Internet Explorer pinned-site and Start-tile metadata; IE11 on Windows 10 LTSC and Server still reads the taskbar names."
 pubDate: "2026-09-13"
 status: "avoid"

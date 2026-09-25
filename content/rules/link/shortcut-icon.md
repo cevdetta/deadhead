@@ -1,6 +1,6 @@
 ---
 ruleId: "link/shortcut-icon"
-title: "link rel=\"shortcut icon\""
+title: "<link rel=\"shortcut icon\">"
 description: "shortcut is not a link relation; browsers already parse rel=\"shortcut icon\" as icon, so the token is inert."
 pubDate: "2026-09-09"
 status: "avoid"

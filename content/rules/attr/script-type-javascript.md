@@ -1,6 +1,6 @@
 ---
 ruleId: "attr/script-type-javascript"
-title: "script type=text/javascript"
+title: "<script type=\"text/javascript\">"
 description: "A JavaScript MIME type in script[type] is the default; the spec says to omit the attribute."
 pubDate: "2026-09-09"
 status: "avoid"

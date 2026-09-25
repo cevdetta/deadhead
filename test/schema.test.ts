@@ -44,7 +44,7 @@ test("splitFrontmatter rejects an unterminated fence", () => {
 
 const base = (): Record<string, unknown> => ({
   ruleId: "meta/example",
-  title: "Example",
+  title: '<meta name="example">',
   description: "One-line summary.",
   pubDate: "2026-01-02",
   status: "avoid",
@@ -139,6 +139,18 @@ test("ruleId must be lowercase namespace/name", () => {
 
 test("a ruleId with a verdict word is rejected", () => {
   assert.match(messages({ ruleId: "attr/foo-obsolete" }).join("\n"), /verdict word `obsolete`/);
+});
+
+test("an element title that does not start with < is rejected", () => {
+  assert.match(messages({ title: "meta name example" }).join("\n"), /must start with `<`/);
+});
+
+test("an element title in code shape passes", () => {
+  assert.deepEqual(messages({ title: '<meta name="example">' }), []);
+});
+
+test("a head-namespace title without < passes", () => {
+  assert.deepEqual(messages({ ruleId: "head/title", kind: "document", title: "Head with no title", selector: undefined, match: "logic" }), []);
 });
 
 test("pubDate must be a real ISO calendar date", () => {

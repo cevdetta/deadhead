@@ -1,6 +1,6 @@
 ---
 ruleId: "element/shadow"
-title: "shadow element"
+title: "<shadow>"
 description: "`shadow` is the dead Shadow DOM v0 slot for nested trees. Chrome removed v0. Use one v1 shadow root with `slot`."
 pubDate: "2026-09-14"
 status: "avoid"

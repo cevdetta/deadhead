@@ -1,6 +1,6 @@
 ---
 ruleId: "attr/svg-baseprofile"
-title: "svg baseProfile attribute"
+title: "<svg baseProfile>"
 description: "SVG 2 removed baseProfile from <svg>; it set no processing restriction and was metadata for authoring tools, so delete it."
 pubDate: "2026-09-23"
 status: "avoid"

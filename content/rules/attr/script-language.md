@@ -1,6 +1,6 @@
 ---
 ruleId: "attr/script-language"
-title: "script language"
+title: "<script language>"
 description: "language on script is obsolete; omit it for JavaScript and use type for data blocks."
 pubDate: "2026-09-21"
 status: "avoid"

@@ -1,6 +1,6 @@
 ---
 ruleId: "attr/menu-type-label"
-title: "menu type and label"
+title: "<menu type, label>"
 description: "type and label on menu are obsolete; script contextmenu handling covers custom menus, toolbars drop them."
 pubDate: "2026-09-19"
 status: "avoid"

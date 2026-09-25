@@ -1,6 +1,6 @@
 ---
 ruleId: "attr/body-presentational"
-title: "Presentational attributes on body"
+title: "<body> presentational attributes"
 description: "Presentational attributes on body are obsolete. Browsers apply them as low-priority hints. Move styling to CSS."
 pubDate: "2026-09-21"
 status: "avoid"

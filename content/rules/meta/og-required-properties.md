@@ -1,6 +1,6 @@
 ---
 ruleId: "meta/og-required-properties"
-title: "Open Graph tags missing a required property"
+title: "<meta property> missing required properties"
 description: "A page starting Open Graph markup without all four required properties ships broken cards."
 pubDate: "2026-09-21"
 status: "avoid"

@@ -1,7 +1,7 @@
 ---
 ruleId: "element/center"
-title: "center element"
-description: "center is obsolete presentational markup for horizontal centering; do it in CSS with text-align: center for text and margin-inline: auto for blocks."
+title: "<center>"
+description: "center is dead presentational markup; align text and blocks in CSS instead."
 pubDate: "2026-09-14"
 status: "avoid"
 severity: "deprecated"

@@ -1,6 +1,6 @@
 ---
 ruleId: "attr/a-coords-shape"
-title: "a coords and shape"
+title: "<a coords, shape>"
 description: "coords and shape do nothing on anchors; delete them and use area elements for image maps."
 pubDate: "2026-09-19"
 status: "avoid"

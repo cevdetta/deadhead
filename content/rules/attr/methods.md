@@ -1,6 +1,6 @@
 ---
 ruleId: "attr/methods"
-title: "a and link methods"
+title: "<a methods>, <link methods>"
 description: "methods on a and link is obsolete; the server answers capability questions over HTTP OPTIONS, so delete the attribute."
 pubDate: "2026-09-19"
 status: "avoid"

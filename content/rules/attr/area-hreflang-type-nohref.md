@@ -1,6 +1,6 @@
 ---
 ruleId: "attr/area-hreflang-type-nohref"
-title: "area hreflang, type and nohref"
+title: "<area hreflang, type, nohref>"
 description: "hreflang, type and nohref do nothing on area; omit them, dropping href where no link is meant."
 pubDate: "2026-09-19"
 status: "avoid"

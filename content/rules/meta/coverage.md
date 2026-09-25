@@ -1,6 +1,6 @@
 ---
 ruleId: "meta/coverage"
-title: "meta name=\"coverage\""
+title: "<meta name=\"coverage\">"
 description: "A geographic-scope hint (Worldwide, Global) that no search crawler reads; reach comes from targeting tools, not markup."
 pubDate: "2026-09-19"
 status: "avoid"

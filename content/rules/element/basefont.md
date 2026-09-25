@@ -1,7 +1,7 @@
 ---
 ruleId: "element/basefont"
-title: "basefont element"
-description: "basefont is obsolete and does nothing: only old Internet Explorer applied it, and the HTML Standard renders it as display:none. Set the font in CSS."
+title: "<basefont>"
+description: "Browsers hide basefont; set the font in CSS instead."
 pubDate: "2026-09-14"
 status: "avoid"
 severity: "deprecated"

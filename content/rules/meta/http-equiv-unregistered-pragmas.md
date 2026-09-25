@@ -1,6 +1,6 @@
 ---
 ruleId: "meta/http-equiv-unregistered-pragmas"
-title: "meta http-equiv with an unregistered value"
+title: "<meta http-equiv> unregistered value"
 description: "A meta tag whose http-equiv value is no registered pragma keyword."
 pubDate: "2026-09-21"
 status: "avoid"

@@ -1,6 +1,6 @@
 ---
 ruleId: "meta/apple-mobile-web-app-title"
-title: "meta name=\"apple-mobile-web-app-title\""
+title: "<meta name=\"apple-mobile-web-app-title\">"
 description: "Apple's Home Screen launch-icon label; <title> already supplies the default and the manifest short_name carries the short form."
 pubDate: "2026-09-19"
 status: "avoid"

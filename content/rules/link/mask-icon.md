@@ -1,6 +1,6 @@
 ---
 ruleId: "link/mask-icon"
-title: "link rel=\"mask-icon\""
+title: "<link rel=\"mask-icon\">"
 description: "A Safari-only monochrome pinned-tab icon that was never a link type; it should not be used."
 pubDate: "2026-09-13"
 status: "avoid"

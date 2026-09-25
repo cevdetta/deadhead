@@ -1,6 +1,6 @@
 ---
 ruleId: "meta/application-title"
-title: "meta name=\"application-title\""
+title: "<meta name=\"application-title\">"
 description: "A PWA title-bar hint that works in Chromium alone, with no standard behind it and no support in Firefox or Safari."
 pubDate: "2026-09-19"
 status: "avoid"

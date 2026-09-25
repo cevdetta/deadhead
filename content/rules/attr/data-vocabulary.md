@@ -1,6 +1,6 @@
 ---
 ruleId: "attr/data-vocabulary"
-title: "data-vocabulary.org structured data"
+title: "<data-vocabulary.org> structured data"
 description: "Google retired the data-vocabulary.org vocabulary in 2020; its markup earns no rich result."
 pubDate: "2026-09-23"
 status: "avoid"

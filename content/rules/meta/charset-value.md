@@ -1,6 +1,6 @@
 ---
 ruleId: "meta/charset-value"
-title: "meta charset with a non-UTF-8 value"
+title: "<meta charset> with non-UTF-8 value"
 description: "utf-8 is the single valid HTML encoding name; any other label misdescribes the bytes."
 pubDate: "2026-09-21"
 status: "avoid"

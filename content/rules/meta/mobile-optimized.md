@@ -1,6 +1,6 @@
 ---
 ruleId: "meta/mobile-optimized"
-title: "meta name=\"MobileOptimized\""
+title: "<meta name=\"MobileOptimized\">"
 description: "Internet Explorer Mobile hint that a page suits small screens; you control small-screen layout with viewport."
 pubDate: "2026-09-19"
 status: "avoid"

@@ -1,6 +1,6 @@
 ---
 ruleId: "link/import"
-title: "link rel=import"
+title: "<link rel=\"import\">"
 description: "A Chrome-alone component loader removed in Chrome 80; no other engine ever shipped it."
 pubDate: "2026-09-21"
 status: "avoid"

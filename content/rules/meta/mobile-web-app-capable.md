@@ -1,6 +1,6 @@
 ---
 ruleId: "meta/mobile-web-app-capable"
-title: "meta name=\"mobile-web-app-capable\""
+title: "<meta name=\"mobile-web-app-capable\">"
 description: "Chrome's pre-manifest switch for launching a home screen shortcut as an app; the manifest's display member replaced it."
 pubDate: "2026-09-13"
 status: "avoid"

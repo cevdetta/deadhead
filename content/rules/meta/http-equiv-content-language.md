@@ -1,6 +1,6 @@
 ---
 ruleId: "meta/http-equiv-content-language"
-title: "meta http-equiv=content-language"
+title: "<meta http-equiv=\"content-language\">"
 description: "http-equiv=content-language is non-conforming; declare the page language with the lang attribute instead. Add lang before deleting this tag."
 pubDate: "2026-09-14"
 status: "avoid"

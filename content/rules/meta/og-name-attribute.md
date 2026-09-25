@@ -1,6 +1,6 @@
 ---
 ruleId: "meta/og-name-attribute"
-title: "meta name with an Open Graph vocabulary"
+title: "<meta name> Open Graph vocabulary"
 description: "Open Graph vocabularies in name instead of property stay invisible to preview parsers."
 pubDate: "2026-09-21"
 status: "avoid"

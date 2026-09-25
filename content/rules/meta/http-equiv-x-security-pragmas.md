@@ -1,7 +1,7 @@
 ---
 ruleId: "meta/http-equiv-x-security-pragmas"
 title: "<meta http-equiv> X-security pragmas"
-description: "x-xss-protection, x-webkit-csp, and x-content-security-policy name defenses that no longer exist even as headers; delete the tags and use a CSP response header."
+description: "Retired XSS and CSP names do nothing; delete the tag and send a CSP header."
 pubDate: "2026-09-14"
 status: "avoid"
 severity: "deprecated"

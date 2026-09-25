@@ -1,7 +1,7 @@
 ---
 ruleId: "meta/og-relative-url"
-title: "Open Graph URL that isn't absolute"
-description: "og:url, og:image, og:video and og:audio must be absolute http(s) URLs; a relative or scheme-less value isn't a URL to the crawlers that build link previews."
+title: "<meta property> relative Open Graph URLs"
+description: "Relative preview URLs point nowhere for crawlers; write absolute http(s) URLs."
 pubDate: "2026-09-14"
 status: "avoid"
 severity: "harmful"

@@ -1,6 +1,6 @@
 ---
 ruleId: "meta/application-name"
-title: "meta name=\"application-name\""
+title: "<meta name=\"application-name\">"
 description: "A standard metadata name for the web app's name, superseded in practice by the manifest's name and short_name."
 pubDate: "2026-09-13"
 status: "avoid"

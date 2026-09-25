@@ -1,6 +1,6 @@
 ---
 ruleId: "meta/http-equiv-content-type"
-title: "meta http-equiv=\"content-type\""
+title: "<meta http-equiv=\"content-type\">"
 description: "http-equiv=content-type duplicates the charset declaration and cannot combine with meta charset. Declare the encoding once."
 pubDate: "2026-09-14"
 status: "avoid"

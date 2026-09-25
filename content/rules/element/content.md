@@ -1,6 +1,6 @@
 ---
 ruleId: "element/content"
-title: "content element"
+title: "<content>"
 description: "`content` is the dead Shadow DOM v0 slot. The v1 standard uses `slot`, and Chrome removed v0. A leftover distributes nothing."
 pubDate: "2026-09-14"
 status: "avoid"

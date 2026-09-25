@@ -1,6 +1,6 @@
 ---
 ruleId: "attr/style-type"
-title: "style type"
+title: "<style type=\"text/css\">"
 description: "type on style is obsolete; omit it for CSS and use script for data blocks."
 pubDate: "2026-09-21"
 status: "avoid"

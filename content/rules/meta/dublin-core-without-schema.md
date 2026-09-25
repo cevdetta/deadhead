@@ -1,6 +1,6 @@
 ---
 ruleId: "meta/dublin-core-without-schema"
-title: "Dublin Core names without their schema declaration"
+title: "<meta name> Dublin Core without schema"
 description: "DC and DCTERMS meta names without a matching schema link bind to no URI, so harvesters skip them."
 pubDate: "2026-09-21"
 status: "avoid"

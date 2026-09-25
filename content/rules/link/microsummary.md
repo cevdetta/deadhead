@@ -1,6 +1,6 @@
 ---
 ruleId: "link/microsummary"
-title: "link rel=microsummary"
+title: "<link rel=\"microsummary\">"
 description: "A live-bookmark generator hook whose single consumer dropped it in Firefox 6."
 pubDate: "2026-09-21"
 status: "avoid"

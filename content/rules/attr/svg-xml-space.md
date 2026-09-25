@@ -1,6 +1,6 @@
 ---
 ruleId: "attr/svg-xml-space"
-title: "SVG xml:space attribute"
+title: "<svg xml:space>"
 description: "SVG 2 deprecates xml:space for the CSS white-space property; browsers still map it, so move the behaviour to CSS before deleting it."
 pubDate: "2026-09-23"
 status: "avoid"

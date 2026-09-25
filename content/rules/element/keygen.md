@@ -1,7 +1,7 @@
 ---
 ruleId: "element/keygen"
-title: "keygen element"
-description: "The form control that generated a keypair and submitted the public key for certificate enrollment, removed from the HTML Standard and inert in every engine."
+title: "<keygen>"
+description: "No engine generates a keypair from keygen; enroll certificates through WebCrypto instead."
 pubDate: "2026-09-14"
 status: "avoid"
 severity: "deprecated"

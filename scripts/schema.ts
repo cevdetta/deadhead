@@ -67,15 +67,7 @@ export const LEGACY_IDS: ReadonlySet<string> = new Set([
  * Task 9 rewrites every one; the set must be empty by Task 10, and nothing is
  * ever added to it.
  */
-export const LONG_DESCRIPTION_IDS: ReadonlySet<string> = new Set([
-  "attr/iframe-allowpaymentrequest", "attr/svg-1-1-attributes", "attr/xmlns-prefix",
-  "document/main-multiple", "element/applet", "element/basefont", "element/big",
-  "element/center", "element/isindex", "element/keygen", "element/multicol", "element/nextid",
-  "element/noembed", "element/strike", "element/xmp", "link/preload-as-missing", "link/prerender",
-  "meta/csp-report-uri", "meta/http-equiv-cache-pragmas", "meta/http-equiv-description",
-  "meta/http-equiv-x-dns-prefetch-control", "meta/http-equiv-x-security-pragmas", "meta/og-relative-url",
-  "script/json-ld-howto-faq-announcement", "script/json-ld-syntax",
-]);
+export const LONG_DESCRIPTION_IDS: ReadonlySet<string> = new Set([]);
 
 /**
  * `attr/<attribute>-obsolete`: the attribute on every element where HTML §16
@@ -364,6 +356,22 @@ export function validateFrontmatter(data: unknown): FrontmatterResult {
   const detectability = oneOf(data["detectability"], DETECTABILITY, ["detectability"], issues);
   const kind = oneOf(data["kind"], KIND, ["kind"], issues);
   const scope = oneOf(data["scope"], SCOPE, ["scope"], issues);
+
+  if (
+    kind === "element" &&
+    typeof title === "string" &&
+    typeof ruleId === "string" &&
+    !ruleId.startsWith("head/") &&
+    !ruleId.startsWith("document/") &&
+    !title.startsWith("<")
+  ) {
+    issues.push(
+      field(
+        ["title"],
+        'must start with `<`: element and attribute titles show the markup (CONTRIBUTING § Naming a rule)',
+      ),
+    );
+  }
 
   const selectorRaw: unknown = data["selector"];
   let selector: string | null = null;

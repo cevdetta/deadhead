@@ -1,6 +1,6 @@
 ---
 ruleId: "meta/http-equiv-x-ua-compatible"
-title: "meta http-equiv=X-UA-Compatible"
+title: "<meta http-equiv=\"X-UA-Compatible\">"
 description: "X-UA-Compatible controlled Internet Explorer document modes; Edge's IE mode and IE11 on Windows 10 LTSC/Server still honour it."
 pubDate: "2026-09-09"
 status: "avoid"

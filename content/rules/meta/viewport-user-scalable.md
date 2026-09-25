@@ -1,6 +1,6 @@
 ---
 ruleId: "meta/viewport-user-scalable"
-title: "meta viewport that disables zoom"
+title: "<meta name=\"viewport\"> that disables zoom"
 description: "A viewport with user-scalable=no or a maximum-scale below 2 stops people zooming to read, failing WCAG 1.4.4."
 pubDate: "2026-09-13"
 status: "avoid"

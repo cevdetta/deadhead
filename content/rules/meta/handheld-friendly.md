@@ -1,6 +1,6 @@
 ---
 ruleId: "meta/handheld-friendly"
-title: "meta name=\"HandheldFriendly\""
+title: "<meta name=\"HandheldFriendly\">"
 description: "Early hint that a page suits small screens; you control small-screen layout with viewport."
 pubDate: "2026-09-19"
 status: "avoid"

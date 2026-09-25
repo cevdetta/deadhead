@@ -1,6 +1,6 @@
 ---
 ruleId: "link/copyright"
-title: "link rel=\"copyright\""
+title: "<link rel=\"copyright\">"
 description: "copyright is a non-conforming synonym of license: user agents still read it as license, and documents must not use it."
 pubDate: "2026-09-23"
 status: "avoid"

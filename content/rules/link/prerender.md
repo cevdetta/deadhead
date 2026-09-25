@@ -1,7 +1,7 @@
 ---
 ruleId: "link/prerender"
-title: "link rel=\"prerender\""
-description: "A Chrome-specific hint asking for the next page to be rendered ahead of navigation; Chrome cut it to a fetch with no render, and Speculation Rules replace it."
+title: "<link rel=\"prerender\">"
+description: "prerender triggers no render; use Speculation Rules for the next page."
 pubDate: "2026-09-16"
 status: "avoid"
 severity: "unnecessary"

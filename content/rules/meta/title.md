@@ -1,6 +1,6 @@
 ---
 ruleId: "meta/title"
-title: "meta name=\"title\""
+title: "<meta name=\"title\">"
 description: "A meta title duplicating the document title that no engine reads."
 pubDate: "2026-09-22"
 status: "avoid"

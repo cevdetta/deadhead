@@ -1,6 +1,6 @@
 ---
 ruleId: "meta/referrer-value"
-title: "meta referrer with an unknown token"
+title: "<meta name=\"referrer\"> with unknown token"
 description: "An unknown referrer token is ignored, so the page falls back to default and can leak more than intended."
 pubDate: "2026-09-21"
 status: "avoid"

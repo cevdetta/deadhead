@@ -1,6 +1,6 @@
 ---
 ruleId: "attr/svg-version"
-title: "svg version attribute"
+title: "<svg version>"
 description: "SVG 2 removed version from <svg>; it never influenced rendering or processing, so delete it."
 pubDate: "2026-09-23"
 status: "avoid"

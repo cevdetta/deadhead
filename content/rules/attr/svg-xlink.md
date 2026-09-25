@@ -1,6 +1,6 @@
 ---
 ruleId: "attr/svg-xlink"
-title: "SVG xlink:* attributes"
+title: "<svg xlink:*> attributes"
 description: "SVG 2 deprecates xlink:href and xlink:title and removes five other xlink: attributes. Write href, target and a child <title>."
 pubDate: "2026-09-19"
 status: "avoid"

@@ -1,6 +1,6 @@
 ---
 ruleId: "meta/http-equiv-set-cookie"
-title: "meta http-equiv=set-cookie"
+title: "<meta http-equiv=\"set-cookie\">"
 description: "http-equiv=set-cookie is non-conforming and has no effect; browsers ignore it, so set cookies with the Set-Cookie response header instead."
 pubDate: "2026-09-14"
 status: "avoid"

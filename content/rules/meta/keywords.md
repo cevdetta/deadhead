@@ -1,6 +1,6 @@
 ---
 ruleId: "meta/keywords"
-title: "meta name=\"keywords\""
+title: "<meta name=\"keywords\">"
 description: "A comma-separated topic list that no major search engine ranks on, and that the HTML Standard itself warns against."
 pubDate: "2026-09-10"
 status: "avoid"

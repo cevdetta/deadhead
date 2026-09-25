@@ -1,6 +1,6 @@
 ---
 ruleId: "attr/input-number-maxlength-size"
-title: "input number maxlength and size"
+title: "<input type=\"number\"> maxlength and size"
 description: "maxlength and size do nothing on number inputs; they sized legacy text fallbacks, so delete them."
 pubDate: "2026-09-21"
 status: "avoid"

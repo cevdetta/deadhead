@@ -1,6 +1,6 @@
 ---
 ruleId: "meta/http-equiv-refresh"
-title: "meta http-equiv=refresh"
+title: "<meta http-equiv=\"refresh\">"
 description: "http-equiv=refresh moves the reader on a timer, which WCAG names as a failure and the back button cannot undo."
 pubDate: "2026-09-09"
 status: "avoid"

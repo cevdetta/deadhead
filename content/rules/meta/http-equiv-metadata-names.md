@@ -1,6 +1,6 @@
 ---
 ruleId: "meta/http-equiv-metadata-names"
-title: "meta http-equiv with a metadata name"
+title: "<meta http-equiv> metadata names"
 description: "http-equiv values like keywords or author are not pragma directives and do nothing. Use name values or charset and lang."
 pubDate: "2026-09-14"
 status: "avoid"

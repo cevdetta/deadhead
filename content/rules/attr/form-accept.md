@@ -1,6 +1,6 @@
 ---
 ruleId: "attr/form-accept"
-title: "form accept"
+title: "<form accept>"
 description: "accept on form is obsolete; the file inputs carry it now, so delete it from the form."
 pubDate: "2026-09-19"
 status: "avoid"

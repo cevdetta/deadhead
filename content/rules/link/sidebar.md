@@ -1,6 +1,6 @@
 ---
 ruleId: "link/sidebar"
-title: "link rel=sidebar"
+title: "<link rel=\"sidebar\">"
 description: "A Firefox-alone sidebar hint dropped in Firefox 63; other engines always treated it as a plain link."
 pubDate: "2026-09-21"
 status: "avoid"

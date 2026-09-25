@@ -1,6 +1,6 @@
 ---
 ruleId: "element/blink"
-title: "blink element"
+title: "<blink>"
 description: "blink is obsolete and no current browser blinks it; don't recreate the effect, because blinking content fails WCAG 2.2.2 Pause, Stop, Hide."
 pubDate: "2026-09-14"
 status: "avoid"

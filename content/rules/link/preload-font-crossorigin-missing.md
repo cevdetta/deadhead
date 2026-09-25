@@ -1,6 +1,6 @@
 ---
 ruleId: "link/preload-font-crossorigin-missing"
-title: "font preload without crossorigin"
+title: "<link rel=\"preload\" as=\"font\"> without crossorigin"
 description: "Fonts are always fetched in CORS mode; a font preload without crossorigin doesn't match that request, so the font is downloaded twice."
 pubDate: "2026-09-13"
 status: "avoid"

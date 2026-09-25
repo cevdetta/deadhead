@@ -1,6 +1,6 @@
 ---
 ruleId: "meta/apple-mobile-web-app-capable"
-title: "meta name=\"apple-mobile-web-app-capable\""
+title: "<meta name=\"apple-mobile-web-app-capable\">"
 description: "Apple's pre-manifest switch for launching a Home Screen web app standalone; the manifest's display member replaces it."
 pubDate: "2026-09-13"
 status: "avoid"

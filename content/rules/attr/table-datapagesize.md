@@ -1,6 +1,6 @@
 ---
 ruleId: "attr/table-datapagesize"
-title: "table datapagesize"
+title: "<table datapagesize>"
 description: "datapagesize on table is unnecessary; omit it altogether."
 pubDate: "2026-09-21"
 status: "avoid"

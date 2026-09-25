@@ -1,7 +1,7 @@
 ---
 ruleId: "attr/svg-1-1-attributes"
-title: "SVG attribute removed in SVG 2"
-description: "requiredFeatures, externalResourcesRequired, contentScriptType, contentStyleType, xml:base, kerning and glyph-orientation-horizontal left SVG in SVG 2."
+title: "<svg> attributes removed in SVG 2"
+description: "SVG 1.1 attributes that SVG 2 drops; delete them, or the markup carries dead weight."
 pubDate: "2026-09-23"
 status: "avoid"
 severity: "deprecated"

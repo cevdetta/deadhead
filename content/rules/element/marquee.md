@@ -1,6 +1,6 @@
 ---
 ruleId: "element/marquee"
-title: "marquee element"
+title: "<marquee>"
 description: "marquee is obsolete, yet every browser still scrolls it; auto-scrolling text with no pause control fails WCAG 2.2.2 Pause, Stop, Hide."
 pubDate: "2026-09-14"
 status: "avoid"

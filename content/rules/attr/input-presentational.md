@@ -1,6 +1,6 @@
 ---
 ruleId: "attr/input-presentational"
-title: "Presentational attributes on input"
+title: "<input> presentational attributes"
 description: "Presentational attributes on input are obsolete. Browsers apply them as low-priority hints. Move styling to CSS."
 pubDate: "2026-09-21"
 status: "avoid"

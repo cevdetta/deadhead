@@ -1,6 +1,6 @@
 ---
 ruleId: "attr/name-obsolete"
-title: "a, embed, img and option name"
+title: "<a name>, <embed name>, <img name> and <option name>"
 description: "name on a, embed, img and option is obsolete; the id attribute names fragment targets now."
 pubDate: "2026-09-19"
 status: "avoid"

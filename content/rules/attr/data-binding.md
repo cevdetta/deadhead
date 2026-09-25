@@ -1,6 +1,6 @@
 ---
 ruleId: "attr/data-binding"
-title: "IE data binding attributes"
+title: "<datasrc, datafld, dataformatas> attributes"
 description: "datasrc, datafld and dataformatas are obsolete IE data hooks; populate the page with script instead."
 pubDate: "2026-09-21"
 status: "avoid"

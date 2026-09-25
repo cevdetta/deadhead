@@ -1,6 +1,6 @@
 ---
 ruleId: "link/wlwmanifest"
-title: "link rel=wlwmanifest"
+title: "<link rel=\"wlwmanifest\">"
 description: "A manifest pointer for a writer discontinued in 2017 and dropped from WordPress 6.3."
 pubDate: "2026-09-21"
 status: "avoid"

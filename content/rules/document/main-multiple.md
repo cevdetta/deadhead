@@ -1,7 +1,7 @@
 ---
 ruleId: "document/main-multiple"
 title: "more than one visible main element"
-description: "A document may have only one main element without the hidden attribute; with two, skip links and landmark navigation land on one and the other is missed."
+description: "Two main elements break landmark navigation; keep one visible main and hide the rest."
 pubDate: "2026-09-14"
 status: "avoid"
 severity: "harmful"

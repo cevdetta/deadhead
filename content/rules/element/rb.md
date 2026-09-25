@@ -1,6 +1,6 @@
 ---
 ruleId: "element/rb"
-title: "rb element"
+title: "<rb>"
 description: "`rb` wraps ruby base text that can sit in `ruby`. The wrapper adds nothing. Omit it."
 pubDate: "2026-09-14"
 status: "avoid"

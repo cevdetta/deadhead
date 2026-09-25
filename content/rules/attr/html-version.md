@@ -1,6 +1,6 @@
 ---
 ruleId: "attr/html-version"
-title: "html version"
+title: "<html version>"
 description: "version on html is unnecessary; the doctype already declares the standard, so delete it."
 pubDate: "2026-09-19"
 status: "avoid"

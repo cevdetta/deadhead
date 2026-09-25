@@ -1,7 +1,7 @@
 ---
 ruleId: "attr/xmlns-prefix"
-title: "xmlns: prefix declaration in HTML"
-description: "An xmlns:* attribute declares no namespace in HTML, and RDFa 1.1 deprecates it for prefixes; declare RDFa prefixes with prefix, or drop them."
+title: "<xmlns:*> prefix in HTML"
+description: "xmlns:* declares no namespace in HTML; drop it, or declare RDFa prefixes with prefix."
 pubDate: "2026-09-23"
 status: "avoid"
 severity: "deprecated"

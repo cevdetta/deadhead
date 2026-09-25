@@ -1,6 +1,6 @@
 ---
 ruleId: "meta/twitter-card-names"
-title: "meta twitter:* card tags"
+title: "<meta> twitter card tags"
 description: "Twitter Card metadata; X has removed its Cards documentation, and every other preview consumer reads Open Graph."
 pubDate: "2026-09-13"
 status: "avoid"

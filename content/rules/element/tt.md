@@ -1,6 +1,6 @@
 ---
 ruleId: "element/tt"
-title: "tt element"
+title: "<tt>"
 description: "tt is obsolete presentational markup for monospace text; use code, kbd, samp or var for what the text is, and CSS if you only want the font."
 pubDate: "2026-09-14"
 status: "avoid"

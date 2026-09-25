@@ -1,6 +1,6 @@
 ---
 ruleId: "link/canonical-http"
-title: "link rel=canonical with an http href"
+title: "<link rel=\"canonical\"> with http href"
 description: "An http canonical steers consolidation toward the insecure variant."
 pubDate: "2026-09-21"
 status: "avoid"

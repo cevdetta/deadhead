@@ -1,6 +1,6 @@
 ---
 ruleId: "link/subresource"
-title: "link rel=subresource"
+title: "<link rel=\"subresource\">"
 description: "A prefetch hint that lived in Chrome alone, never worked, and left a decade ago."
 pubDate: "2026-09-21"
 status: "avoid"

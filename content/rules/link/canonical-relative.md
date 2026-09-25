@@ -1,6 +1,6 @@
 ---
 ruleId: "link/canonical-relative"
-title: "link rel=canonical with a relative href"
+title: "<link rel=\"canonical\"> with relative href"
 description: "A relative canonical resolves against the crawled host, so staging copies point at themselves."
 pubDate: "2026-09-21"
 status: "avoid"

@@ -1,6 +1,6 @@
 ---
 ruleId: "meta/http-equiv-ie-pragmas"
-title: "meta http-equiv with IE-only values"
+title: "<meta http-equiv> IE pragmas"
 description: "imagetoolbar, msthemecompatible, and the Page/Site-Enter/Exit transitions only ever worked in Internet Explorer; delete the tags."
 pubDate: "2026-09-14"
 status: "avoid"

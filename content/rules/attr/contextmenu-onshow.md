@@ -1,6 +1,6 @@
 ---
 ruleId: "attr/contextmenu-onshow"
-title: "global contextmenu and onshow"
+title: "<contextmenu, onshow>"
 description: "contextmenu and onshow are obsolete; script event handling replaces them, so delete the attributes."
 pubDate: "2026-09-19"
 status: "avoid"

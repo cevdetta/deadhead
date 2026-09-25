@@ -1,6 +1,6 @@
 ---
 ruleId: "attr/svg-enable-background"
-title: "svg enable-background attribute"
+title: "<svg enable-background>"
 description: "enable-background fed SVG 1.1's BackgroundImage filter input; Filter Effects dropped it and browsers never shipped it, so delete it."
 pubDate: "2026-09-23"
 status: "avoid"

@@ -1,6 +1,6 @@
 ---
 ruleId: "attr/head-profile"
-title: "head profile"
+title: "<head profile>"
 description: "profile on head is unnecessary; register meta names instead and trigger behaviors with link elements."
 pubDate: "2026-09-19"
 status: "avoid"
