@@ -4,8 +4,8 @@ title: "form accept"
 description: "accept on form is obsolete; the file inputs carry it now, so delete it from the form."
 pubDate: "2026-09-19"
 status: "avoid"
-severity: "unnecessary"
-standardsBasis: "spec"
+severity: "deprecated"
+standardsBasis: "spec-obsolete"
 detectability: "yes"
 kind: "element"
 scope: "body"
@@ -14,7 +14,7 @@ fix: { op: "remove-attribute", attr: "accept" }
 replacement: "Delete the attribute and put accept on each file input: <input type=\"file\" accept=\"image/*\">."
 tags: ["forms"]
 impacts: ["maintainability"]
-related: ["attr/rev-urn"]
+related: []
 ---
 
 `accept` on `form` filters nothing. WHATWG lists the attribute as obsolete on forms with one replacement, the same attribute on the `input` elements, so the form-level hint is dead weight on every form that carries it.

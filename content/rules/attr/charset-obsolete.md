@@ -4,8 +4,8 @@ title: "<a charset>, <link charset> and <script charset>"
 description: "charset on a, link and script is obsolete. a ignores it; stylesheets and external classic scripts still decode by it. Use UTF-8."
 pubDate: "2026-09-19"
 status: "avoid"
-severity: "unnecessary"
-standardsBasis: "spec"
+severity: "deprecated"
+standardsBasis: "spec-obsolete"
 detectability: "yes"
 kind: "element"
 scope: "any"
@@ -28,7 +28,7 @@ MDN repeats the call on both link elements. The `a` page puts `charset` under de
 
 A stylesheet `link` is the exception. Blink's `LinkResource::GetCharset()` returns the encoding the `charset` attribute names, and `LinkStyle::Process()` passes it to `LoadStylesheetIfNeeded`. Gecko's CSS `Loader` takes its fallback encoding from `LinkStyle::GetCharset`, which `HTMLLinkElement` answers with the attribute, before trying the document's encoding. A stylesheet with no BOM, no `charset` parameter in its `Content-Type` and no `@charset` rule decodes by that value, so a `charset` naming anything but the document's encoding changes which characters a non-ASCII selector or `content` string holds.
 
-On `script` the same section says to omit the attribute, since both documents and scripts are required to use UTF-8 and the script inherits its encoding from the document. The attribute named the encoding of an external file in an era of competing encodings, and the "prepare the script element" algorithm still consults it first: "If el has a charset attribute, then let encoding be the result of getting an encoding from the value of the charset attribute" before falling back to the document's own encoding. Chromium's `ScriptLoader` implements that step. A `charset` naming a superseded encoding, such as `iso-8859-1`, still changes which bytes decode to which characters in the fetched file.
+On `script` Section 16.1 covers `charset="utf-8"` as obsolete but conforming, and Section 16.2 covers any other value as non-conforming: omit the attribute, since both documents and scripts are required to use UTF-8 and the script inherits its encoding from the document. The attribute named the encoding of an external file in an era of competing encodings, and the "prepare the script element" algorithm still consults it first: "If el has a charset attribute, then let encoding be the result of getting an encoding from the value of the charset attribute" before falling back to the document's own encoding. Chromium's `ScriptLoader` implements that step. A `charset` naming a superseded encoding, such as `iso-8859-1`, still changes which bytes decode to which characters in the fetched file.
 
 MDN's `script` page files `charset` under deprecated attributes: where present its value must be an ASCII case-insensitive match for `utf-8`, and the attribute is unnecessary since documents must use UTF-8 and the element inherits its encoding from the document. That holds only while `charset` matches the document's encoding. A `charset="utf-8"` restates the default and changes nothing; a `charset` naming any other encoding still picks the decode encoding the fetch uses.
 

@@ -4,8 +4,8 @@ title: "input ismap and usemap"
 description: "ismap and usemap do nothing on inputs; image buttons already map server-side and img covers client maps."
 pubDate: "2026-09-19"
 status: "avoid"
-severity: "unnecessary"
-standardsBasis: "spec"
+severity: "deprecated"
+standardsBasis: "spec-obsolete"
 detectability: "yes"
 kind: "element"
 scope: "body"
@@ -14,7 +14,7 @@ fix: { op: "remove-attributes" }
 replacement: "Delete the attributes. For a server-side map keep <input type=\"image\" src=\"go.png\" alt=\"Go\">; for a client-side map use img with usemap."
 tags: ["forms", "media"]
 impacts: ["maintainability"]
-related: ["attr/html-version"]
+related: ["attr/object-usemap"]
 ---
 
 `ismap` and `usemap` do nothing on `input`. WHATWG calls the first a restatement of the image-button default and moves the second to `img`, so the pair is dead weight on every image button that carries it.

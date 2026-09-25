@@ -4,8 +4,8 @@ title: "area hreflang, type and nohref"
 description: "hreflang, type and nohref do nothing on area; omit them, dropping href where no link is meant."
 pubDate: "2026-09-19"
 status: "avoid"
-severity: "unnecessary"
-standardsBasis: "spec"
+severity: "deprecated"
+standardsBasis: "spec-obsolete"
 detectability: "yes"
 kind: "element"
 scope: "body"
@@ -14,7 +14,7 @@ fix: { op: "remove-attributes" }
 replacement: "Delete the attributes. Omit href where the region links nowhere: <area shape=\"rect\" coords=\"0,0,10,10\">."
 tags: ["hyperlinks", "media"]
 impacts: ["maintainability"]
-related: ["attr/form-accept"]
+related: ["attr/a-coords-shape"]
 ---
 
 `hreflang`, `type` and `nohref` do nothing on `area`. WHATWG buries all three with the same instruction, omit them altogether, since no region processing reads them and no IDL member backs them.

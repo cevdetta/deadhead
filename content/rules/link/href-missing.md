@@ -12,6 +12,7 @@ scope: "head"
 selector: 'link:not([href]):not([imagesrcset]):not([itemprop])'
 fix: { op: "remove-element" }
 replacement: "Delete the element. If a resource was meant, name it: <link rel=\"stylesheet\" href=\"main.css\">."
+tags: ["hyperlinks"]
 impacts: ["maintainability"]
 related: ["link/preload-as-missing"]
 ---

@@ -14,7 +14,7 @@ fix: { op: "remove-element" }
 replacement: "Delete the tag. Publish a human-readable privacy policy instead; content descriptions belong in linked Description Resources, not markup."
 tags: ["http-equiv"]
 impacts: ["maintainability"]
-related: ["meta/http-equiv-x-ua-compatible"]
+related: ["meta/http-equiv-set-cookie"]
 ---
 
 Two retired W3C vocabularies linger in `<meta>` tags. PICS labels rated

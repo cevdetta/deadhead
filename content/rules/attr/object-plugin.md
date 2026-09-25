@@ -4,8 +4,8 @@ title: "<object> plugin attributes"
 description: "seven plugin-era attributes on object are obsolete; data and type invoke resources now."
 pubDate: "2026-09-19"
 status: "avoid"
-severity: "unnecessary"
-standardsBasis: "spec"
+severity: "deprecated"
+standardsBasis: "spec-obsolete"
 detectability: "yes"
 kind: "element"
 scope: "body"
@@ -14,7 +14,7 @@ fix: { op: "remove-attributes" }
 replacement: "Delete the attributes. Invoke resources with data and type: <object data=\"clip.mp4\" type=\"video/mp4\">."
 tags: ["embedding"]
 impacts: ["maintainability"]
-related: ["attr/contextmenu-onshow", "element/object-embed-plugin"]
+related: ["element/object-embed-plugin"]
 ---
 
 Seven plugin-era attributes on `object` invoke nothing. WHATWG lists each as obsolete with a replacement, `data` and `type` for invocation plus plain markup for the rest, since browsers run no plug-ins and the object renders or falls back without them.

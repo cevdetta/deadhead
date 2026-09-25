@@ -4,7 +4,7 @@ title: "<meta http-equiv=\"Content-Security-Policy\"> referrer"
 description: "The CSP referrer directive moved out of CSP into Referrer Policy, and Chrome removed it in 56; use <meta name=\"referrer\"> instead."
 pubDate: "2026-09-23"
 status: "avoid"
-severity: "deprecated"
+severity: "harmful"
 standardsBasis: "spec-obsolete"
 detectability: "yes"
 kind: "element"
@@ -26,7 +26,7 @@ The directive moved out. The W3C Working Draft of CSP 1.1 from 11 February 2014 
 
 The engines followed. Chrome supported the directive from Chrome 33 and removed it in Chrome 56; its status entry says it "has been removed from the spec and replaced with the Referrer-Policy header". Gecko's directive list does not contain the name, so Firefox logs "Couldn’t process unknown directive" and drops it. WebKit's directive list does not contain it either.
 
-This directive has a visible cost. A page that relies on `referrer no-referrer` inside its policy gets the default policy, `strict-origin-when-cross-origin`, instead: its origin goes to every other site it requests from, and its full URLs go to its own origin. The severity stays `deprecated` because the page itself works; the leak is a policy the author believes is in force and is not.
+This directive has a visible cost. A page that relies on `referrer no-referrer` inside its policy gets the default policy, `strict-origin-when-cross-origin`, instead: its origin goes to every other site it requests from, and its full URLs go to its own origin. The severity is `harmful` because the page sends the default policy where the author wrote no-referrer.
 
 ## Use instead
 

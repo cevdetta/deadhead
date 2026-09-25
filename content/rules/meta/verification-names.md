@@ -5,7 +5,7 @@ description: "Ownership tokens for services that closed or renamed their tag; no
 pubDate: "2026-09-21"
 status: "avoid"
 severity: "unnecessary"
-standardsBasis: "spec"
+standardsBasis: "community"
 detectability: "yes"
 kind: "element"
 scope: "head"

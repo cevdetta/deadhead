@@ -14,7 +14,7 @@ fix: { op: "remove-element" }
 replacement: "Delete it. Topical relevance comes from the page's own content, headings and structured data."
 tags: ["search"]
 impacts: ["seo", "maintainability"]
-related: ["meta/http-equiv-x-ua-compatible"]
+related: ["meta/page-info-names", "meta/title"]
 ---
 
 No major search engine ranks on `<meta name="keywords">`. In the mid-1990s a search

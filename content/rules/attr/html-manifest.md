@@ -4,8 +4,8 @@ title: "html manifest"
 description: "manifest on html points at a removed offline cache; serve offline through a service worker instead."
 pubDate: "2026-09-19"
 status: "avoid"
-severity: "unnecessary"
-standardsBasis: "spec"
+severity: "deprecated"
+standardsBasis: "spec-obsolete"
 detectability: "yes"
 kind: "element"
 scope: "any"
@@ -14,7 +14,7 @@ fix: { op: "remove-attribute", attr: "manifest" }
 replacement: "Delete the attribute: <html lang=\"en\">. Register a service worker to serve the page offline."
 tags: ["caching"]
 impacts: ["maintainability"]
-related: ["attr/head-profile"]
+related: ["attr/html-version"]
 ---
 
 `manifest` on `html` enrolls the page in a cache that no longer exists. WHATWG calls the attribute obsolete with one replacement, service workers, and vendors deleted the application cache outright, so the pointer names a file nothing fetches.

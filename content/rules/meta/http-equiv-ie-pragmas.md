@@ -15,7 +15,7 @@ fix: { op: "remove-element" }
 replacement: "Delete the tag. Image toolbars, XP theming hooks, and DX-filter page transitions have no modern equivalent."
 tags: ["http-equiv", "microsoft"]
 impacts: ["maintainability"]
-related: ["meta/http-equiv-x-ua-compatible"]
+related: ["meta/msapplication-names"]
 ---
 
 A cluster of http-equiv values only ever worked in Internet Explorer. `imagetoolbar`

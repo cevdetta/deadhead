@@ -14,7 +14,7 @@ fix: { op: "remove-token", attr: "rel", token: "shortcut" }
 replacement: "Drop the shortcut token: <link rel=\"icon\" href=\"/favicon.ico\" sizes=\"32x32\">."
 tags: ["icons"]
 impacts: ["maintainability"]
-related: ["meta/http-equiv-x-ua-compatible"]
+related: ["link/mask-icon"]
 ---
 
 The `shortcut` token does nothing. `rel="shortcut icon"` is the spelling Internet Explorer 5

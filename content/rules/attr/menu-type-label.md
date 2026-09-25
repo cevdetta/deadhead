@@ -4,8 +4,8 @@ title: "menu type and label"
 description: "type and label on menu are obsolete; script contextmenu handling covers custom menus, toolbars drop them."
 pubDate: "2026-09-19"
 status: "avoid"
-severity: "unnecessary"
-standardsBasis: "spec"
+severity: "deprecated"
+standardsBasis: "spec-obsolete"
 detectability: "yes"
 kind: "element"
 scope: "body"
@@ -14,7 +14,7 @@ fix: { op: "remove-attributes" }
 replacement: "Delete the attributes. For custom menus handle contextmenu in script; for toolbars drop the attributes."
 tags: ["scripting"]
 impacts: ["maintainability"]
-related: ["attr/link-target"]
+related: ["attr/contextmenu-onshow"]
 ---
 
 `type` and `label` on `menu` select nothing. WHATWG lists both as obsolete with one replacement, script contextmenu handling for custom menus and bare lists for toolbars, so the pair is dead weight on every menu that carries it.

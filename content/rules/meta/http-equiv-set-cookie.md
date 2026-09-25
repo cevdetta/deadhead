@@ -14,7 +14,7 @@ fix: { op: "remove-element" }
 replacement: "Send a Set-Cookie response header (or set document.cookie from script); then delete the tag."
 tags: ["http-equiv"]
 impacts: ["maintainability"]
-related: ["meta/http-equiv-x-ua-compatible"]
+related: ["meta/http-equiv-cache-pragmas"]
 ---
 
 `<meta http-equiv="set-cookie">` sets no cookie. It used to set cookies from markup.

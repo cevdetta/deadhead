@@ -14,7 +14,7 @@ fix: { op: "none" }
 replacement: "Delete the tile names unless Windows Server 2012 R2 ESU users, IE11's only remaining reader for them, matter. Keep the taskbar names (msapplication-task*, -starturl, -tooltip, -window, -navbutton-color, -allowDomain*) where IE11-on-Windows-10-LTSC/Server pinned-site users matter. Put app name, colours and icons in the web app manifest."
 tags: ["icons", "microsoft", "web-app"]
 impacts: ["maintainability"]
-related: ["meta/http-equiv-x-ua-compatible", "meta/application-name"]
+related: ["meta/application-name"]
 ---
 
 IE11 on Windows 10 LTSC and Server still reads part of the `msapplication-*` family.

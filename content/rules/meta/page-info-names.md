@@ -5,7 +5,7 @@ description: "Twenty-four gist-era names such as subject, copyright and icbm; no
 pubDate: "2026-09-21"
 status: "avoid"
 severity: "unnecessary"
-standardsBasis: "spec"
+standardsBasis: "community"
 detectability: "yes"
 kind: "element"
 scope: "head"

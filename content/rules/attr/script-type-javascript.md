@@ -15,7 +15,7 @@ fix: { op: "remove-attribute", attr: "type" }
 replacement: "Drop the attribute: <script src=\"app.js\"></script>. Keep type only for module, importmap, speculationrules or a data block."
 tags: ["defaults", "scripting"]
 impacts: ["maintainability"]
-related: ["meta/http-equiv-x-ua-compatible"]
+related: ["attr/script-language"]
 ---
 
 Omit `type="text/javascript"`: it is the default. The spelling dates from a time when the
