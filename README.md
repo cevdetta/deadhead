@@ -56,6 +56,9 @@ pnpm build
 pnpm check -- path/to/your/html
 ```
 
+`pnpm build` comes first: it generates the rule registry typecheck and tests
+read, so run it before `pnpm typecheck` on a fresh clone.
+
 `deadhead` takes files, directories, or globs -- it expands globs itself, so they
 behave the same in every shell:
 

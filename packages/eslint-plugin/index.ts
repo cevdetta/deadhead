@@ -23,7 +23,7 @@ import { parseSuppressions } from "../core/suppressions.ts";
 import type { Rule as DeadheadRule } from "../core/engine.ts";
 import type { Finding } from "../core/types.ts";
 import { ruleUrl } from "../core/vocabulary.ts";
-import { loadRules } from "../rules/load.ts";
+import { RULES as loaded } from "../rules/registry.gen.ts";
 import { fromProgram } from "./adapter.ts";
 
 /** The slice of ESLint's API this plugin touches, described structurally. */
@@ -125,8 +125,6 @@ function toEslintRule(rule: DeadheadRule): EslintRule {
     },
   };
 }
-
-const loaded = await loadRules();
 
 export const rules: Record<string, EslintRule> = Object.fromEntries(
   loaded.map((rule) => [rule.meta.ruleId, toEslintRule(rule)]),
