@@ -179,3 +179,13 @@ test("a missing or malformed baseline explains itself", async () => {
     await assert.rejects(() => readBaseline(join(dir, "wrong.json")), /not a deadhead baseline/);
   });
 });
+
+test("a baseline written from one directory applies from another", async () => {
+  const { summarise, applyBaseline } = await import("../packages/cli/baseline.ts");
+  const finding = { ruleId: "meta/x", severity: "unnecessary" } as never;
+  const base = "/repo";
+  const written = summarise([{ file: "/repo/site/a.html", findings: [finding], fixed: 0, warnings: [] }], base);
+  assert.deepEqual(Object.keys(written.entries), ["site/a.html"]);
+  const applied = applyBaseline([{ file: "site/a.html", findings: [finding], fixed: 0, warnings: [] }], written, base, "/repo");
+  assert.equal(applied.results[0]!.findings.length, 0);
+});

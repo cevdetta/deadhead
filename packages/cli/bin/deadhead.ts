@@ -12,7 +12,7 @@
  */
 
 import { readFile, writeFile } from "node:fs/promises";
-import { matchesGlob } from "node:path";
+import { dirname, matchesGlob, resolve } from "node:path";
 import { parseArgs, styleText } from "node:util";
 import { enableCompileCache } from "node:module";
 
@@ -224,7 +224,7 @@ try {
       if (baselinePath === undefined) {
         fail("--update-baseline needs --baseline <path>, or `baseline` in the config");
       }
-      const baseline = summarise(results);
+      const baseline = summarise(results, dirname(resolve(baselinePath)));
       await writeBaseline(baselinePath, baseline);
       const count = total(results);
       process.stdout.write(
@@ -235,7 +235,7 @@ try {
     }
 
     if (baselinePath !== undefined) {
-      const applied = applyBaseline(results, await readBaseline(baselinePath));
+      const applied = applyBaseline(results, await readBaseline(baselinePath), dirname(resolve(baselinePath)));
       results = applied.results;
       resolved = applied.resolved;
     }

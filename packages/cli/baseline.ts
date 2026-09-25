@@ -14,6 +14,7 @@
  */
 
 import { readFile, writeFile } from "node:fs/promises";
+import { relative, resolve, sep } from "node:path";
 
 import type { Finding } from "../core/types.ts";
 import type { FileResult } from "./reporters/index.ts";
@@ -74,8 +75,12 @@ export async function readBaseline(path: string): Promise<Baseline> {
   return { version: 1, entries: parsed.entries };
 }
 
+/** Baseline keys are POSIX paths relative to the baseline file's directory. */
+const key = (file: string, baseDir: string, cwd: string = process.cwd()): string =>
+  relative(baseDir, resolve(cwd, file)).split(sep).join("/");
+
 /** Counts for one lint run, in the baseline's own shape. */
-export function summarise(results: FileResult[]): Baseline {
+export function summarise(results: FileResult[], baseDir: string = process.cwd()): Baseline {
   const entries: Record<string, Record<string, number>> = {};
   for (const { file, findings } of results) {
     if (findings.length === 0) continue;
@@ -84,7 +89,7 @@ export function summarise(results: FileResult[]): Baseline {
       perRule[finding.ruleId] = (perRule[finding.ruleId] ?? 0) + 1;
     }
     // Sorted so the file is stable in version control and diffs stay readable.
-    entries[file] = Object.fromEntries(Object.entries(perRule).sort(([a], [b]) => a.localeCompare(b)));
+    entries[key(file, baseDir)] = Object.fromEntries(Object.entries(perRule).sort(([a], [b]) => a.localeCompare(b)));
   }
   return {
     version: 1,
@@ -110,12 +115,17 @@ export type Applied = {
  * occurrence rather than an arbitrary one — the position is approximate by
  * construction, and a stable choice at least keeps output deterministic.
  */
-export function applyBaseline(results: FileResult[], baseline: Baseline): Applied {
+export function applyBaseline(
+  results: FileResult[],
+  baseline: Baseline,
+  baseDir: string = process.cwd(),
+  cwd: string = process.cwd(),
+): Applied {
   const out: FileResult[] = [];
   let accountedFor = 0;
 
   for (const result of results) {
-    const allowance = { ...(baseline.entries[result.file] ?? {}) };
+    const allowance = { ...(baseline.entries[key(result.file, baseDir, cwd)] ?? {}) };
     const kept: Finding[] = [];
 
     for (const finding of result.findings) {
