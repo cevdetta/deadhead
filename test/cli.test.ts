@@ -45,7 +45,7 @@ test("every rule in content/rules is loaded, with its logic module attached", ()
 test("each invalid.html trips its own rule", async () => {
   for (const rule of rules) {
     const file = `test/fixtures/${rule.meta.ruleId}/invalid.html`;
-    const [result] = await lintFiles(await collectFiles([file]), rules);
+    const [result] = (await lintFiles(await collectFiles([file]), rules)).results;
     const own = result?.findings.filter((f) => f.ruleId === rule.meta.ruleId) ?? [];
     assert.ok(own.length > 0, `${file} produced no ${rule.meta.ruleId} finding`);
     for (const finding of own) {
@@ -59,7 +59,7 @@ test("each invalid.html trips its own rule", async () => {
 test("each valid.html is clean, and clean of every rule, not just its own", async () => {
   const files = await collectFiles(["test/fixtures/*/*/valid.html"]);
   assert.equal(files.length, rules.length);
-  const results = await lintFiles(files, rules);
+  const results = (await lintFiles(files, rules)).results;
   const findings = results.flatMap((r) => r.findings.map((f) => `${r.file}: ${f.ruleId}`));
   assert.deepEqual(findings, []);
 });
@@ -384,6 +384,65 @@ test("a directory with no HTML files is a usage error", async () => {
     const run = deadhead(dir);
     assert.equal(run.status, 2);
     assert.match(run.stderr, /no HTML files/);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("--jobs gives the same report as a serial run", async () => {
+  const serial = deadhead("--format=json", "--jobs=1", "test/fixtures");
+  const parallel = deadhead("--format=json", "--jobs=4", "test/fixtures");
+  assert.equal(parallel.status, serial.status);
+  assert.deepEqual(JSON.parse(parallel.stdout), JSON.parse(serial.stdout));
+});
+
+test("- reads stdin and --stdin-filename names it", () => {
+  const run = spawnSync(process.execPath, [BIN, "--format=json", "--stdin-filename=page.html", "-"], {
+    cwd: ROOT, encoding: "utf8", input: '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><title>x</title></head></html>',
+  });
+  const report = JSON.parse(run.stdout);
+  assert.equal(report.results[0].file, "page.html");
+  assert.ok(report.results[0].findings.some((f: { ruleId: string }) => f.ruleId === "meta/http-equiv-x-ua-compatible"));
+});
+
+test("--quiet drops findings below --fail-on; --output-file writes the report", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "dh-"));
+  try {
+    const out = join(dir, "report.json");
+    const run = deadhead("--format=json", "--quiet", "--fail-on=harmful", `--output-file=${out}`, "test/fixtures/meta/http-equiv-x-ua-compatible/invalid.html");
+    assert.equal(run.stdout, "");
+    const report = JSON.parse(await readFile(out, "utf8"));
+    assert.deepEqual(report.results[0].findings, []);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("--list-rules prints every rule and exits 0", () => {
+  const run = deadhead("--list-rules", "--format=json");
+  assert.equal(run.status, 0);
+  assert.equal(JSON.parse(run.stdout).length, rules.length);
+});
+
+test("a suppression naming an unknown rule id warns on stderr", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "dh-"));
+  try {
+    const file = join(dir, "a.html");
+    await writeFile(file, '<!doctype html><html lang="en"><head><meta charset="utf-8"><title>x</title>\n<!-- deadhead-disable-next-line meta/nope -->\n</head></html>\n');
+    const run = deadhead(file);
+    assert.match(run.stderr, /unknown rule id `meta\/nope`/);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("a suppression naming a rule disabled by config does not warn", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "dh-"));
+  try {
+    await writeFile(join(dir, "deadhead.config.ts"), `export default { rules: { "meta/http-equiv-x-ua-compatible": "off" } };\n`);
+    await writeFile(join(dir, "a.html"), '<!doctype html><html lang="en"><head><meta charset="utf-8"><title>x</title>\n<!-- deadhead-disable-next-line meta/http-equiv-x-ua-compatible -->\n<meta http-equiv="X-UA-Compatible" content="IE=edge">\n</head></html>\n');
+    const run = spawnSync(process.execPath, [BIN, join(dir, "a.html")], { cwd: dir, encoding: "utf8" });
+    assert.doesNotMatch(run.stderr, /unknown rule id/);
   } finally {
     await rm(dir, { recursive: true, force: true });
   }

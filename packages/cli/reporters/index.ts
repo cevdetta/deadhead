@@ -6,6 +6,8 @@ export type FileResult = {
   findings: Finding[];
   /** How many fixes `--fix` applied to this file. */
   fixed: number;
+  /** Suppression directives naming rule ids the run does not know, in order. */
+  warnings: { line: number; id: string }[];
 };
 export type Reporter = (results: FileResult[]) => string;
 

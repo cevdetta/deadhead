@@ -4,7 +4,9 @@
  */
 
 import { glob, readFile, readdir, stat, writeFile } from "node:fs/promises";
+import { availableParallelism } from "node:os";
 import { extname, join, sep } from "node:path";
+import { Worker } from "node:worker_threads";
 
 import {
   type CompiledRules,
@@ -15,6 +17,8 @@ import {
   runCompiled,
 } from "../core/index.ts";
 import { applyFixes } from "../core/fix.ts";
+import { loadRules } from "../rules/load.ts";
+import { applySettings, type RuleSetting } from "./config.ts";
 import { parseHtml } from "./adapter.ts";
 import type { FileResult } from "./reporters/index.ts";
 
@@ -113,13 +117,26 @@ export async function lintFile(
   return lintFileCompiled(file, compileForRun(rules, options), options);
 }
 
-async function lintFileCompiled(
+/**
+ * Lint one source string: the fix loop and the analysis with no I/O. The
+ * `file` names the source in the report; nothing is read or written.
+ */
+export function lintSource(
+  source: string,
   file: string,
   compiled: CompiledRules,
   options: LintOptions,
-): Promise<FileResult> {
-  const original = await readFile(file, "utf8");
-  let source = original;
+): { file: string; findings: Finding[]; fixed: number; output: string; warnings: { line: number; id: string }[] } {
+  const suppressions = parseSuppressions(source);
+  const known = new Set<string>();
+  for (const bucket of [compiled.byTag, compiled.byAttr]) {
+    for (const entries of bucket.values()) for (const entry of entries) known.add(entry.rule.meta.ruleId);
+  }
+  for (const entry of compiled.wildcard) known.add(entry.rule.meta.ruleId);
+  for (const rule of compiled.documents) known.add(rule.meta.ruleId);
+  const warnings = suppressions.ids().filter(({ id }) => !known.has(id));
+
+  let current = source;
   let fixed = 0;
   // Findings from the latest fix pass, reused as the report when the loop
   // stabilises on the current source. Analysing is deterministic, so a pass
@@ -129,7 +146,7 @@ async function lintFileCompiled(
 
   if (options.fix === true) {
     for (let pass = 0; pass < MAX_FIX_PASSES; pass++) {
-      const findings = analyse(source, compiled, options);
+      const findings = analyse(current, compiled, options);
       const fixes = findings
         .map((finding) => finding.fix)
         .filter((fix) => fix !== null);
@@ -139,37 +156,78 @@ async function lintFileCompiled(
         break;
       }
 
-      const result = applyFixes(source, fixes);
+      const result = applyFixes(current, fixes);
       // No progress: the source this pass saw is still current.
-      if (result.applied.length === 0 || result.output === source) {
+      if (result.applied.length === 0 || result.output === current) {
         stable = findings;
         break;
       }
-      source = result.output;
+      current = result.output;
       fixed += result.applied.length;
     }
-    // Only touch the file if something changed, so `--fix` on a clean tree
-    // does not rewrite every mtime and invalidate every build cache.
-    if (source !== original) await writeFile(file, source, "utf8");
   }
 
   // `stable` is set exactly when the last fix pass ran on the current source.
   // It stays null when the loop exhausted its passes while still changing the
   // file (or never ran), and then one final analyse reports what is left.
-  return { file, findings: stable ?? analyse(source, compiled, options), fixed };
+  return { file, findings: stable ?? analyse(current, compiled, options), fixed, output: current, warnings };
+}
+
+async function lintFileCompiled(
+  file: string,
+  compiled: CompiledRules,
+  options: LintOptions,
+): Promise<FileResult> {
+  const original = await readFile(file, "utf8");
+  const linted = lintSource(original, file, compiled, options);
+  // Only touch the file if something changed, so `--fix` on a clean tree
+  // does not rewrite every mtime and invalidate every build cache.
+  if (linted.output !== original) await writeFile(file, linted.output, "utf8");
+  return { file, findings: linted.findings, fixed: linted.fixed, warnings: linted.warnings };
 }
 
 export async function lintFiles(
   files: string[],
   rules: Rule[],
   options: LintOptions = {},
-): Promise<FileResult[]> {
+): Promise<{ results: FileResult[]; visitBody: boolean }> {
   // Compile once for the whole run: selectors and buckets do not depend on
   // the file, and --fix re-analyses the same file up to MAX_FIX_PASSES times.
   const compiled = compileForRun(rules, options);
   const results: FileResult[] = [];
   for (const file of files) results.push(await lintFileCompiled(file, compiled, options));
-  return results;
+  return { results, visitBody: compiled.visitBody };
+}
+
+export const defaultJobs = (): number => Math.max(1, Math.min(availableParallelism() - 1, 8));
+
+/** Round-robin files across workers; results are put back in input order. */
+export async function lintFilesParallel(
+  files: string[],
+  settings: Record<string, RuleSetting>,
+  options: LintOptions,
+  jobs: number,
+): Promise<{ results: FileResult[]; visitBody: boolean }> {
+  const slices: string[][] = Array.from({ length: jobs }, () => []);
+  files.forEach((file, i) => slices[i % jobs]!.push(file));
+  const workerUrl = new URL("./worker.ts", import.meta.url);
+  const parts = await Promise.all(
+    slices.filter((s) => s.length > 0).map(
+      (slice) =>
+        new Promise<FileResult[]>((resolve, reject) => {
+          const worker = new Worker(workerUrl);
+          worker.once("message", (results: FileResult[]) => {
+            void worker.terminate();
+            resolve(results);
+          });
+          worker.once("error", reject);
+          worker.postMessage({ files: slice, settings, options });
+        }),
+    ),
+  );
+  const byFile = new Map(parts.flat().map((r) => [r.file, r]));
+  const compiled = compileForRun(applySettings(await loadRules(), settings), options);
+  return { results: files.map((f) => byFile.get(f)!), visitBody: compiled.visitBody };
 }
 
 /**
@@ -178,7 +236,7 @@ export async function lintFiles(
  * forces the walk anyway. Findings are unchanged either way — document rules
  * query the whole tree regardless — it only costs the walk.
  */
-const compileForRun = (rules: Rule[], options: LintOptions): CompiledRules => {
+export const compileForRun = (rules: Rule[], options: LintOptions): CompiledRules => {
   const compiled = compile(rules);
   if (options.headOnly === false) compiled.visitBody = true;
   return compiled;

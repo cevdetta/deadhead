@@ -18,7 +18,9 @@
  * the ground truth.
  */
 
-import { run } from "../core/engine.ts";
+import * as htmlParser from "@html-eslint/parser";
+
+import { type CompiledRules, compile, runCompiled } from "../core/engine.ts";
 import { parseSuppressions } from "../core/suppressions.ts";
 import type { Rule as DeadheadRule } from "../core/engine.ts";
 import type { Finding } from "../core/types.ts";
@@ -66,6 +68,30 @@ const fixDescriptor = (
 const eslintType = (rule: DeadheadRule): string =>
   rule.meta.severity === "harmful" ? "problem" : "suggestion";
 
+/** One run per file: the rules enabled for it, and their findings once computed. */
+type FileRun = { requested: Set<string>; findings: Map<string, Finding[]> | null };
+const perFile = new WeakMap<object, FileRun>();
+/** Compiled rule subsets, reused across files with the same enabled set. */
+const compiledBySet = new Map<string, CompiledRules>();
+let passes = 0;
+
+function findingsFor(run: FileRun, program: unknown, source: string): Map<string, Finding[]> {
+  if (run.findings !== null) return run.findings;
+  const key = [...run.requested].sort().join("\n");
+  let compiled = compiledBySet.get(key);
+  if (compiled === undefined) {
+    compiled = compile(loaded.filter((rule) => run.requested.has(rule.meta.ruleId)));
+    compiledBySet.set(key, compiled);
+  }
+  passes++;
+  const grouped = new Map<string, Finding[]>();
+  for (const finding of runCompiled(compiled, fromProgram(program, source), { suppressions: parseSuppressions(source), fix: true })) {
+    (grouped.get(finding.ruleId) ?? grouped.set(finding.ruleId, []).get(finding.ruleId)!).push(finding);
+  }
+  run.findings = grouped;
+  return grouped;
+}
+
 function toEslintRule(rule: DeadheadRule): EslintRule {
   return {
     meta: {
@@ -88,19 +114,19 @@ function toEslintRule(rule: DeadheadRule): EslintRule {
     },
 
     create(context) {
+      // ESLint calls create() for every enabled rule before it traverses, with
+      // one SourceCode object per file: register here, run once in Program.
+      const key = context.sourceCode as unknown as object;
+      let run = perFile.get(key);
+      if (run === undefined) {
+        run = { requested: new Set(), findings: null };
+        perFile.set(key, run);
+      }
+      run.requested.add(rule.meta.ruleId);
+      const fileRun = run;
       return {
-        // One pass over the whole program. Dispatching per-node would mean
-        // reimplementing the engine's bucketing against ESLint's visitor keys,
-        // and the two would drift.
         Program(node: unknown) {
-          const source = context.sourceCode.getText();
-          const findings = run([rule], fromProgram(node, source), {
-            suppressions: parseSuppressions(source),
-            // The fixer below needs finding.fix, and ESLint decides itself
-            // whether --fix applies it — the engine cannot know in advance.
-            fix: true,
-          });
-
+          const findings = findingsFor(fileRun, node, context.sourceCode.getText()).get(rule.meta.ruleId) ?? [];
           for (const finding of findings) {
             const range = finding.range;
             const start =
@@ -132,19 +158,34 @@ export const rules: Record<string, EslintRule> = Object.fromEntries(
 
 export const meta = { name: "eslint-plugin-deadhead", version: "0.0.0" };
 
-/**
- * Ready-made configs. `recommended` turns on everything that is not merely
- * `unnecessary`; `all` turns on every rule. Both need `@html-eslint/parser`,
- * which is the consumer's to install — this plugin only reads its AST.
- */
-const enable = (list: DeadheadRule[]): Record<string, "error"> =>
-  Object.fromEntries(
-    list.map((rule): [string, "error"] => [`deadhead/${rule.meta.ruleId}`, "error"]),
-  );
+const levels = (list: DeadheadRule[]): Record<string, "error" | "warn"> =>
+  Object.fromEntries(list.map((r) => [`deadhead/${r.meta.ruleId}`, r.meta.severity === "harmful" ? "error" : "warn"]));
 
-export const configs = {
-  recommended: { rules: enable(loaded.filter((r) => r.meta.severity !== "unnecessary")) },
-  all: { rules: enable(loaded) },
+type FlatConfig = {
+  name: string;
+  files: string[];
+  plugins: Record<string, unknown>;
+  languageOptions: Record<string, unknown>;
+  rules: Record<string, "error" | "warn">;
 };
 
-export default { meta, rules, configs };
+const plugin = {
+  meta,
+  rules,
+  configs: {} as { recommended: FlatConfig; all: FlatConfig },
+  /** Test hook: engine passes so far. Not part of the public API. */
+  __passes: () => passes,
+};
+
+const preset = (name: string, list: DeadheadRule[]) => ({
+  name: `deadhead/${name}`,
+  files: ["**/*.html"],
+  plugins: { deadhead: plugin },
+  languageOptions: { parser: htmlParser },
+  rules: levels(list),
+});
+
+plugin.configs.recommended = preset("recommended", loaded.filter((r) => r.meta.severity !== "unnecessary"));
+plugin.configs.all = preset("all", loaded);
+export const configs = plugin.configs;
+export default plugin;

@@ -85,3 +85,14 @@ test("a finding with no line can never be suppressed", () => {
   const s = parseSuppressions("<!-- deadhead-disable -->");
   assert.equal(s.isSuppressed("meta/x", null), false);
 });
+
+test("ids lists every rule id named in a directive with its line", () => {
+  const s = parseSuppressions(
+    ["<!-- deadhead-disable-next-line meta/a -->", "x", "<!-- deadhead-disable meta/b -->", "<!-- deadhead-enable meta/b -->"].join("\n"),
+  );
+  assert.deepEqual(s.ids(), [
+    { line: 1, id: "meta/a" },
+    { line: 3, id: "meta/b" },
+    { line: 4, id: "meta/b" },
+  ]);
+});

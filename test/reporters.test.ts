@@ -18,7 +18,7 @@ const finding = (ruleId: string, severity: Finding["severity"]): Finding => ({
   fix: null,
 });
 
-const result = (file: string, findings: Finding[], fixed = 0): FileResult => ({ file, findings, fixed });
+const result = (file: string, findings: Finding[], fixed = 0): FileResult => ({ file, findings, fixed, warnings: [] });
 
 test("tally counts per severity in harmful, deprecated, unnecessary order", () => {
   const results = [

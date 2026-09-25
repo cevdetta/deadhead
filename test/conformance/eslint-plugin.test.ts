@@ -54,7 +54,7 @@ test("every rule id resolves to this plugin", () => {
 
 test("ESLint reports exactly what the CLI reports, at the same positions", async () => {
   const files = await collectFiles(["test/fixtures"]);
-  const results = await lintFiles(files, rules);
+  const results = (await lintFiles(files, rules)).results;
 
   for (const { file, findings } of results) {
     const source = await readFile(file, "utf8");
@@ -192,4 +192,30 @@ test("ESLint never offers a fix the CLI would refuse", async () => {
   });
   assert.equal(fixed.fixed, false);
   assert.equal(fixed.output, source);
+});
+
+test("one engine pass per file, however many rules are on", async () => {
+  // The plugin counts its own engine passes (a test hook); patching an ESM
+  // binding from outside is not possible.
+  const plugin = (await import("../../packages/eslint-plugin/index.ts")).default as unknown as {
+    __passes?: () => number;
+    configs: { all: { rules: Record<string, "error" | "warn"> } };
+  };
+  const { ESLint } = await import("eslint");
+  const parser = await import("@html-eslint/parser");
+  const eslint = new ESLint({
+    overrideConfigFile: true,
+    overrideConfig: [{ files: ["**/*.html"], languageOptions: { parser }, plugins: { deadhead: plugin as never }, rules: plugin.configs.all.rules }],
+  });
+  const before = plugin.__passes?.() ?? 0;
+  await eslint.lintText("<!doctype html><html><head><title>x</title></head><body></body></html>", { filePath: "a.html" });
+  assert.equal((plugin.__passes?.() ?? 0) - before, 1);
+});
+
+test("configs.recommended is a complete flat config", async () => {
+  const plugin = (await import("../../packages/eslint-plugin/index.ts")).default;
+  const rec = plugin.configs.recommended as Record<string, unknown>;
+  assert.deepEqual(rec["files"], ["**/*.html"]);
+  assert.ok((rec["plugins"] as Record<string, unknown>)["deadhead"]);
+  assert.ok((rec["languageOptions"] as Record<string, unknown>)["parser"]);
 });
