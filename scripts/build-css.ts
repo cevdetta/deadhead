@@ -20,6 +20,7 @@ import { styleText } from "node:util";
 
 import { ruleUrl, SITE_URL, type RuleMeta, type Severity } from "../packages/core/vocabulary.ts";
 import { ROOT, rel } from "./rules-source.ts";
+import { SVG_CAMEL } from "./svg-names.ts";
 
 const IN = resolve(ROOT, "packages/rules/rules.json");
 const OUT = resolve(ROOT, "packages/browser/deadhead.css");
@@ -34,6 +35,24 @@ const COLOUR: Record<Severity, string> = {
 export const cssString = (value: string): string =>
   `"${value.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
 
+/** Top-level comma split that respects quoted values: `[x="a,b"]` stays whole. */
+const splitTopLevel = (selector: string): string[] => {
+  const out: string[] = [];
+  let depth = 0;
+  let quote: string | null = null;
+  let start = 0;
+  for (let i = 0; i < selector.length; i++) {
+    const c = selector[i];
+    if (quote !== null) { if (c === quote) quote = null; continue; }
+    if (c === '"' || c === "'") quote = c;
+    else if (c === "(" || c === "[") depth++;
+    else if (c === ")" || c === "]") depth--;
+    else if (c === "," && depth === 0) { out.push(selector.slice(start, i).trim()); start = i + 1; }
+  }
+  out.push(selector.slice(start).trim());
+  return out.filter((s) => s !== "");
+};
+
 /**
  * `scope` becomes the CSS ancestor, mirroring what the walker does: a rule
  * scoped to `head` must not light up a `<meta>` someone put in the body.
@@ -41,10 +60,13 @@ export const cssString = (value: string): string =>
 export const scoped = (meta: Pick<RuleMeta, "scope" | "selector">): string => {
   const prefix = meta.scope === "any" ? "" : `${meta.scope} `;
   // A rule's selector may be a comma list; the prefix distributes over it.
-  return (meta.selector ?? "")
-    .split(",")
-    .map((part) => `${prefix}${part.trim()}`)
-    .join(",\n");
+  const alternatives = splitTopLevel(meta.selector ?? "");
+  const withCamel = alternatives.flatMap((alt) => {
+    const tag = /^[a-z][a-z0-9-]*/.exec(alt)?.[0];
+    const camel = tag === undefined ? undefined : SVG_CAMEL.get(tag);
+    return camel === undefined ? [alt] : [alt, camel + alt.slice(tag!.length)];
+  });
+  return withCamel.map((part) => `${prefix}${part}`).join(",\n");
 };
 
 /** The stylesheet for a rule set. Pure: no I/O. */

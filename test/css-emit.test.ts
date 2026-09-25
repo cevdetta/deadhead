@@ -31,17 +31,22 @@ test("the scope prefix distributes over every comma branch", () => {
   );
 });
 
-test("the scope prefix distributes and no branch emits empty", () => {
+test("the scope prefix distributes and no branch emits empty", async () => {
+  const { SVG_CAMEL } = await import("../scripts/svg-names.ts");
   const css = renderCss(rules.map((rule) => rule.meta));
   assert.ok(css.includes("deadhead"), "expected the rendered stylesheet");
   for (const rule of rules) {
     if (rule.meta.selector === null) continue;
     const emitted = scoped(rule.meta);
     const inputBranches = rule.meta.selector.split(",");
+    const doubled = inputBranches.filter((branch) => {
+      const tag = /^[a-z][a-z0-9-]*/.exec(branch.trim())?.[0];
+      return tag !== undefined && SVG_CAMEL.has(tag);
+    }).length;
     const outputBranches = emitted.split(",\n");
     assert.equal(
       outputBranches.length,
-      inputBranches.length,
+      inputBranches.length + doubled,
       `${rule.meta.ruleId}: scope prefix must distribute over every comma branch`,
     );
     for (const branch of outputBranches) {
@@ -61,10 +66,9 @@ test("each rules.json selector with a value survives the emit", () => {
     }
     const emitted = scoped(rule.meta);
     const outputs = emitted.split(",\n").map((part) => part.trim());
-    assert.equal(outputs.length, inputs.length, rule.meta.ruleId);
-    for (const [index, input] of inputs.entries()) {
-      const output = outputs[index];
-      assert.ok(output !== undefined && output.includes(input), `${rule.meta.ruleId}: lost ${JSON.stringify(input)}`);
+    assert.ok(outputs.length >= inputs.length, rule.meta.ruleId);
+    for (const input of inputs) {
+      assert.ok(outputs.some((output) => output.includes(input)), `${rule.meta.ruleId}: lost ${JSON.stringify(input)}`);
     }
   }
 });
@@ -80,8 +84,16 @@ test("an unemittable selector fails instead of dropping the rule", () => {
   );
   const emitted = scoped({ scope: "head", selector });
   const outputs = emitted.split(",\n").map((part) => part.trim());
-  // The second branch emits as bare scope, losing the rule's meaning.
-  assert.equal(outputs[1], "head", "empty input must not emit as bare scope");
+  // The empty branch is dropped, never emitted as a bare scope.
+  assert.deepEqual(outputs, ["head meta[name]"]);
+});
+
+test("an SVG camelCase element gets its camelCase spelling in the stylesheet", async () => {
+  const { scoped } = await import("../scripts/build-css.ts");
+  const css = scoped({ scope: "any", selector: "lineargradient[x], rect[y]" });
+  assert.match(css, /linearGradient\[x\]/);
+  assert.match(css, /lineargradient\[x\]/);
+  assert.doesNotMatch(css, /Rect/);
 });
 
 test("importing build-css writes nothing", async () => {
