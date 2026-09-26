@@ -59,6 +59,16 @@ export default defineConfig({
         },
       },
     },
+    {
+      name: "deadhead-host",
+      hooks: {
+        "astro:build:done": async ({ dir }) => {
+          const { writeFile } = await import("node:fs/promises");
+          // Hashed build assets never change under the same name.
+          await writeFile(new URL("_headers", dir), "/_astro/*\n  Cache-Control: public, max-age=31536000, immutable\n");
+        },
+      },
+    },
     sitemap({
       serialize(item) {
         const path =

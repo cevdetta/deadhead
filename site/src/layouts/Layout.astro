@@ -11,9 +11,11 @@ interface Props {
   /** Rule pages are articles; the index pages are not. */
   ogType?: "website" | "article";
   publishedTime?: Date | undefined;
+  /** True for pages with no lasting URL, like 404: no canonical, no og:url. */
+  noindex?: boolean;
 }
 
-const { title, description, ogType = "website", publishedTime } = Astro.props;
+const { title, description, ogType = "website", publishedTime, noindex = false } = Astro.props;
 
 const pageTitle = title === SITE_NAME ? title : `${title} · ${SITE_NAME}`;
 
@@ -56,19 +58,24 @@ const nav = [
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/app.webmanifest" />
 
-    <link rel="canonical" href={canonical} />
+    {!noindex && <link rel="canonical" href={canonical} />}
     <meta name="description" content={description} />
-    <meta property="og:site_name" content={SITE_NAME} />
-    <meta property="og:type" content={ogType} />
-    <meta property="og:url" content={canonical} />
-    <meta property="og:title" content={pageTitle} />
-    <meta property="og:description" content={description} />
-    <meta property="og:image" content={ogImage} />
-    {ogType === "article" && publishedTime && (
-      <meta
-        property="article:published_time"
-        content={publishedTime.toISOString()}
-      />
+    {noindex && <meta name="robots" content="noindex" />}
+    {!noindex && (
+      <>
+        <meta property="og:site_name" content={SITE_NAME} />
+        <meta property="og:type" content={ogType} />
+        <meta property="og:url" content={canonical} />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={description} />
+        <meta property="og:image" content={ogImage} />
+        {ogType === "article" && publishedTime && (
+          <meta
+            property="article:published_time"
+            content={publishedTime.toISOString()}
+          />
+        )}
+      </>
     )}
   </head>
   <body>

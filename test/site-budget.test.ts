@@ -36,7 +36,21 @@ const astroJs = "console.log(" + "z".repeat(500) + ");";
 const deadheadCss = "." + "d".repeat(99_000) + "{color:blue}"; // engine stylesheet at dist root, never counted
 const bookmarkletJs = "javascript:" + "b".repeat(53_000); // bookmarklet at dist root, never counted
 
-async function writeSyntheticDist(dir: string): Promise<void> {
+// A valid `_headers`: only `/_astro/*` (Astro's hashed build assets) is immutable.
+const validHeaders = "/_astro/*\n  Cache-Control: public, max-age=31536000, immutable\n";
+
+// A valid 404: noindex, and so no canonical or og:url (both would assert a
+// canonical identity for a page that should not be indexed at all).
+const notFoundNoindex =
+  '<html><head><meta name="robots" content="noindex"></head><body>not found</body></html>';
+
+type DistOverrides = {
+  /** `null` omits the file entirely, to test the missing-file case. */
+  headers?: string | null;
+  notFound?: string;
+};
+
+async function writeSyntheticDist(dir: string, overrides: DistOverrides = {}): Promise<void> {
   await mkdir(join(dir, "dist", "_astro"), { recursive: true });
   await mkdir(join(dir, "dist", "rules", "meta"), { recursive: true });
   await mkdir(join(dir, "dist", "rules", "link"), { recursive: true });
@@ -49,6 +63,12 @@ async function writeSyntheticDist(dir: string): Promise<void> {
   await writeFile(join(dir, "dist", "_astro", "chunk.def456.js"), astroJs);
   await writeFile(join(dir, "dist", "deadhead.css"), deadheadCss);
   await writeFile(join(dir, "dist", "bookmarklet.js"), bookmarkletJs);
+
+  const headers = overrides.headers === undefined ? validHeaders : overrides.headers;
+  if (headers !== null) {
+    await writeFile(join(dir, "dist", "_headers"), headers);
+  }
+  await writeFile(join(dir, "dist", "404.html"), overrides.notFound ?? notFoundNoindex);
 }
 
 const expected = {
@@ -60,19 +80,29 @@ const expected = {
   cssRaw: Buffer.byteLength(astroCss),
 };
 
+/** Writes `site/budget.json` with every key padded above `expected`, unless overridden. */
+async function writeBudget(dir: string, overrides: Partial<typeof expected> = {}): Promise<void> {
+  await mkdir(join(dir, "site"), { recursive: true });
+  const budget = {
+    homeGzip: expected.homeGzip + 100,
+    rulesIndexGzip: expected.rulesIndexGzip + 100,
+    rulePageAvgGzip: expected.rulePageAvgGzip + 100,
+    cssRaw: expected.cssRaw + 100,
+    ...overrides,
+  };
+  await writeFile(join(dir, "site", "budget.json"), JSON.stringify(budget));
+}
+
+function run(dir: string): { status: number | null; stdout: string; stderr: string } {
+  return spawnSync(process.execPath, [SCRIPT, "dist"], { cwd: dir, encoding: "utf8" });
+}
+
 test("prints the four measured values and passes when inside budget", async () => {
   await withDist(async (dir) => {
     await writeSyntheticDist(dir);
-    await mkdir(join(dir, "site"), { recursive: true });
-    const budget = {
-      homeGzip: expected.homeGzip + 100,
-      rulesIndexGzip: expected.rulesIndexGzip + 100,
-      rulePageAvgGzip: expected.rulePageAvgGzip + 100,
-      cssRaw: expected.cssRaw + 100,
-    };
-    await writeFile(join(dir, "site", "budget.json"), JSON.stringify(budget));
+    await writeBudget(dir);
 
-    const result = spawnSync(process.execPath, [SCRIPT, "dist"], { cwd: dir, encoding: "utf8" });
+    const result = run(dir);
 
     assert.equal(result.status, 0, result.stdout + result.stderr);
     for (const [key, value] of Object.entries(expected)) {
@@ -87,16 +117,9 @@ test("prints the four measured values and passes when inside budget", async () =
 test("cssRaw counts only dist/_astro/*.css: not deadhead.css, not bookmarklet.js, not non-css _astro files", async () => {
   await withDist(async (dir) => {
     await writeSyntheticDist(dir);
-    await mkdir(join(dir, "site"), { recursive: true });
-    const budget = {
-      homeGzip: expected.homeGzip + 100,
-      rulesIndexGzip: expected.rulesIndexGzip + 100,
-      rulePageAvgGzip: expected.rulePageAvgGzip + 100,
-      cssRaw: expected.cssRaw + 100,
-    };
-    await writeFile(join(dir, "site", "budget.json"), JSON.stringify(budget));
+    await writeBudget(dir);
 
-    const result = spawnSync(process.execPath, [SCRIPT, "dist"], { cwd: dir, encoding: "utf8" });
+    const result = run(dir);
 
     assert.equal(result.status, 0, result.stdout + result.stderr);
     const line = result.stdout.split("\n").find((l) => l.startsWith("cssRaw"));
@@ -111,16 +134,9 @@ test("cssRaw counts only dist/_astro/*.css: not deadhead.css, not bookmarklet.js
 test("exits 1 and flags OVER on the homeGzip line when its budget is below the measured value", async () => {
   await withDist(async (dir) => {
     await writeSyntheticDist(dir);
-    await mkdir(join(dir, "site"), { recursive: true });
-    const budget = {
-      homeGzip: expected.homeGzip - 1,
-      rulesIndexGzip: expected.rulesIndexGzip + 100,
-      rulePageAvgGzip: expected.rulePageAvgGzip + 100,
-      cssRaw: expected.cssRaw + 100,
-    };
-    await writeFile(join(dir, "site", "budget.json"), JSON.stringify(budget));
+    await writeBudget(dir, { homeGzip: expected.homeGzip - 1 });
 
-    const result = spawnSync(process.execPath, [SCRIPT, "dist"], { cwd: dir, encoding: "utf8" });
+    const result = run(dir);
 
     assert.equal(result.status, 1, result.stdout + result.stderr);
     const homeLine = result.stdout.split("\n").find((l) => l.startsWith("homeGzip"));
@@ -131,5 +147,76 @@ test("exits 1 and flags OVER on the homeGzip line when its budget is below the m
       assert.ok(line);
       assert.match(line, /\bok\b/, `${key} should stay ok: ${line}`);
     }
+  });
+});
+
+test("passes with no problem lines when _headers and 404.html are both valid", async () => {
+  await withDist(async (dir) => {
+    await writeSyntheticDist(dir);
+    await writeBudget(dir);
+
+    const result = run(dir);
+
+    assert.equal(result.status, 0, result.stdout + result.stderr);
+    assert.doesNotMatch(result.stdout, /✗/, result.stdout);
+  });
+});
+
+test("fails when dist/_headers is missing", async () => {
+  await withDist(async (dir) => {
+    await writeSyntheticDist(dir, { headers: null });
+    await writeBudget(dir);
+
+    const result = run(dir);
+
+    assert.equal(result.status, 1, result.stdout + result.stderr);
+    assert.match(result.stdout, /_headers is missing/);
+  });
+});
+
+test("fails when _headers also marks another path immutable", async () => {
+  await withDist(async (dir) => {
+    await writeSyntheticDist(dir, {
+      headers:
+        validHeaders +
+        "\n/bookmarklet.js\n  Cache-Control: public, max-age=31536000, immutable\n",
+    });
+    await writeBudget(dir);
+
+    const result = run(dir);
+
+    assert.equal(result.status, 1, result.stdout + result.stderr);
+    assert.match(result.stdout, /\/bookmarklet\.js[^\n]*immutable/);
+  });
+});
+
+test("fails when the 404 page carries a canonical link", async () => {
+  await withDist(async (dir) => {
+    await writeSyntheticDist(dir, {
+      notFound:
+        '<html><head><meta name="robots" content="noindex">' +
+        '<link rel="canonical" href="https://deadhead.cevdet.ch/404">' +
+        "</head><body>not found</body></html>",
+    });
+    await writeBudget(dir);
+
+    const result = run(dir);
+
+    assert.equal(result.status, 1, result.stdout + result.stderr);
+    assert.match(result.stdout, /404\.html[^\n]*canonical/);
+  });
+});
+
+test("fails when the 404 page has no robots noindex", async () => {
+  await withDist(async (dir) => {
+    await writeSyntheticDist(dir, {
+      notFound: "<html><head></head><body>not found</body></html>",
+    });
+    await writeBudget(dir);
+
+    const result = run(dir);
+
+    assert.equal(result.status, 1, result.stdout + result.stderr);
+    assert.match(result.stdout, /404\.html[^\n]*noindex/);
   });
 });
