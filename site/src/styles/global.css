@@ -23,6 +23,9 @@ body {
   font: clamp(1rem, 0.97rem + 0.15vw, 1.0625rem) / 1.65 system-ui, sans-serif;
   text-underline-offset: 0.15em;
 }
+/* One header and one footer per page, both direct children of body; the only
+   img is the header logo; every section sits inside main. Scope these bare
+   selectors again if any of that stops holding. */
 header, main, footer { padding-inline: max(var(--gutter), (100% - var(--measure)) / 2); }
 header {
   display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.6rem 1.4rem;
@@ -68,7 +71,7 @@ aside h2 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em
 dl { background: var(--sunk); border: 1px solid var(--line); border-radius: 6px; padding-inline: 1rem; font-size: 0.9375rem; }
 dl > div { display: grid; grid-template-columns: minmax(7rem, auto) 1fr; gap: 0 1rem; padding-block: 0.45rem; border-block-start: 1px solid var(--line); }
 dl > div:first-child { border-block-start: 0; }
-dt, dd small { color: var(--muted); }
+dt, dd small, .rules p { color: var(--muted); }
 dd, .rules a { overflow-wrap: anywhere; }
 dd small { display: block; font-size: 0.8125rem; line-height: 1.4; }
 dd code { background: none; padding: 0; }
@@ -78,8 +81,8 @@ dd code { background: none; padding: 0; }
   display: grid; grid-template-columns: 1fr auto; gap: 0.2rem 1rem; align-items: baseline;
   padding-block: 0.85rem; border-block-end: 1px solid var(--line); font-size: 0.9375rem;
 }
-span { font-size: 0.75rem; border: 1px solid currentColor; border-radius: 3px; padding: 0.05rem 0.45rem; white-space: nowrap; }
-.rules p { grid-column: 1 / -1; color: var(--muted); line-height: 1.5; }
+.rules span { font-size: 0.75rem; border: 1px solid currentColor; border-radius: 3px; padding: 0.05rem 0.45rem; white-space: nowrap; }
+.rules p { grid-column: 1 / -1; line-height: 1.5; }
 @media print {
   header nav, footer, .skip { display: none; }
   a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 0.8em; }
