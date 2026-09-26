@@ -55,6 +55,8 @@ const splitTopLevel = (selector: string): string[] => {
   return out.filter((s) => s !== "");
 };
 
+const leadingTag = (alternative: string): string | undefined => /^[a-z][a-z0-9-]*/.exec(alternative)?.[0];
+
 /**
  * `scope` becomes the CSS ancestor, mirroring what the walker does: a rule
  * scoped to `head` must not light up a `<meta>` someone put in the body.
@@ -64,11 +66,14 @@ export const scoped = (meta: Pick<RuleMeta, "scope" | "selector">): string => {
   // A rule's selector may be a comma list; the prefix distributes over it.
   const alternatives = splitTopLevel(meta.selector ?? "");
   const withCamel = alternatives.flatMap((alt) => {
-    const tag = /^[a-z][a-z0-9-]*/.exec(alt)?.[0];
+    const tag = leadingTag(alt);
     const camel = tag === undefined ? undefined : SVG_CAMEL.get(tag);
     return camel === undefined ? [alt] : [alt, camel + alt.slice(tag!.length)];
   });
-  return withCamel.map((part) => `${prefix}${part}`).join(",\n");
+  // The walker counts the scope element as inside its own region, so
+  // `<body bgcolor>` is in body scope; `body body[bgcolor]` would never match
+  // it. An alternative led by the scope's own tag stands bare.
+  return withCamel.map((part) => (leadingTag(part) === meta.scope ? part : `${prefix}${part}`)).join(",\n");
 };
 
 /**

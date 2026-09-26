@@ -20,6 +20,12 @@ test("scope becomes the CSS ancestor", () => {
   assert.equal(scoped({ scope: "any", selector: "meta[charset]" }), "meta[charset]");
 });
 
+test("the scope element itself is in scope, the way the walker counts it", () => {
+  // `body body[bgcolor]` would never match: body has no body ancestor.
+  assert.equal(scoped({ scope: "body", selector: "body[bgcolor], font[color]" }), "body[bgcolor],\nbody font[color]");
+  assert.equal(scoped({ scope: "head", selector: "head[profile]" }), "head[profile]");
+});
+
 test("the scope prefix distributes over every comma branch", () => {
   assert.equal(
     scoped({ scope: "head", selector: "meta[name], meta[property]" }),
