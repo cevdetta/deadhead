@@ -207,6 +207,23 @@ test("fails when the 404 page carries a canonical link", async () => {
   });
 });
 
+test("fails when the 404 page carries an og:url meta", async () => {
+  await withDist(async (dir) => {
+    await writeSyntheticDist(dir, {
+      notFound:
+        '<html><head><meta name="robots" content="noindex">' +
+        '<meta property="og:url" content="https://deadhead.cevdet.ch/404">' +
+        "</head><body>not found</body></html>",
+    });
+    await writeBudget(dir);
+
+    const result = run(dir);
+
+    assert.equal(result.status, 1, result.stdout + result.stderr);
+    assert.match(result.stdout, /404\.html[^\n]*og:url/);
+  });
+});
+
 test("fails when the 404 page has no robots noindex", async () => {
   await withDist(async (dir) => {
     await writeSyntheticDist(dir, {
