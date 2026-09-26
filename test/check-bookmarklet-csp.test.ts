@@ -35,6 +35,8 @@ test("the gate server answers the favicon with empty and names it in the steps",
     const icon = await fetch(`http://127.0.0.1:${port}/f.ico`);
     assert.equal(icon.status, 204);
     assert.match(output, /f\.ico/);
+    // The page declares color-scheme dark light; the panel must stay readable in dark mode.
+    assert.match(output, /dark mode/);
   } finally {
     stop();
   }
