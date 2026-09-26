@@ -1,11 +1,12 @@
 ---
 import styleURL from "../styles/global.css?url";
 import { ogSlugForPath } from "../lib/og-path.ts";
+import { pageTitle, SITE_NAME } from "../lib/seo.ts";
 
-export const SITE_NAME = "deadhead";
 export const REPO = "https://github.com/cevdetta/deadhead";
 
 interface Props {
+  /** The core title; the layout appends the brand when it fits (`pageTitle`). */
   title: string;
   description: string;
   /** Rule pages are articles; the index pages are not. */
@@ -13,11 +14,13 @@ interface Props {
   publishedTime?: Date | undefined;
   /** True for pages with no lasting URL, like 404: no canonical, no og:url. */
   noindex?: boolean;
+  /** Structured data, rendered as one JSON-LD script after the Open Graph tags. */
+  jsonLd?: object;
 }
 
-const { title, description, ogType = "website", publishedTime, noindex = false } = Astro.props;
+const { title, description, ogType = "website", publishedTime, noindex = false, jsonLd } = Astro.props;
 
-const pageTitle = title === SITE_NAME ? title : `${title} · ${SITE_NAME}`;
+const fullTitle = pageTitle(title);
 
 // With `build.format: "file"`, Astro.url.pathname at build time is the emitted
 // file (`/rules.html`, `/index.html`), not the URL it is served at. Left alone it
@@ -51,7 +54,7 @@ const nav = [
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{pageTitle}</title>
+    <title>{fullTitle}</title>
     <meta name="color-scheme" content="dark light" />
     <link rel="stylesheet" href={styleURL} />
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
@@ -67,7 +70,7 @@ const nav = [
         <meta property="og:site_name" content={SITE_NAME} />
         <meta property="og:type" content={ogType} />
         <meta property="og:url" content={canonical} />
-        <meta property="og:title" content={pageTitle} />
+        <meta property="og:title" content={fullTitle} />
         <meta property="og:description" content={description} />
         <meta property="og:image" content={ogImage} />
         {ogType === "article" && publishedTime && (
@@ -77,6 +80,13 @@ const nav = [
           />
         )}
       </>
+    )}
+    {jsonLd && (
+      <script
+        type="application/ld+json"
+        is:inline
+        set:html={JSON.stringify(jsonLd).replace(/</g, "\\u003c")}
+      />
     )}
   </head>
   <body>

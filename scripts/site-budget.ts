@@ -58,6 +58,37 @@ if (notFoundHtml === null) {
   if (!hasNoindex) problems.push('dist/404.html: missing <meta name="robots" content="noindex">');
 }
 
+// Every page: a unique title of at most 60 characters and a description of
+// 50-160, the lengths search results show without truncation. Astro escapes
+// <, > and " in <title> text but only " in attribute values, so both are
+// measured decoded.
+const TITLE_MAX = 60;
+const DESCRIPTION_MIN = 50;
+const DESCRIPTION_MAX = 160;
+const decode = (text: string) =>
+  text
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, "&");
+const pages = (await readdir(dist, { recursive: true })).filter((f) => f.endsWith(".html")).sort();
+const titles = new Map<string, string>();
+for (const page of pages) {
+  const html = await readFile(join(dist, page), "utf8");
+  const title = decode(/<title>([^<]*)<\/title>/.exec(html)?.[1] ?? "");
+  const description = decode(/<meta name="description" content="([^"]*)"/.exec(html)?.[1] ?? "");
+  if (title.length === 0 || title.length > TITLE_MAX) {
+    problems.push(`${page}: title is ${title.length} characters: ${title}`);
+  }
+  if (description.length < DESCRIPTION_MIN || description.length > DESCRIPTION_MAX) {
+    problems.push(`${page}: description is ${description.length} characters: ${description}`);
+  }
+  const clash = titles.get(title);
+  if (clash === undefined) titles.set(title, page);
+  else problems.push(`${page}: title duplicates ${clash}: ${title}`);
+}
+
 const ruleFiles = (await readdir(join(dist, "rules"), { recursive: true })).filter((f) => f.endsWith(".html"));
 const ruleSizes = await Promise.all(ruleFiles.map((f) => gz(join("rules", f))));
 const css = (await readdir(join(dist, "_astro"))).filter((f) => f.endsWith(".css"));
