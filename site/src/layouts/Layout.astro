@@ -33,6 +33,7 @@ const ogImage = new URL(`/og/${ogSlugForPath(path)}.png`, Astro.site);
 
 const nav = [
   { href: "/rules", label: "Rules" },
+  { href: "/topics", label: "Topics" },
   { href: "/install", label: "Install" },
   { href: REPO, label: "GitHub" },
 ];
@@ -54,7 +55,7 @@ const nav = [
     <meta name="color-scheme" content="dark light" />
     <link rel="stylesheet" href={styleURL} />
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
-    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/logo.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/app.webmanifest" />
 
@@ -79,48 +80,25 @@ const nav = [
     )}
   </head>
   <body>
-    <a class="skip-link" href="#main">Skip to content</a>
-    <header class="masthead">
-      <div class="shell">
-        <b>
-          <a href="/" aria-current={path === "/" ? "page" : undefined}><img src="/logo.svg" alt="" width="20" height="20" />deadhead</a>
-        </b>
-        <nav aria-label="Primary">
-          {nav.map((item) => {
-            const internal = item.href.startsWith("/");
-            const current =
-              internal &&
-              (path === item.href || path.startsWith(item.href + "/"));
-            return (
-              <a
-                href={item.href}
-                aria-current={current ? "page" : undefined}
-                rel={internal ? undefined : "external"}
-              >
-                {item.label}
-              </a>
-            );
-          })}
-        </nav>
-      </div>
+    <a class="skip" href="#main">Skip to content</a>
+    <header>
+      <a href="/" aria-current={path === "/" ? "page" : undefined}><img src="/logo.svg" alt="" width="20" height="20" />deadhead</a>
+      <nav aria-label="Primary">
+        {nav.map((item) => {
+          const internal = item.href.startsWith("/");
+          // "page" only for the page itself; "true" for its section (a rule under /rules).
+          const current = !internal ? undefined : path === item.href ? "page" : path.startsWith(`${item.href}/`) ? "true" : undefined;
+          return <a href={item.href} aria-current={current} rel={internal ? undefined : "external"}>{item.label}</a>;
+        })}
+      </nav>
     </header>
-
-    <main id="main" tabindex="-1">
-      <slot />
-    </main>
-
-    <footer class="colophon">
-      <div class="shell flow">
-        <p>
-          Every rule on this site is one markdown file in{" "}
-          <a href={`${REPO}/tree/main/content/rules`}>
-            <code>content/rules/</code>
-          </a>. A rule with no documentation is not a rule.
-        </p>
-        <p>
-          MIT licensed. <a href={REPO}>Source on GitHub</a>.
-        </p>
-      </div>
+    <main id="main"><slot /></main>
+    <footer>
+      <p>
+        Every rule is one markdown file in{" "}
+        <a href={`${REPO}/tree/main/content/rules`}><code>content/rules/</code></a>. MIT licensed.{" "}
+        <a href={REPO}>Source on GitHub</a>.
+      </p>
     </footer>
   </body>
 </html>

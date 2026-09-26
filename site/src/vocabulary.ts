@@ -110,7 +110,7 @@ export const namespaceBlurbs: Record<string, string> = {
   head: "The shape of the head itself — order, position, what must come first.",
   link: "<link> relations that no longer have a reader.",
   meta: "<meta> names and pragmas.",
-  script: "<script> attributes, their defaults, and the data blocks it carries.",
+  script: "What <script> blocks contain: JSON-LD data and its encoding.",
 };
 
 export const tagLabels: Record<Tag, string> = {
