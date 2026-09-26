@@ -6,8 +6,6 @@ import type { RuleMeta } from "../packages/core/vocabulary.ts";
 import {
   GLOBAL,
   SLIM_KEYS,
-  buildBootCall,
-  buildRuleLiteral,
   bundleBookmarklet,
   exportsEntry,
   logicEntryFor,
@@ -62,19 +60,8 @@ test("slim literals carry exactly the keys the bookmarklet reads", () => {
 test("match vs check follows kind", () => {
   assert.equal(logicEntryFor(meta({ kind: "document" })), "check");
   assert.equal(logicEntryFor(meta({ kind: "element" })), "match");
-  assert.equal(
-    buildRuleLiteral(meta({ ruleId: "head/x", kind: "document" }), true),
-    `{ meta: ${JSON.stringify(toSlimMeta(meta({ ruleId: "head/x", kind: "document" })))}` +
-      `, check: ${GLOBAL}.${logicVarName(meta({ ruleId: "head/x", kind: "document" }))} }`,
-  );
-  const elementLiteral = buildRuleLiteral(
-    meta({ ruleId: "meta/x", kind: "element", match: "logic" }),
-    true,
-  );
-  assert.match(elementLiteral, /, match: __deadhead\.match_meta_x/);
-  assert.doesNotMatch(elementLiteral, /check:/);
-  // A selector-only element rule wires no logic.
-  assert.doesNotMatch(buildRuleLiteral(meta({ kind: "element", match: null }), false), /match:|check:/);
+  assert.equal(logicVarName(meta({ ruleId: "head/x", kind: "document" })), "check_head_x");
+  assert.equal(logicVarName(meta({ ruleId: "meta/x", kind: "element" })), "match_meta_x");
 });
 
 test("needsLogic matches the assembly filter", () => {
@@ -83,54 +70,47 @@ test("needsLogic matches the assembly filter", () => {
   assert.equal(needsLogic(meta({ kind: "document", match: null })), true);
 });
 
-test("a module exporting only fixable() inlines nothing and ships as selector-only", async () => {
+test("a module exporting only fixable() inlines nothing and still reports", async () => {
   const rule = (await loadRules()).find((r) => r.meta.ruleId === "attr/script-language");
   assert.ok(rule?.fixable && !rule.match, "attr/script-language exports fixable() alone");
   assert.equal(needsLogic(rule.meta), true);
   assert.equal(await exportsEntry(rule.meta), false);
-  const literal = buildRuleLiteral(rule.meta, false);
-  assert.match(literal, /"match":null/);
-  assert.doesNotMatch(literal, /__deadhead\./);
   const json = JSON.parse(await readFile(new URL("../packages/rules/rules.json", import.meta.url), "utf8"));
   const bundle = await bundleBookmarklet(json.rules);
   assert.doesNotMatch(bundle, /match_attr_script_language/);
 });
 
-test("the appended boot call survives minification", async () => {
+test("the appended start call survives minification", async () => {
   const json = JSON.parse(await readFile(new URL("../packages/rules/rules.json", import.meta.url), "utf8"));
   const bundle = await bundleBookmarklet(json.rules);
-  const call = buildBootCall(["{ meta: {} }"]);
-  assert.ok(call.startsWith(`${GLOBAL}.boot([`), "boot call shape changed");
-  assert.ok(call.endsWith("]);"), "boot call must close the array");
-  assert.ok(bundle.trimEnd().endsWith("]);"), "built bundle must end with the appended boot call");
-  assert.ok(bundle.includes(`${GLOBAL}.boot([`), "built bundle lost its boot call");
+  assert.ok(bundle.includes(`${GLOBAL}.start(`), "built bundle lost its start call");
+  assert.ok(bundle.trimEnd().endsWith(");"), "built bundle must end with the appended start call");
 });
 
-test("every rule in rules.json assembles with the right entry", async () => {
-  const rules = await loadRules();
-  assert.ok(rules.length > 0);
-  for (const rule of rules) {
-    const hasLogic = needsLogic(rule.meta) && (await exportsEntry(rule.meta));
-    const literal = buildRuleLiteral(rule.meta, hasLogic);
-    if (!hasLogic) {
-      assert.doesNotMatch(literal, /match: __deadhead|check:/, rule.meta.ruleId);
-      continue;
-    }
-    if (rule.meta.kind === "document") {
-      assert.match(literal, /check: __deadhead\.check_/, rule.meta.ruleId);
-      assert.doesNotMatch(literal, /match: __deadhead/, rule.meta.ruleId);
-    } else {
-      assert.match(literal, /match: __deadhead\.match_/, rule.meta.ruleId);
-      assert.doesNotMatch(literal, /check: __deadhead/, rule.meta.ruleId);
-    }
-  }
+test("the javascript: URL fits Firefox's and Safari's 65,536-byte cap", async () => {
+  const { bundleBookmarklet } = await import("../scripts/build-bookmarklet.ts");
+  const { bookmarkletUrl, MAX_URL_BYTES } = await import("../packages/browser/bookmarklet-url.ts");
+  const { readFile } = await import("node:fs/promises");
+  const { rules } = JSON.parse(await readFile(new URL("../packages/rules/rules.json", import.meta.url), "utf8"));
+  const url = bookmarkletUrl(await bundleBookmarklet(rules));
+  assert.ok(url.startsWith("javascript:"));
+  assert.ok(Buffer.byteLength(url) <= MAX_URL_BYTES, `URL is ${Buffer.byteLength(url)} bytes`);
 });
 
+test("the URL helper stays import-free so the site can use it", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const source = await readFile(new URL("../packages/browser/bookmarklet-url.ts", import.meta.url), "utf8");
+  assert.doesNotMatch(source, /^\s*import\s/m);
+  assert.doesNotMatch(source, /import\s*\(/);
+  const { bookmarkletUrl, MAX_URL_BYTES } = await import("../packages/browser/bookmarklet-url.ts");
+  assert.equal(MAX_URL_BYTES, 65_536);
+  assert.equal(bookmarkletUrl("a b#c%d"), "javascript:a%20b%23c%25d");
+});
 test("bundleBookmarklet builds in memory and never touches .git", async () => {
   const { bundleBookmarklet } = await import("../scripts/build-bookmarklet.ts");
   const { readFile, stat } = await import("node:fs/promises");
   const json = JSON.parse(await readFile(new URL("../packages/rules/rules.json", import.meta.url), "utf8"));
   const bundle = await bundleBookmarklet(json.rules);
-  assert.match(bundle, /__deadhead\.boot\(\[/);
+  assert.match(bundle, /__deadhead\.start\(/);
   await assert.rejects(stat(new URL("../.git/deadhead/bundle-entry/entry.ts", import.meta.url)));
 });

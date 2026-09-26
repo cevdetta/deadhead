@@ -2,102 +2,119 @@
  * The bookmarklet's entry point: run the rules against the live document and
  * draw the results over the page.
  *
- * Exported as `boot(rules)` rather than running on import, so the build can
- * append one call with the rule set inlined. That is what keeps the artifact a
+ * Exported as `start(payload, logic)` rather than running on import, so the
+ * build can append one call with the compressed rule set inlined. That is what keeps the artifact a
  * single IIFE with no `fetch` — nothing to load means there is no request for
  * a Content-Security-Policy to block, which is exactly the kind of page most
  * worth pointing this at.
  */
 
 import { type Rule, run } from "../core/index.ts";
-import type { Finding, Severity } from "../core/index.ts";
+import type { CheckFn, Finding, MatchFn, RuleMeta } from "../core/index.ts";
 import { fromDocument } from "./adapter.ts";
 
-const PANEL_ID = "deadhead-panel";
-
-const COLOUR: Record<Severity, string> = {
-  harmful: "#d7263d",
-  deprecated: "#e08700",
-  unnecessary: "#2d7dd2",
-};
-
-const escape = (value: string): string =>
-  value.replace(/[&<>"]/g, (c) => `&${{ "&": "amp", "<": "lt", ">": "gt", '"': "quot" }[c]};`);
+const HOST = "deadhead-panel";
 
 /**
- * `all: initial` on the shell, so a page's own stylesheet cannot restyle the
- * report. A linter whose output is unreadable on the site it is linting is
- * not much of a linter.
+ * Styles for the shadow root. The shadow boundary keeps the page's CSS out
+ * and ours in, so no `all: initial` resets are needed. They are applied as a
+ * constructed stylesheet through adoptedStyleSheets, which a page's
+ * `style-src` does not govern, unlike a `<style>` element.
  */
-const CSS = `
-#${PANEL_ID}{all:initial;position:fixed;top:12px;right:12px;z-index:2147483647;
- max-height:calc(100vh - 24px);width:min(30rem,calc(100vw - 24px));overflow:auto;
+const PANEL_CSS = `
+:host{all:initial;position:fixed;top:12px;right:12px;z-index:2147483647}
+section{max-height:calc(100vh - 24px);width:min(30rem,calc(100vw - 24px));overflow:auto;
  background:#fff;color:#111;border:1px solid #d0d0d0;border-radius:8px;
  box-shadow:0 8px 32px rgba(0,0,0,.24);font:13px/1.5 ui-sans-serif,system-ui,sans-serif}
-#${PANEL_ID} *{all:unset;display:revert;box-sizing:border-box;font:inherit;color:inherit}
-#${PANEL_ID} header{display:flex;align-items:center;justify-content:space-between;
- gap:.5rem;padding:.6rem .8rem;border-bottom:1px solid #e6e6e6;position:sticky;top:0;background:#fff}
-#${PANEL_ID} h1{font-weight:600;font-size:13px}
-#${PANEL_ID} button{cursor:pointer;padding:.1rem .45rem;border:1px solid #d0d0d0;border-radius:4px}
-#${PANEL_ID} ol{display:block;padding:0;margin:0}
-#${PANEL_ID} li{display:block;padding:.6rem .8rem;border-bottom:1px solid #f0f0f0}
-#${PANEL_ID} .dh-sev{display:inline-block;padding:0 .4em;border-radius:3px;color:#fff;
- font:11px/1.6 ui-monospace,monospace}
-#${PANEL_ID} .dh-id{font:11px/1.6 ui-monospace,monospace;color:#555}
-#${PANEL_ID} .dh-msg{display:block;margin:.35rem 0}
-#${PANEL_ID} .dh-fix{display:block;color:#1a7f37}
-#${PANEL_ID} a{display:block;margin-top:.2rem;color:#2d7dd2;text-decoration:underline;
- font:11px/1.6 ui-monospace,monospace;cursor:pointer}
-#${PANEL_ID} .dh-empty{display:block;padding:1rem .8rem}
+header{display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:.6rem .8rem;
+ border-bottom:1px solid #e6e6e6;position:sticky;top:0;background:#fff}
+h1{margin:0;font-weight:600;font-size:13px}
+button{font:inherit;cursor:pointer;padding:.1rem .45rem;border:1px solid #d0d0d0;border-radius:4px;background:#fff}
+ol{list-style:none;padding:0;margin:0}
+li{padding:.6rem .8rem;border-bottom:1px solid #f0f0f0}
+.sev{display:inline-block;padding:0 .4em;border-radius:3px;color:#fff;font:11px/1.6 ui-monospace,monospace}
+.sev.harmful{background:#d7263d}.sev.deprecated{background:#e08700}.sev.unnecessary{background:#2d7dd2}
+code{font:11px/1.6 ui-monospace,monospace;color:#555}
+p{margin:.35rem 0}.fix{color:#1a7f37}
+a{display:block;color:#2d7dd2;font:11px/1.6 ui-monospace,monospace}
 `;
 
-function render(findings: Finding[]): void {
-  document.getElementById(PANEL_ID)?.remove();
+/** One element with text, built without innerHTML (Trusted Types forbid it). */
+const el = <K extends keyof HTMLElementTagNameMap>(tag: K, text?: string, className?: string): HTMLElementTagNameMap[K] => {
+  const node = document.createElement(tag);
+  if (text !== undefined) node.textContent = text;
+  if (className !== undefined) node.className = className;
+  return node;
+};
 
-  const panel = document.createElement("div");
-  panel.id = PANEL_ID;
+function render(findings: Finding[]): HTMLElement {
+  document.querySelector(HOST)?.remove();
+  const host = document.createElement(HOST);
+  const root = host.attachShadow({ mode: "open" });
+  // A page without CSSStyleSheet construction still gets a working, unstyled
+  // panel: better than failing on exactly the old browsers worth auditing.
+  if (typeof CSSStyleSheet === "function" && "adoptedStyleSheets" in root) {
+    const sheet = new CSSStyleSheet();
+    sheet.replaceSync(PANEL_CSS);
+    root.adoptedStyleSheets = [sheet];
+  }
 
-  const style = document.createElement("style");
-  style.textContent = CSS;
-  panel.append(style);
-
-  const header = document.createElement("header");
-  const title = document.createElement("h1");
-  title.textContent =
-    findings.length === 0
-      ? "deadhead — nothing to cut"
-      : `deadhead — ${findings.length} finding${findings.length === 1 ? "" : "s"}`;
-  const close = document.createElement("button");
-  close.textContent = "close";
-  close.addEventListener("click", () => panel.remove());
-  header.append(title, close);
+  const panel = el("section");
+  const header = el("header");
+  header.append(
+    el("h1", findings.length === 0 ? "deadhead: nothing to cut" : `deadhead: ${findings.length} finding${findings.length === 1 ? "" : "s"}`),
+  );
+  const close = el("button", "close");
+  close.addEventListener("click", () => host.remove());
+  header.append(close);
   panel.append(header);
 
   if (findings.length === 0) {
-    const empty = document.createElement("p");
-    empty.className = "dh-empty";
-    empty.textContent = "No harmful, deprecated or unnecessary markup found in this document.";
-    panel.append(empty);
+    panel.append(el("p", "No harmful, deprecated or unnecessary markup found in this document."));
   } else {
-    const list = document.createElement("ol");
+    const list = el("ol");
     for (const finding of findings) {
-      const item = document.createElement("li");
-      item.innerHTML =
-        `<span class="dh-sev" style="background:${COLOUR[finding.severity]}">` +
-        `${escape(finding.severity)}${finding.possible ? " · possible" : ""}</span> ` +
-        `<span class="dh-id">${escape(finding.ruleId)}</span>` +
-        `<span class="dh-msg">${escape(finding.message)}</span>` +
-        `<span class="dh-fix">${escape(finding.replacement)}</span>` +
-        `<a href="${escape(finding.url)}" target="_blank" rel="noreferrer">${escape(finding.url)}</a>`;
+      const item = el("li");
+      item.append(
+        el("span", `${finding.severity}${finding.possible ? " · possible" : ""}`, `sev ${finding.severity}`),
+        document.createTextNode(" "),
+        el("code", finding.ruleId),
+        el("p", finding.message),
+        el("p", finding.replacement, "fix"),
+      );
+      const link = el("a", finding.url);
+      link.href = finding.url;
+      link.target = "_blank";
+      link.rel = "noreferrer";
+      item.append(link);
       list.append(item);
     }
     panel.append(list);
   }
 
-  document.body.append(panel);
+  root.append(panel);
+  // SVG and XML documents have no body; the root element takes the host.
+  (document.body ?? document.documentElement).append(host);
+  return host;
 }
 
-export function boot(rules: Rule[]): Finding[] {
+/** Base64 of gzip of the slim rule metadata: about a fifth of the literal JSON. */
+async function inflate(payload: string): Promise<unknown> {
+  const bytes = Uint8Array.from(atob(payload), (c) => c.charCodeAt(0));
+  const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"));
+  return JSON.parse(await new Response(stream).text());
+}
+
+export async function start(payload: string, logic: Record<string, MatchFn | CheckFn>): Promise<Finding[]> {
+  const metas = (await inflate(payload)) as RuleMeta[];
+  const rules: Rule[] = metas.map((meta) => {
+    const fn = logic[meta.ruleId];
+    // A module exporting only `fixable` inlines nothing: the DOM has no source
+    // text and never fixes, so the rule runs on its selector alone, the way
+    // the literal build nulled `match` for it.
+    if (fn === undefined) return meta.kind === "element" ? { meta: { ...meta, match: null } } : { meta };
+    return meta.kind === "document" ? { meta, check: fn as CheckFn } : { meta, match: fn as MatchFn };
+  });
   const findings = run(rules, fromDocument(document));
   render(findings);
   return findings;
