@@ -2,13 +2,12 @@
 import { getCollection } from "astro:content";
 import Layout, { REPO } from "../layouts/Layout.astro";
 import RuleList from "../components/RuleList.astro";
-import { severityOrder } from "../vocabulary.ts";
 
-const rules = (await getCollection("rules")).sort(
-  (a, b) =>
-    severityOrder[a.data.severity] - severityOrder[b.data.severity] ||
-    a.data.ruleId.localeCompare(b.data.ruleId),
-);
+const rules = await getCollection("rules");
+const count = (severity: string) => rules.filter((r) => r.data.severity === severity).length;
+const newest = [...rules]
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf() || a.data.ruleId.localeCompare(b.data.ruleId))
+  .slice(0, 8);
 
 const sample = `$ npx deadhead dist
 
@@ -88,10 +87,13 @@ dist/index.html
 
     <h2>The rules</h2>
     <p>
-      {rules.length} so far, worst first.{" "}
-      <a href="/rules">Browse them by namespace</a>.
+      {rules.length} rules: {count("harmful")} harmful, {count("deprecated")} deprecated,{" "}
+      {count("unnecessary")} unnecessary.{" "}
+      <a href="/rules">Browse them by namespace</a>, <a href="/topics">by topic</a> or{" "}
+      <a href="/impacts">by impact</a>.
     </p>
-    <RuleList rules={rules} />
+    <h3>Newest</h3>
+    <RuleList rules={newest} />
 
     <h2>Get it</h2>
     <p>
