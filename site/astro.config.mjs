@@ -48,6 +48,17 @@ export default defineConfig({
   build: { format: "file" },
 
   integrations: [
+    {
+      name: "deadhead-artifacts",
+      hooks: {
+        "astro:build:done": async ({ dir }) => {
+          const { copyFile } = await import("node:fs/promises");
+          for (const name of ["bookmarklet.js", "deadhead.css"]) {
+            await copyFile(new URL(`../packages/browser/${name}`, import.meta.url), new URL(name, dir));
+          }
+        },
+      },
+    },
     sitemap({
       serialize(item) {
         const path =

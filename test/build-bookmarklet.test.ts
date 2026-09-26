@@ -88,12 +88,23 @@ test("the appended start call survives minification", async () => {
 });
 
 test("the javascript: URL fits Firefox's and Safari's 65,536-byte cap", async () => {
-  const { bundleBookmarklet, bookmarkletUrl, MAX_URL_BYTES } = await import("../scripts/build-bookmarklet.ts");
+  const { bundleBookmarklet } = await import("../scripts/build-bookmarklet.ts");
+  const { bookmarkletUrl, MAX_URL_BYTES } = await import("../packages/browser/bookmarklet-url.ts");
   const { readFile } = await import("node:fs/promises");
   const { rules } = JSON.parse(await readFile(new URL("../packages/rules/rules.json", import.meta.url), "utf8"));
   const url = bookmarkletUrl(await bundleBookmarklet(rules));
   assert.ok(url.startsWith("javascript:"));
   assert.ok(Buffer.byteLength(url) <= MAX_URL_BYTES, `URL is ${Buffer.byteLength(url)} bytes`);
+});
+
+test("the URL helper stays import-free so the site can use it", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const source = await readFile(new URL("../packages/browser/bookmarklet-url.ts", import.meta.url), "utf8");
+  assert.doesNotMatch(source, /^\s*import\s/m);
+  assert.doesNotMatch(source, /import\s*\(/);
+  const { bookmarkletUrl, MAX_URL_BYTES } = await import("../packages/browser/bookmarklet-url.ts");
+  assert.equal(MAX_URL_BYTES, 65_536);
+  assert.equal(bookmarkletUrl("a b#c%d"), "javascript:a%20b%23c%25d");
 });
 test("bundleBookmarklet builds in memory and never touches .git", async () => {
   const { bundleBookmarklet } = await import("../scripts/build-bookmarklet.ts");

@@ -36,6 +36,7 @@ import { gzipSync } from "node:zlib";
 import { rolldown } from "rolldown";
 
 import type { RuleMeta } from "../packages/core/vocabulary.ts";
+import { bookmarkletUrl, MAX_URL_BYTES } from "../packages/browser/bookmarklet-url.ts";
 import { ROOT, rel } from "./rules-source.ts";
 
 const ENTRY = resolve(ROOT, "packages/browser/bookmarklet.ts");
@@ -43,13 +44,6 @@ const RULES_JSON = resolve(ROOT, "packages/rules/rules.json");
 const OUT = resolve(ROOT, "packages/browser/bookmarklet.js");
 /** The one page-global the snippet leaves behind. Double runs redeclare it. */
 export const GLOBAL = "__deadhead";
-
-/** Firefox and Safari cap a `javascript:` URL at this many bytes. */
-export const MAX_URL_BYTES = 65_536;
-
-/** A javascript: URL escaping only what a bookmark would mangle, not all of encodeURIComponent's set. */
-export const bookmarkletUrl = (bundle: string): string =>
-  `javascript:${bundle.replace(/[%#\r\n\t ]/g, (c) => encodeURIComponent(c))}`;
 
 /**
  * Exactly the keys the bookmarklet reads: the engine dispatches on selector,

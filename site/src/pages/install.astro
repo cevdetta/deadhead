@@ -1,5 +1,8 @@
 ---
 import Layout, { REPO } from "../layouts/Layout.astro";
+import { bookmarkletUrl } from "../../../packages/browser/bookmarklet-url.ts";
+import bundle from "../../../packages/browser/bookmarklet.js?raw";
+const href = bookmarkletUrl(bundle);
 ---
 
 <Layout
@@ -64,12 +67,17 @@ deadhead --fix dist               # rewrite files, then report what is left</cod
     </p>
 
     <h2>Bookmarklet</h2>
+    <p>Drag this link to your bookmarks bar, then click it on any page:</p>
+    <p><a href={href}>deadhead</a></p>
     <p>
-      A single IIFE with the rules inlined and no <code>fetch</code>, so a
-      strict CSP cannot block it. It reads rendered output, which is the only
-      ground truth when your head tags are assembled by a framework. Build it
-      from the repository with{" "}
-      <code>pnpm build:bookmarklet</code>.
+      It reads the rendered page, where frameworks have already assembled the head,
+      and draws its findings in a panel. It makes no request and runs no eval, so a
+      strict Content-Security-Policy does not block it. To run it from DevTools
+      instead, paste <a href="/bookmarklet.js">bookmarklet.js</a> into Sources → Snippets.
+    </p>
+    <p>
+      <a href="/deadhead.css">deadhead.css</a> does the same without script: add it to
+      a page and the offending tags outline themselves.
     </p>
 
     <h2>ESLint</h2>
