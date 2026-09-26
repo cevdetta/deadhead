@@ -102,6 +102,23 @@ test("the panel lives in a shadow root and adopts a constructed stylesheet", asy
   assert.equal(adopted.length, 1);
 });
 
+test("the panel pins a light color scheme, so a dark page cannot blank the close button", async () => {
+  const { window, document } = parseHTML(
+    '<!doctype html><html lang=en><head><meta name="color-scheme" content="dark light"><title>x</title></head><body></body></html>',
+  );
+  let css = "";
+  class CSSStyleSheet { replaceSync(text: string): void { css = text; } }
+  const proto = Object.getPrototypeOf(document.createElement("div").attachShadow({ mode: "open" }));
+  Object.defineProperty(proto, "adoptedStyleSheets", { configurable: true, get: () => [], set: () => {} });
+  await vm.runInNewContext(bundle, { document, window, CSSStyleSheet, DecompressionStream, Blob, Response, atob, TextDecoder });
+  const rules = new Map([...css.matchAll(/([^{}]+)\{([^}]*)\}/g)].map(([, selector, body]) => [selector!.trim(), body!.replace(/\s/g, "")]));
+  // Browser-default colours (button text, scrollbars) follow the used color
+  // scheme. The panel paints white, so a page declaring dark must not reach it.
+  assert.match(rules.get("section") ?? "", /(^|;)color-scheme:light(;|$)/);
+  // The button paints its own background, so it names its own text colour.
+  assert.match(rules.get("button") ?? "", /(^|;)color:/);
+});
+
 test("it renders a panel, and running it twice does not stack panels", async () => {
   const source = "<!doctype html><html lang='en'><head><title>t</title><meta name='viewport' content='width=device-width'>" +
     '<meta http-equiv="X-UA-Compatible" content="IE=edge"></head><body></body></html>';

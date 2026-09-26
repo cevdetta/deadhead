@@ -20,6 +20,12 @@ test("scope becomes the CSS ancestor", () => {
   assert.equal(scoped({ scope: "any", selector: "meta[charset]" }), "meta[charset]");
 });
 
+test("the scope element itself is in scope, the way the walker counts it", () => {
+  // `body body[bgcolor]` would never match: body has no body ancestor.
+  assert.equal(scoped({ scope: "body", selector: "body[bgcolor], font[color]" }), "body[bgcolor],\nbody font[color]");
+  assert.equal(scoped({ scope: "head", selector: "head[profile]" }), "head[profile]");
+});
+
 test("the scope prefix distributes over every comma branch", () => {
   assert.equal(
     scoped({ scope: "head", selector: "meta[name], meta[property]" }),
@@ -33,7 +39,7 @@ test("the scope prefix distributes over every comma branch", () => {
 
 test("the scope prefix distributes and no branch emits empty", async () => {
   const { SVG_CAMEL } = await import("../scripts/svg-names.ts");
-  const css = renderCss(rules.map((rule) => rule.meta));
+  const css = renderCss(rules);
   assert.ok(css.includes("deadhead"), "expected the rendered stylesheet");
   for (const rule of rules) {
     if (rule.meta.selector === null) continue;
@@ -104,4 +110,17 @@ test("importing build-css writes nothing", async () => {
   assert.equal(typeof mod.renderCss, "function");
   const after = await stat(out).then((s) => s.mtimeMs, () => 0);
   assert.equal(after, before);
+});
+
+test("a rule refined by code stays out; a module exporting only fixable stays in", async () => {
+  const { selectorDecides } = await import("../scripts/build-css.ts");
+  const byId = new Map(rules.map((rule) => [rule.meta.ruleId, rule]));
+  // document/html-lang's selector is `html`: drawing it would outline every page.
+  assert.equal(selectorDecides(byId.get("document/html-lang")!), false);
+  // attr/script-language exports fixable() alone: its selector decides findings.
+  assert.equal(selectorDecides(byId.get("attr/script-language")!), true);
+  const css = renderCss(rules);
+  assert.doesNotMatch(css, /· document\/html-lang"/);
+  assert.match(css, /· attr\/script-language"/);
+  assert.doesNotMatch(css, /approximate|dashed/);
 });

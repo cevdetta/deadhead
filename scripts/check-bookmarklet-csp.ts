@@ -26,6 +26,7 @@ server.listen(0, "127.0.0.1", () => {
       "1. pnpm build:bookmarklet, then copy the printed javascript: URL into a bookmark in Chrome, Firefox and Safari.\n" +
       "2. Open the page, click the bookmark. Pass: a styled panel listing 3 findings, and no CSP or Trusted Types errors in the console.\n" +
       "Ignore the single refusal for /f.ico: the page links it on purpose, and the refusal comes from the page, not the bookmarklet.\n" +
+      "3. Switch the OS or browser to dark mode and click it again. The page declares color-scheme dark light; pass: the panel stays white with a readable close button.\n" +
       "Ctrl-C to stop.\n",
   );
 });

@@ -210,10 +210,10 @@ the devtools snippet: paste it into **Sources → Snippets** and run.
 
 `packages/browser/deadhead.css` outlines offenders in place, in the
 [ct.css](https://csswizardry.com/ct/) spirit, using `head, head * { display: block }` to
-give head elements a box to draw. Only selector-backed rules can appear in it: a
-`kind: "document"` rule asks something CSS cannot ask, and a rule refined by code is
-included but drawn with a dashed outline and labelled `(approximate)`, because the
-stylesheet cannot run the refinement.
+give head elements a box to draw. Only rules whose selector alone decides the finding
+appear in it: a `kind: "document"` rule asks something CSS cannot ask, and a rule
+refined by a `match` function stays out, because its selector is a pre-filter and
+drawing it would outline markup the engine passes.
 
 ### ESLint
 

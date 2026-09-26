@@ -8,21 +8,23 @@
  * `head, head *  { display: block }` gives head elements a box to outline, and
  * `::after` on a void element like `<meta>` renders once it has one.
  *
- * Only selector-backed rules can appear here. A `kind: "document"` rule asks a
- * question CSS cannot ask ("does this start after byte 1024?"), and a rule
- * with `match: "logic"` is refined by code the stylesheet has no way to run —
- * that one is included, deliberately over-matching, and labelled as such.
+ * Only rules whose selector alone decides every finding can appear here. A
+ * `kind: "document"` rule asks a question CSS cannot ask ("does this start
+ * after byte 1024?"), and a `match` function refines its selector in code the
+ * stylesheet cannot run: that selector is a pre-filter (`html` for
+ * document/html-lang), and drawing it would outline markup the engine passes.
  */
 
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { styleText } from "node:util";
 
+import type { Rule } from "../packages/core/engine.ts";
 import { ruleUrl, SITE_URL, type RuleMeta, type Severity } from "../packages/core/vocabulary.ts";
+import { loadRules, RulesNotBuiltError } from "../packages/rules/load.ts";
 import { ROOT, rel } from "./rules-source.ts";
 import { SVG_CAMEL } from "./svg-names.ts";
 
-const IN = resolve(ROOT, "packages/rules/rules.json");
 const OUT = resolve(ROOT, "packages/browser/deadhead.css");
 
 const COLOUR: Record<Severity, string> = {
@@ -53,6 +55,8 @@ const splitTopLevel = (selector: string): string[] => {
   return out.filter((s) => s !== "");
 };
 
+const leadingTag = (alternative: string): string | undefined => /^[a-z][a-z0-9-]*/.exec(alternative)?.[0];
+
 /**
  * `scope` becomes the CSS ancestor, mirroring what the walker does: a rule
  * scoped to `head` must not light up a `<meta>` someone put in the body.
@@ -62,31 +66,40 @@ export const scoped = (meta: Pick<RuleMeta, "scope" | "selector">): string => {
   // A rule's selector may be a comma list; the prefix distributes over it.
   const alternatives = splitTopLevel(meta.selector ?? "");
   const withCamel = alternatives.flatMap((alt) => {
-    const tag = /^[a-z][a-z0-9-]*/.exec(alt)?.[0];
+    const tag = leadingTag(alt);
     const camel = tag === undefined ? undefined : SVG_CAMEL.get(tag);
     return camel === undefined ? [alt] : [alt, camel + alt.slice(tag!.length)];
   });
-  return withCamel.map((part) => `${prefix}${part}`).join(",\n");
+  // The walker counts the scope element as inside its own region, so
+  // `<body bgcolor>` is in body scope; `body body[bgcolor]` would never match
+  // it. An alternative led by the scope's own tag stands bare.
+  return withCamel.map((part) => (leadingTag(part) === meta.scope ? part : `${prefix}${part}`)).join(",\n");
 };
 
+/**
+ * Whether the stylesheet can carry a rule: its selector alone decides every
+ * finding. A module exporting only `fixable` vetoes fixes, not findings, so
+ * its rule stays in.
+ */
+export const selectorDecides = (rule: Pick<Rule, "meta" | "match" | "check">): boolean =>
+  rule.meta.selector !== null &&
+  rule.meta.detectability !== "no" &&
+  rule.match === undefined &&
+  rule.check === undefined;
+
 /** The stylesheet for a rule set. Pure: no I/O. */
-export function renderCss(raw: RuleMeta[]): string {
-  const rules = raw.filter((meta) => meta.selector !== null && meta.detectability !== "no");
-  const skipped = raw.filter((meta) => meta.selector === null);
+export function renderCss(all: Rule[]): string {
+  const rules = all.filter(selectorDecides).map((rule) => rule.meta);
+  const skipped = all.filter((rule) => !selectorDecides(rule)).map((rule) => rule.meta.ruleId);
 
   const blocks = rules.map((meta) => {
     const selector = scoped(meta);
-    const approximate = meta.match === "logic";
-    const label = `${meta.severity} · ${meta.ruleId}${approximate ? " (approximate)" : ""}`;
+    const label = `${meta.severity} · ${meta.ruleId}`;
     return `/* ${meta.ruleId} — ${meta.title}
    ${meta.description}
-   ${ruleUrl(meta.ruleId)}${
-     approximate
-       ? "\n   Approximate: the rule refines this selector in code the stylesheet cannot run."
-       : ""
-   } */
+   ${ruleUrl(meta.ruleId)} */
 ${selector} {
-  outline: 2px ${approximate ? "dashed" : "solid"} ${COLOUR[meta.severity]} !important;
+  outline: 2px solid ${COLOUR[meta.severity]} !important;
   outline-offset: 2px;
 }
 ${selector
@@ -112,9 +125,9 @@ ${selector
  *
  * Every finding is explained at ${SITE_URL}/rules/<ruleId>.
  *
- * ${rules.length} of ${raw.length} rules are expressible as CSS.${
+ * ${rules.length} of ${all.length} rules are expressible as CSS.${
    skipped.length > 0
-     ? `\n * Not here (no selector — they need code): ${skipped.map((m) => m.ruleId).join(", ")}.`
+     ? `\n * Not here (code decides them, so a selector would over-match): ${skipped.join(", ")}.`
      : ""
  }
  */
@@ -138,23 +151,20 @@ ${blocks.join("\n\n")}
 }
 
 if (import.meta.main) {
-  const raw = await readRules();
-  const css = renderCss(raw);
-  const count = raw.filter((meta) => meta.selector !== null && meta.detectability !== "no").length;
+  const all = await readRules();
+  const css = renderCss(all);
+  const count = all.filter(selectorDecides).length;
   await mkdir(dirname(OUT), { recursive: true });
   await writeFile(OUT, css, "utf8");
   process.stdout.write(`${styleText("green", "✓")} ${count} rule(s) → ${rel(OUT)}\n`);
 }
 
-async function readRules(): Promise<RuleMeta[]> {
+async function readRules(): Promise<Rule[]> {
   try {
-    const parsed = JSON.parse(await readFile(IN, "utf8")) as { rules: RuleMeta[] };
-    return parsed.rules;
+    return await loadRules();
   } catch (err) {
-    if ((err as NodeJS.ErrnoException).code === "ENOENT") {
-      process.stderr.write(
-        `${styleText("red", "error")} ${rel(IN)} does not exist — run \`pnpm build\` first.\n`,
-      );
+    if (err instanceof RulesNotBuiltError) {
+      process.stderr.write(`${styleText("red", "error")} ${err.message}\n`);
       process.exit(2);
     }
     throw err;

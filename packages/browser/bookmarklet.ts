@@ -20,16 +20,21 @@ const HOST = "deadhead-panel";
  * and ours in, so no `all: initial` resets are needed. They are applied as a
  * constructed stylesheet through adoptedStyleSheets, which a page's
  * `style-src` does not govern, unlike a `<style>` element.
+ *
+ * The panel is light, so it pins `color-scheme: light`. A page declaring
+ * `<meta name="color-scheme" content="dark light">` otherwise turns the
+ * browser's default colours (button text, scrollbars) light-on-white in dark
+ * mode.
  */
 const PANEL_CSS = `
 :host{all:initial;position:fixed;top:12px;right:12px;z-index:2147483647}
-section{max-height:calc(100vh - 24px);width:min(30rem,calc(100vw - 24px));overflow:auto;
+section{max-height:calc(100vh - 24px);width:min(30rem,calc(100vw - 24px));overflow:auto;color-scheme:light;
  background:#fff;color:#111;border:1px solid #d0d0d0;border-radius:8px;
  box-shadow:0 8px 32px rgba(0,0,0,.24);font:13px/1.5 ui-sans-serif,system-ui,sans-serif}
 header{display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:.6rem .8rem;
  border-bottom:1px solid #e6e6e6;position:sticky;top:0;background:#fff}
 h1{margin:0;font-weight:600;font-size:13px}
-button{font:inherit;cursor:pointer;padding:.1rem .45rem;border:1px solid #d0d0d0;border-radius:4px;background:#fff}
+button{font:inherit;color:inherit;cursor:pointer;padding:.1rem .45rem;border:1px solid #d0d0d0;border-radius:4px;background:#fff}
 ol{list-style:none;padding:0;margin:0}
 li{padding:.6rem .8rem;border-bottom:1px solid #f0f0f0}
 .sev{display:inline-block;padding:0 .4em;border-radius:3px;color:#fff;font:11px/1.6 ui-monospace,monospace}
