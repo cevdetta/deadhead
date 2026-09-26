@@ -140,15 +140,6 @@ pre samp {
   font-size: inherit;
 }
 
-/* Astro emits both Shiki themes inline and expects the page to pick one. */
-@media (prefers-color-scheme: dark) {
-  pre,
-  pre span {
-    color: var(--shiki-dark) !important;
-    background-color: transparent !important;
-  }
-}
-
 blockquote {
   border-inline-start: 3px solid var(--accent);
   padding-inline-start: 1rem;
