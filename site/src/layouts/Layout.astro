@@ -12,7 +12,7 @@ interface Props {
   /** Rule pages are articles; the index pages are not. */
   ogType?: "website" | "article";
   publishedTime?: Date | undefined;
-  /** True for pages with no lasting URL, like 404: no canonical, no og:url. */
+  /** True for pages with no lasting URL, like 404: no canonical, no Open Graph block. */
   noindex?: boolean;
   /** Structured data, rendered as one JSON-LD script after the Open Graph tags. */
   jsonLd?: object;

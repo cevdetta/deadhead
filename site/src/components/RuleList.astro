@@ -12,7 +12,7 @@ const { rules } = Astro.props;
 <ul class="rules">
   {rules.map((rule) => (
     <li>
-      <a href={`/rules/${rule.data.ruleId}`}><code>{rule.data.ruleId}</code></a>
+      <a href={`/rules/${rule.data.ruleId}`}><code>{rule.data.ruleId}</code></a>{" "}
       <span data-severity={rule.data.severity}>{severityLabels[rule.data.severity]}</span>
       <p>{rule.data.description}</p>
     </li>

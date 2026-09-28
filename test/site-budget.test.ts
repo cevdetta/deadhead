@@ -9,9 +9,10 @@ import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
 import { gzipSync } from "node:zlib";
 
-const SCRIPT = new URL("../scripts/site-budget.ts", import.meta.url).pathname;
+const SCRIPT = fileURLToPath(new URL("../scripts/site-budget.ts", import.meta.url));
 
 const gz = (text: string) => gzipSync(Buffer.from(text), { level: 9 }).length;
 
@@ -170,6 +171,43 @@ test("exits 1 and flags OVER on the homeGzip line when its budget is below the m
   });
 });
 
+test("fails when a budget key is missing from site/budget.json", async () => {
+  await withDist(async (dir) => {
+    await writeSyntheticDist(dir);
+    await mkdir(join(dir, "site"), { recursive: true });
+    // cssRaw omitted: a missing key must not fall back to an unbounded limit.
+    const budget = {
+      homeGzip: expected.homeGzip + 100,
+      rulesIndexGzip: expected.rulesIndexGzip + 100,
+      rulePageAvgGzip: expected.rulePageAvgGzip + 100,
+    };
+    await writeFile(join(dir, "site", "budget.json"), JSON.stringify(budget));
+
+    const result = run(dir);
+
+    assert.equal(result.status, 1, result.stdout + result.stderr);
+    assert.match(result.stdout, /✗ site\/budget\.json: missing key "cssRaw"/);
+  });
+});
+
+test("fails when dist/rules has no .html pages", async () => {
+  await withDist(async (dir) => {
+    await mkdir(join(dir, "dist", "_astro"), { recursive: true });
+    await mkdir(join(dir, "dist", "rules"), { recursive: true });
+    await writeFile(join(dir, "dist", "index.html"), home);
+    await writeFile(join(dir, "dist", "rules.html"), rulesIndex);
+    await writeFile(join(dir, "dist", "_astro", "global.abc123.css"), astroCss);
+    await writeFile(join(dir, "dist", "_headers"), validHeaders);
+    await writeFile(join(dir, "dist", "404.html"), notFoundNoindex);
+    await writeBudget(dir);
+
+    const result = run(dir);
+
+    assert.equal(result.status, 1, result.stdout + result.stderr);
+    assert.match(result.stdout, /✗ dist\/rules has no \.html pages/);
+  });
+});
+
 test("passes with no problem lines when _headers and 404.html are both valid", async () => {
   await withDist(async (dir) => {
     await writeSyntheticDist(dir);
@@ -207,6 +245,20 @@ test("fails when _headers also marks another path immutable", async () => {
 
     assert.equal(result.status, 1, result.stdout + result.stderr);
     assert.match(result.stdout, /\/bookmarklet\.js[^\n]*immutable/);
+  });
+});
+
+test("fails when the /_astro/* block lacks the immutable line", async () => {
+  await withDist(async (dir) => {
+    await writeSyntheticDist(dir, {
+      headers: "/_astro/*\n  Cache-Control: public, max-age=31536000\n",
+    });
+    await writeBudget(dir);
+
+    const result = run(dir);
+
+    assert.equal(result.status, 1, result.stdout + result.stderr);
+    assert.match(result.stdout, /\/_astro\/\*[^\n]*missing/);
   });
 });
 
@@ -323,6 +375,15 @@ test("passes a description of 160 characters decoded that is longer raw", async 
   const description = "&lt;meta&gt; &quot;a&quot; &#39;b&#39; &amp; " + "d".repeat(160 - "<meta> \"a\" 'b' & ".length);
   assert.ok(description.length > 160, "sanity: raw form is over the limit");
   const result = await runWithPages({ "index.html": doc("Home page", "home", description) });
+
+  assert.equal(result.status, 0, result.stdout);
+  assert.doesNotMatch(result.stdout, /✗/, result.stdout);
+});
+
+test("skips a page with no <head>, like a search-console verification file", async () => {
+  const result = await runWithPages({
+    "google1234567890abcdef.html": "google-site-verification: google1234567890abcdef.html",
+  });
 
   assert.equal(result.status, 0, result.stdout);
   assert.doesNotMatch(result.stdout, /✗/, result.stdout);

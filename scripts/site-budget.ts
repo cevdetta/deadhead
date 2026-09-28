@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 /**
- * The site is held to a byte budget, like its <head> is held to the rules.
- * Numbers are gzip -9 of the built HTML, and raw bytes of the CSS. Each
- * improvement lowers site/budget.json, so a regression fails check:site.
+ * Gates the built site on four byte budgets in site/budget.json (gzip -9 of
+ * the built HTML, raw bytes of the CSS), dist/_headers immutable caching,
+ * the 404 page's noindex, and every page's title and description length
+ * and uniqueness.
  */
 
 import { readFile, readdir } from "node:fs/promises";
@@ -76,6 +77,10 @@ const pages = (await readdir(dist, { recursive: true })).filter((f) => f.endsWit
 const titles = new Map<string, string>();
 for (const page of pages) {
   const html = await readFile(join(dist, page), "utf8");
+  // A file with no <head>, like a search-console verification page the
+  // maintainer drops into site/public, carries no title or description to
+  // check.
+  if (!/<head[\s>]/i.test(html)) continue;
   const title = decode(/<title>([^<]*)<\/title>/.exec(html)?.[1] ?? "");
   const description = decode(/<meta name="description" content="([^"]*)"/.exec(html)?.[1] ?? "");
   if (title.length === 0 || title.length > TITLE_MAX) {
@@ -90,6 +95,7 @@ for (const page of pages) {
 }
 
 const ruleFiles = (await readdir(join(dist, "rules"), { recursive: true })).filter((f) => f.endsWith(".html"));
+if (ruleFiles.length === 0) problems.push("dist/rules has no .html pages");
 const ruleSizes = await Promise.all(ruleFiles.map((f) => gz(join("rules", f))));
 const css = (await readdir(join(dist, "_astro"))).filter((f) => f.endsWith(".css"));
 const cssRaw = (await Promise.all(css.map((f) => readFile(join(dist, "_astro", f))))).reduce((n, b) => n + b.length, 0);
@@ -97,13 +103,18 @@ const cssRaw = (await Promise.all(css.map((f) => readFile(join(dist, "_astro", f
 const measured: Record<string, number> = {
   homeGzip: await gz("index.html"),
   rulesIndexGzip: await gz("rules.html"),
-  rulePageAvgGzip: Math.round(ruleSizes.reduce((a, b) => a + b, 0) / ruleSizes.length),
+  rulePageAvgGzip: ruleSizes.length === 0 ? 0 : Math.round(ruleSizes.reduce((a, b) => a + b, 0) / ruleSizes.length),
   cssRaw,
 };
 
 let over = false;
 for (const [key, value] of Object.entries(measured)) {
-  const limit = budget[key] ?? Infinity;
+  const limit = budget[key];
+  if (limit === undefined) {
+    problems.push(`site/budget.json: missing key "${key}"`);
+    process.stdout.write(`${key.padEnd(16)} ${String(value).padStart(7)} / ${"missing".padStart(7)}  MISSING\n`);
+    continue;
+  }
   const flag = value > limit ? "OVER" : "ok";
   if (value > limit) over = true;
   process.stdout.write(`${key.padEnd(16)} ${String(value).padStart(7)} / ${String(limit).padStart(7)}  ${flag}\n`);
