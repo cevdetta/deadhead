@@ -71,7 +71,7 @@ test("<template> is walked by default and skippable on request", () => {
 });
 
 test("an empty document walks nothing rather than throwing", () => {
-  assert.deepEqual(visited(""), ["html", "head", "body"], "parse5 implies the structure");
+  assert.deepEqual(visited(""), [], "an empty file is a fragment: nothing is invented around it");
   const seen: string[] = [];
   walk([], (element) => seen.push(element.tag));
   assert.deepEqual(seen, []);

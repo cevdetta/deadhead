@@ -10,7 +10,7 @@
  * reporter, no test helper — may import a parse5 type.
  */
 
-import { type DefaultTreeAdapterTypes, parse } from "parse5";
+import { type DefaultTreeAdapterTypes, defaultTreeAdapter, html, parse, parseFragment } from "parse5";
 import { makeDocumentQueries, makeDoctypePort, withPortCache } from "../core/port.ts";
 import type { DoctypePort, DocumentPort, ElementPort, Parsed, Range } from "../core/types.ts";
 
@@ -32,6 +32,17 @@ const childrenOf = (node: P5Node | P5Parent): P5Node[] => {
   if ("content" in node) return node.content.childNodes;
   return "childNodes" in node ? node.childNodes : [];
 };
+
+/**
+ * The context a fragment is parsed in. A `<template>`'s insertion mode takes
+ * anything a component template holds (`<meta>`, `<title>`, `<tr>`, `<li>`)
+ * and invents no `<html>`, `<head>` or `<body>` around it, which is the tree
+ * `@html-eslint/parser` builds. Offsets still point into the source text.
+ */
+const TEMPLATE = defaultTreeAdapter.createElement("template", html.NS.HTML, []);
+
+/** parse5 leaves the elements it invents (an implied `<html>`, `<head>` or `<body>`) without a source location. */
+const written = (node: P5Element): boolean => node.sourceCodeLocation != null;
 
 /** Concatenated text of every descendant, in document order. */
 function textOf(node: P5Element): string {
@@ -161,6 +172,19 @@ function doctypeOf(document: DefaultTreeAdapterTypes.Document): DoctypePort | nu
  */
 export function parseHtml(source: string): Parsed {
   const document = parse(source, { sourceCodeLocationInfo: true });
+  const doctype = doctypeOf(document);
+  const htmlElement = document.childNodes.find(isElement);
+  const page = doctype !== null || (htmlElement !== undefined && written(htmlElement));
+
+  // A fragment gets the tree its author wrote. A layout partial that writes
+  // <head> or <body> keeps the document parse, minus the <html> parse5
+  // invented; anything else is parsed again as template content, which keeps
+  // a bare <tr> that the document parse drops. (In the document parse the
+  // only element children of <html> are <head> and <body>.)
+  const writesHalves =
+    htmlElement !== undefined && htmlElement.childNodes.some((child) => isElement(child) && written(child));
+  const top: P5Parent =
+    page || writesHalves ? document : parseFragment(TEMPLATE, source, { sourceCodeLocationInfo: true });
 
   const elements: P5Element[] = [];
   const parents = new WeakMap<P5Element, P5Element>();
@@ -180,10 +204,12 @@ export function parseHtml(source: string): Parsed {
   // recursive walk dies on it. Children are pushed in reverse so they pop in
   // document order.
   const roots: P5Element[] = [];
-  const stack: [P5Node | P5Parent, P5Element | null][] = [[document, null]];
+  const stack: [P5Node | P5Parent, P5Element | null][] = [[top, null]];
   while (stack.length > 0) {
     const [node, parent] = stack.pop()!;
-    const element = isElement(node) ? node : null;
+    // On a fragment an element parse5 invented is left out, and its children
+    // move up to the nearest written ancestor, as the author wrote them.
+    const element = isElement(node) && (page || written(node)) ? node : null;
     if (element !== null) {
       elements.push(element);
       const tag = element.tagName.toLowerCase();
@@ -202,11 +228,6 @@ export function parseHtml(source: string): Parsed {
   }
 
   const portFor = makePorts(parents, elementChildren);
-
-  const doctype = doctypeOf(document);
-  // parse5 leaves an <html> it invented without a source location.
-  const htmlElement = roots.find((node) => node.tagName === "html");
-  const page = doctype !== null || htmlElement?.sourceCodeLocation != null;
 
   const doc: DocumentPort = {
     doctype: () => doctype,
