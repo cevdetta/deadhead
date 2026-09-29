@@ -179,6 +179,7 @@ export function parseHtml(source: string): Parsed {
   // An explicit stack: markup nested thousands deep is legal HTML, and a
   // recursive walk dies on it. Children are pushed in reverse so they pop in
   // document order.
+  const roots: P5Element[] = [];
   const stack: [P5Node | P5Parent, P5Element | null][] = [[document, null]];
   while (stack.length > 0) {
     const [node, parent] = stack.pop()!;
@@ -194,7 +195,7 @@ export function parseHtml(source: string): Parsed {
         const siblings = elementChildren.get(parent);
         if (siblings === undefined) elementChildren.set(parent, [element]);
         else siblings.push(element);
-      }
+      } else roots.push(element);
     }
     const children = childrenOf(node);
     for (let i = children.length - 1; i >= 0; i--) stack.push([children[i]!, element ?? parent]);
@@ -202,14 +203,16 @@ export function parseHtml(source: string): Parsed {
 
   const portFor = makePorts(parents, elementChildren);
 
-  const root = elements.find((node) => node.tagName.toLowerCase() === "html") ?? elements[0];
-
   const doctype = doctypeOf(document);
+  // parse5 leaves an <html> it invented without a source location.
+  const htmlElement = roots.find((node) => node.tagName === "html");
+  const page = doctype !== null || htmlElement?.sourceCodeLocation != null;
 
   const doc: DocumentPort = {
     doctype: () => doctype,
+    isPage: () => page,
     ...makeDocumentQueries(elements, byTag, portFor),
   };
 
-  return { root: root === undefined ? null : portFor(root), doc, source };
+  return { roots: roots.map(portFor), doc, source };
 }
