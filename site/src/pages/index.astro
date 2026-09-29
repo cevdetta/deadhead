@@ -3,12 +3,22 @@ import { getCollection } from "astro:content";
 import Layout, { REPO } from "../layouts/Layout.astro";
 import RuleList from "../components/RuleList.astro";
 import { AUTHOR, SITE_NAME } from "../lib/seo.ts";
+import { namespaceBlurbs } from "../vocabulary.ts";
 
 const rules = await getCollection("rules");
 const count = (severity: string) => rules.filter((r) => r.data.severity === severity).length;
 const newest = [...rules]
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf() || a.data.ruleId.localeCompare(b.data.ruleId))
   .slice(0, 8);
+
+// Namespaces in the order the rules index lists them, with their counts.
+const namespaces = [...new Set(rules.map((r) => r.data.ruleId.split("/")[0]!))]
+  .sort()
+  .map((namespace) => ({
+    namespace,
+    count: rules.filter((r) => r.data.ruleId.startsWith(`${namespace}/`)).length,
+    blurb: namespaceBlurbs[namespace] ?? "",
+  }));
 
 const sample = `$ npx deadhead dist
 
@@ -97,6 +107,16 @@ const jsonLd = {
       identical findings. That is what stops them
       drifting.
     </p>
+
+    <h2>What it catches</h2>
+    <dl>
+      {namespaces.map(({ namespace, count, blurb }) => (
+        <div>
+          <dt><a href={`/rules#${namespace}`}><code>{namespace}/</code></a></dt>
+          <dd>{blurb}<small>{count} rules</small></dd>
+        </div>
+      ))}
+    </dl>
 
     <h2>The rules</h2>
     <p>
