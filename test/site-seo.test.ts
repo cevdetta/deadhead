@@ -32,10 +32,27 @@ export const WEBSITE_LD = ld({
   publisher: { "@type": "Person", name: "Cevdet", url: "https://github.com/cevdetta" },
 });
 
+export const ARTICLE_LD = ld({
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      headline: "Rule meta/a",
+      description: "A synthetic page, described at a length the checks accept.",
+      url: "https://deadhead.cevdet.ch/rules/meta/a",
+      datePublished: "2026-09-28",
+      dateModified: "2026-09-29",
+      author: { "@type": "Person", name: "Cevdet", url: "https://github.com/cevdetta" },
+      citation: ["https://example.com/one", "https://example.com/two"],
+    },
+    { "@type": "BreadcrumbList", itemListElement: [] },
+  ],
+});
+
 /** The smallest dist that passes: a home page and one rule page. */
 const defaultPages = (): Record<string, string> => ({
   "index.html": page({ title: "deadhead: lint the HTML head for dead and harmful markup", description: HOME_DESCRIPTION, head: WEBSITE_LD }),
-  "rules/meta/a.html": page({ title: "Rule meta/a" }),
+  "rules/meta/a.html": page({ title: "Rule meta/a", head: ARTICLE_LD }),
 });
 
 async function runGate(pages: Record<string, string>): Promise<{ status: number | null; out: string }> {
@@ -60,8 +77,8 @@ test("passes a dist whose pages each carry one h1", async () => {
 
 test("fails a page with no h1 or with two", async () => {
   const pages = defaultPages();
-  pages["rules/meta/a.html"] = page({ body: "<p>no heading</p>" });
-  pages["rules/meta/b.html"] = page({ title: "Rule meta/b", body: "<h1>one</h1><h1>two</h1>" });
+  pages["rules/meta/a.html"] = page({ head: ARTICLE_LD, body: "<p>no heading</p>" });
+  pages["rules/meta/b.html"] = page({ title: "Rule meta/b", head: ARTICLE_LD, body: "<h1>one</h1><h1>two</h1>" });
   const { status, out } = await runGate(pages);
   assert.equal(status, 1);
   assert.match(out, /rules\/meta\/a\.html: 0 <h1> elements/);
@@ -106,4 +123,20 @@ test("fails a JSON-LD block that does not parse", async () => {
   const { status, out } = await runGate(pages);
   assert.equal(status, 1);
   assert.match(out, /rules\/meta\/a\.html: JSON-LD does not parse/);
+});
+
+test("fails a rule page whose TechArticle lacks a field", async () => {
+  const pages = defaultPages();
+  pages["rules/meta/a.html"] = page({ title: "Rule meta/a", head: ARTICLE_LD.replace('"dateModified":"2026-09-29",', "") });
+  const { status, out } = await runGate(pages);
+  assert.equal(status, 1);
+  assert.match(out, /rules\/meta\/a\.html: TechArticle lacks dateModified/);
+});
+
+test("fails a rule page citing fewer than two sources", async () => {
+  const pages = defaultPages();
+  pages["rules/meta/a.html"] = page({ title: "Rule meta/a", head: ARTICLE_LD.replace('"https://example.com/one",', "") });
+  const { status, out } = await runGate(pages);
+  assert.equal(status, 1);
+  assert.match(out, /rules\/meta\/a\.html: TechArticle cites 1 sources, want 2 or more/);
 });

@@ -87,6 +87,22 @@ if (home !== undefined) {
   }
 }
 
+// Rule pages are articles: headline, dates, author and the sources the rule
+// cites (decisions S4, S5). validate:rules guarantees two or more sources.
+const ARTICLE_FIELDS = ["headline", "description", "url", "datePublished", "dateModified", "author"] as const;
+for (const { path } of pages.filter((p) => p.path.startsWith("rules/"))) {
+  const article = nodesByPage.get(path)?.find((n) => n["@type"] === "TechArticle");
+  if (article === undefined) {
+    problems.push(`${path}: no JSON-LD TechArticle node`);
+    continue;
+  }
+  for (const field of ARTICLE_FIELDS) {
+    if (article[field] === undefined) problems.push(`${path}: TechArticle lacks ${field}`);
+  }
+  const cited = Array.isArray(article["citation"]) ? article["citation"].length : 0;
+  if (cited < 2) problems.push(`${path}: TechArticle cites ${cited} sources, want 2 or more`);
+}
+
 for (const problem of problems) process.stdout.write(`✗ ${problem}\n`);
 if (problems.length === 0) process.stdout.write(`✓ SEO checks passed on ${pages.length} pages\n`);
 process.exit(problems.length > 0 ? 1 : 0);
