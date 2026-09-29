@@ -2,6 +2,7 @@
 import { getCollection } from "astro:content";
 import Layout, { REPO } from "../layouts/Layout.astro";
 import RuleList from "../components/RuleList.astro";
+import { AUTHOR, SITE_NAME } from "../lib/seo.ts";
 
 const rules = await getCollection("rules");
 const count = (severity: string) => rules.filter((r) => r.data.severity === severity).length;
@@ -19,11 +20,27 @@ dist/index.html
        https://deadhead.cevdet.ch/rules/meta/revisit-after
 
 ✖ 1 finding (1 unnecessary)`;
+
+const description =
+  "A documentation-driven linter for the HTML head: it finds deprecated, unnecessary and harmful markup, and every finding links to a sourced explanation.";
+
+// The site name Google shows in results comes from a WebSite node on the
+// home page. No SearchAction: meta/json-ld-search-action reports it.
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: SITE_NAME,
+  url: new URL("/", Astro.site).href,
+  description,
+  inLanguage: "en",
+  publisher: { "@type": "Person", name: AUTHOR.name, url: AUTHOR.url },
+};
 ---
 
 <Layout
   title="deadhead: lint the HTML head for dead and harmful markup"
-  description="A documentation-driven linter for the HTML head: it finds deprecated, unnecessary and harmful markup, and every finding links to a sourced explanation."
+  description={description}
+  jsonLd={jsonLd}
 >
     <h1>Lint the HTML head for dead, deprecated and harmful markup</h1>
     <p class="lede">

@@ -21,9 +21,20 @@ type Parts = { title?: string; description?: string; head?: string; body?: strin
 const page = ({ title = "A page", description = "A synthetic page, described at a length the checks accept.", head = "", body = "<h1>A page</h1>" }: Parts = {}) =>
   `<!doctype html><html lang="en"><head><title>${title}</title><meta name="description" content="${description}">${head}</head><body>${body}</body></html>`;
 
+const ld = (value: object) => `<script type="application/ld+json">${JSON.stringify(value)}</script>`;
+
+export const WEBSITE_LD = ld({
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "deadhead",
+  url: "https://deadhead.cevdet.ch/",
+  inLanguage: "en",
+  publisher: { "@type": "Person", name: "Cevdet", url: "https://github.com/cevdetta" },
+});
+
 /** The smallest dist that passes: a home page and one rule page. */
 const defaultPages = (): Record<string, string> => ({
-  "index.html": page({ title: "deadhead: lint the HTML head for dead and harmful markup", description: HOME_DESCRIPTION }),
+  "index.html": page({ title: "deadhead: lint the HTML head for dead and harmful markup", description: HOME_DESCRIPTION, head: WEBSITE_LD }),
   "rules/meta/a.html": page({ title: "Rule meta/a" }),
 });
 
@@ -79,4 +90,20 @@ test("fails a home description under 120 characters", async () => {
   const { status, out } = await runGate(pages);
   assert.equal(status, 1);
   assert.match(out, /index\.html: description is 59 characters, want 120-160/);
+});
+
+test("fails a home page without a WebSite node", async () => {
+  const pages = defaultPages();
+  pages["index.html"] = page({ title: "deadhead", description: HOME_DESCRIPTION });
+  const { status, out } = await runGate(pages);
+  assert.equal(status, 1);
+  assert.match(out, /index\.html: no JSON-LD WebSite node with name and url/);
+});
+
+test("fails a JSON-LD block that does not parse", async () => {
+  const pages = defaultPages();
+  pages["rules/meta/a.html"] = page({ head: '<script type="application/ld+json">{"@type": </script>' });
+  const { status, out } = await runGate(pages);
+  assert.equal(status, 1);
+  assert.match(out, /rules\/meta\/a\.html: JSON-LD does not parse/);
 });

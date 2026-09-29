@@ -55,6 +55,38 @@ if (home === undefined) {
   }
 }
 
+/** Every node of every JSON-LD block on the page, `@graph` flattened. A block that fails to parse adds a problem. */
+const jsonLdNodes = (path: string, html: string): Record<string, unknown>[] => {
+  const nodes: Record<string, unknown>[] = [];
+  for (const match of html.matchAll(/<script type="application\/ld\+json">([^]*?)<\/script>/g)) {
+    let value: unknown;
+    try {
+      value = JSON.parse(match[1] ?? "");
+    } catch {
+      problems.push(`${path}: JSON-LD does not parse`);
+      continue;
+    }
+    const top = Array.isArray(value) ? value : [value];
+    for (const node of top) {
+      if (node === null || typeof node !== "object") continue;
+      const graph = (node as { "@graph"?: unknown })["@graph"];
+      if (Array.isArray(graph)) nodes.push(...(graph as Record<string, unknown>[]));
+      else nodes.push(node as Record<string, unknown>);
+    }
+  }
+  return nodes;
+};
+
+const nodesByPage = new Map(pages.map(({ path, html }) => [path, jsonLdNodes(path, html)]));
+
+// The home page names the site for search results (decision S4).
+if (home !== undefined) {
+  const website = nodesByPage.get("index.html")?.find((n) => n["@type"] === "WebSite");
+  if (website === undefined || typeof website["name"] !== "string" || typeof website["url"] !== "string") {
+    problems.push("index.html: no JSON-LD WebSite node with name and url");
+  }
+}
+
 for (const problem of problems) process.stdout.write(`✗ ${problem}\n`);
 if (problems.length === 0) process.stdout.write(`✓ SEO checks passed on ${pages.length} pages\n`);
 process.exit(problems.length > 0 ? 1 : 0);
