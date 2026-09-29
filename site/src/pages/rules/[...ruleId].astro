@@ -3,19 +3,22 @@ import { getCollection, render } from "astro:content";
 import Layout, { REPO } from "../../layouts/Layout.astro";
 import RuleFacts from "../../components/RuleFacts.astro";
 import { ruleCoreTitle } from "../../lib/seo.ts";
+import { modifiedDate, ruleCommitDates } from "../../lib/lastmod.ts";
 
 // The route is `[...ruleId]` rather than `[ruleId]` because a ruleId contains a
 // slash: `meta/keywords` is one id, not two segments. This URL is the contract
 // `packages/core/vocabulary.ts` prints in every finding.
 export async function getStaticPaths() {
   const rules = await getCollection("rules");
+  // One git pass for all rule pages, not one per page.
+  const committed = ruleCommitDates(process.cwd());
   return rules.map((rule) => ({
     params: { ruleId: rule.data.ruleId },
-    props: { rule },
+    props: { rule, modified: modifiedDate(rule.data.pubDate.toISOString().slice(0, 10), committed.get(rule.data.ruleId)) },
   }));
 }
 
-const { rule } = Astro.props;
+const { rule, modified } = Astro.props;
 const { Content } = await render(rule);
 const { data } = rule;
 
@@ -39,6 +42,7 @@ const jsonLd = {
   description={data.description}
   ogType="article"
   publishedTime={data.pubDate}
+  modifiedTime={new Date(`${modified}T00:00:00Z`)}
   jsonLd={jsonLd}
 >
   <article>
