@@ -53,6 +53,9 @@ export const ARTICLE_LD = ld({
 const defaultPages = (): Record<string, string> => ({
   "index.html": page({ title: "deadhead: lint the HTML head for dead and harmful markup", description: HOME_DESCRIPTION, head: WEBSITE_LD }),
   "rules/meta/a.html": page({ title: "Rule meta/a", head: ARTICLE_LD }),
+  "llms.txt": "# deadhead\n\n> A linter.\n\n## meta/\n\n- [meta/a](https://deadhead.cevdet.ch/rules/meta/a.md): a rule.\n",
+  "llms-full.txt": "# deadhead\n\n# Rule meta/a\n",
+  "rules/meta/a.md": "# Rule meta/a\n\n> A synthetic rule.\n",
 });
 
 async function runGate(pages: Record<string, string>): Promise<{ status: number | null; out: string }> {
@@ -139,4 +142,37 @@ test("fails a rule page citing fewer than two sources", async () => {
   const { status, out } = await runGate(pages);
   assert.equal(status, 1);
   assert.match(out, /rules\/meta\/a\.html: TechArticle cites 1 sources, want 2 or more/);
+});
+
+test("fails an llms.txt that misses a rule's markdown copy", async () => {
+  const pages = defaultPages();
+  pages["rules/meta/b.html"] = page({ title: "Rule meta/b", head: ARTICLE_LD });
+  pages["rules/meta/b.md"] = "# Rule meta/b\n";
+  const { status, out } = await runGate(pages);
+  assert.equal(status, 1);
+  assert.match(out, /llms\.txt: no link to \/rules\/meta\/b\.md/);
+});
+
+test("fails a rule page without its markdown copy", async () => {
+  const pages = defaultPages();
+  delete pages["rules/meta/a.md"];
+  const { status, out } = await runGate(pages);
+  assert.equal(status, 1);
+  assert.match(out, /rules\/meta\/a\.md: missing/);
+});
+
+test("fails an llms.txt without the proposal's H1 and summary", async () => {
+  const pages = defaultPages();
+  pages["llms.txt"] = "- [meta/a](https://deadhead.cevdet.ch/rules/meta/a.md): a rule.\n";
+  const { status, out } = await runGate(pages);
+  assert.equal(status, 1);
+  assert.match(out, /llms\.txt: must open with "# " and a "> " summary/);
+});
+
+test("fails a dist without llms-full.txt", async () => {
+  const pages = defaultPages();
+  delete pages["llms-full.txt"];
+  const { status, out } = await runGate(pages);
+  assert.equal(status, 1);
+  assert.match(out, /llms-full\.txt: missing/);
 });

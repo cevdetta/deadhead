@@ -103,6 +103,29 @@ for (const { path } of pages.filter((p) => p.path.startsWith("rules/"))) {
   if (cited < 2) problems.push(`${path}: TechArticle cites ${cited} sources, want 2 or more`);
 }
 
+// llms.txt per https://llmstxt.org: an H1, a blockquote summary, and a link
+// to the markdown copy of every rule page; each copy exists; llms-full.txt
+// exists (decision S8).
+const readText = (rel: string) => readFile(join(dist, rel), "utf8").catch(() => null);
+const rulePages = pages.filter((p) => p.path.startsWith("rules/"));
+const llms = await readText("llms.txt");
+if (llms === null) {
+  problems.push("llms.txt: missing");
+} else {
+  if (!/^# .+\n\n> .+/.test(llms)) problems.push('llms.txt: must open with "# " and a "> " summary');
+  for (const { path } of rulePages) {
+    const md = `/${path.replace(/\.html$/, ".md")}`;
+    if (!llms.includes(`${md})`)) problems.push(`llms.txt: no link to ${md}`);
+  }
+}
+for (const { path } of rulePages) {
+  const md = path.replace(/\.html$/, ".md");
+  const text = await readText(md);
+  if (text === null) problems.push(`${md}: missing`);
+  else if (!text.startsWith("# ")) problems.push(`${md}: must open with "# "`);
+}
+if ((await readText("llms-full.txt")) === null) problems.push("llms-full.txt: missing");
+
 for (const problem of problems) process.stdout.write(`✗ ${problem}\n`);
 if (problems.length === 0) process.stdout.write(`✓ SEO checks passed on ${pages.length} pages\n`);
 process.exit(problems.length > 0 ? 1 : 0);
