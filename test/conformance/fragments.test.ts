@@ -81,3 +81,25 @@ test("a fix splices the fragment's own text", () => {
   assert.doesNotMatch(output, /keywords/);
   assert.match(output, /^<nav><\/nav>\n/);
 });
+
+/** What each fragment reports: the markup it holds, never head content it lacks. */
+const EXPECTED: Record<string, string[]> = {
+  "component.html": ["element/center"],
+  "dublin-core-partial.html": [],
+  "duplicate-title.html": ["head/title"],
+  "head-partial.html": ["meta/http-equiv-x-ua-compatible"],
+  "late-charset.html": ["head/charset-position"],
+  "layout.html": ["attr/body-presentational"],
+  "mixed.html": ["meta/keywords"],
+  "og-partial.html": [],
+  "row.html": ["attr/td-abbr-axis-scope"],
+};
+
+test("a fragment reports what it holds and no head content it lacks", () => {
+  assert.deepEqual(Object.keys(EXPECTED).sort(), names, "every fragment needs an expected list");
+  for (const [name, source] of sources) {
+    for (const [adapter, parse] of Object.entries(ADAPTERS)) {
+      assert.deepEqual(run(rules, parse(source)).map((f) => f.ruleId), EXPECTED[name], `${adapter}: ${name}`);
+    }
+  }
+});
