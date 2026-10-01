@@ -36,3 +36,25 @@ test("each package reports its own manifest's name and version", async () => {
   const plugin = await manifest("eslint-plugin");
   assert.deepEqual(meta, { name: plugin.name, version: plugin.version, namespace: "deadhead" });
 });
+
+test("the built packages are plain ESM with generated types and a runnable bin", async () => {
+  const build = spawnSync(process.execPath, ["scripts/build-packages.ts"], { encoding: "utf8" });
+  assert.equal(build.status, 0, build.stderr);
+  const read = (file: string) => readFile(new URL(`../packages/${file}`, import.meta.url), "utf8");
+  for (const file of ["cli/dist/deadhead.js", "cli/dist/index.js", "cli/dist/worker.js", "eslint-plugin/dist/index.js"]) {
+    assert.doesNotMatch(await read(file), /from\s*["'][^"']+\.ts["']/, `${file} imports .ts`);
+  }
+  assert.match(await read("cli/dist/deadhead.js"), /^#!\/usr\/bin\/env node\n/);
+  const cliTypes = await read("cli/dist/index.d.ts");
+  assert.match(cliTypes, /defineConfig/);
+  assert.match(cliTypes, /DeadheadConfig/);
+  const pluginTypes = await read("eslint-plugin/dist/index.d.ts");
+  assert.match(pluginTypes, /from "eslint"/);
+  assert.match(pluginTypes, /export default |as default\b/);
+  // Region comments name source files; import specifiers must not.
+  for (const types of [cliTypes, pluginTypes]) {
+    assert.doesNotMatch(types, /from\s*["'][^"']*(packages\/|\.ts["'])/, "no repo paths or .ts specifiers in types");
+  }
+  const run = spawnSync(process.execPath, ["packages/cli/dist/deadhead.js", "--version"], { encoding: "utf8" });
+  assert.equal(run.stdout.trim(), (await manifest("cli")).version);
+});
