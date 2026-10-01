@@ -66,5 +66,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.ref_name }}
         run: |
-          awk -v v="## ${TAG#v}" '$0==v{f=1;next} /^## /{f=0} f' CHANGELOG.md > notes.md
+          # The section headed "## X.Y.Z" or "## X.Y.Z - <date>", up to the next one.
+          awk -v v="## ${TAG#v}" '$0==v || index($0, v " - ")==1 {f=1;next} /^## /{f=0} f' CHANGELOG.md > notes.md
+          test -s notes.md
           gh release create "$TAG" --verify-tag --title "$TAG" --notes-file notes.md
