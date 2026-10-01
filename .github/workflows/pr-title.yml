@@ -1,7 +1,7 @@
 name: PR title
 
-# Squash merges use the PR title as the commit subject, and
-# scripts/release.ts drafts the changelog from those subjects. So the title
+# Squash merges use the PR title as the commit subject, and git-cliff
+# (cliff.toml) builds the changelog from those subjects. So the title
 # must be a Conventional Commit: `feat(rule): meta/keywords`, `fix(core): …`,
 # `site: …`. Its own workflow, so editing a title re-runs this check alone.
 

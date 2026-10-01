@@ -54,11 +54,19 @@ jobs:
 
       # Node 24 ships npm 11.19: `stage` needs 11.15, OIDC 11.5.1. No token and
       # no registry-url: trusted publishing exchanges this job's OIDC token.
+      # A version already on npm (0.1.0, published by hand before trusted
+      # publishing could exist) is left alone; the release notes still follow.
       - name: Stage both packages
         run: |
           npm --version
-          for tarball in tarballs/*.tgz; do
-            npm stage publish "$tarball" --access public
+          for pkg in packages/cli packages/eslint-plugin; do
+            name=$(node -p "require('./$pkg/package.json').name")
+            version=$(node -p "require('./$pkg/package.json').version")
+            if npm view "$name@$version" version >/dev/null 2>&1; then
+              echo "$name@$version is already on npm; not staging it"
+              continue
+            fi
+            npm stage publish "tarballs/$name-$version.tgz" --access public
           done
 
       - name: GitHub Release
