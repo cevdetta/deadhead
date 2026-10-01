@@ -90,3 +90,22 @@ jobs:
       - run: pnpm build
       - run: pnpm site:check
       - run: pnpm check:site
+
+  packages:
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: pnpm/setup@fbda4c85fc2e1e08721cd8763afea8f48d60f024 # v3
+        with:
+          runtime: node@24
+          require-lockfile: true
+
+      # What would be published, checked as npm and a consumer see it: publint
+      # and the pack list, then the tarballs installed into an empty ESM
+      # project with ESLint 10 and TypeScript 7 and used for real.
+      - run: pnpm check:packages
+      - run: pnpm smoke:packages
