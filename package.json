@@ -26,8 +26,7 @@
     "site:build": "pnpm build && pnpm build:css && pnpm build:bookmarklet && pnpm --filter @deadhead/site build",
     "site:preview": "pnpm --filter @deadhead/site preview",
     "site:check": "pnpm --filter @deadhead/site check",
-    "lint:deps": "e18e-cli analyze --log-level error --report-level warn",
-    "prepublishOnly": "publint"
+    "lint:deps": "e18e-cli analyze --log-level error --report-level warn"
   },
   "devDependencies": {
     "@e18e/cli": "0.7.0",

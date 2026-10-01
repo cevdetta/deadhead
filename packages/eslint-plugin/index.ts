@@ -19,6 +19,7 @@
  */
 
 import * as htmlParser from "@html-eslint/parser";
+import manifest from "./package.json" with { type: "json" };
 
 import { type CompiledRules, compile, runCompiled } from "../core/engine.ts";
 import { parseSuppressions } from "../core/suppressions.ts";
@@ -156,7 +157,12 @@ export const rules: Record<string, EslintRule> = Object.fromEntries(
   loaded.map((rule) => [rule.meta.ruleId, toEslintRule(rule)]),
 );
 
-export const meta = { name: "eslint-plugin-deadhead", version: "0.0.0" };
+/** `namespace` is the prefix users type: `deadhead/meta/keywords`. */
+export const meta: { name: string; version: string; namespace: string } = {
+  name: manifest.name,
+  version: manifest.version,
+  namespace: "deadhead",
+};
 
 const levels = (list: DeadheadRule[]): Record<string, "error" | "warn"> =>
   Object.fromEntries(list.map((r) => [`deadhead/${r.meta.ruleId}`, r.meta.severity === "harmful" ? "error" : "warn"]));
