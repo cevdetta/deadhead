@@ -1,14 +1,19 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
 import test from "node:test";
 
 import { classifyRaw, duplicateRanks, isBlocked, type RawFacts } from "../corpus/classify.ts";
 import { errorKind, fetchSite, USER_AGENT } from "../corpus/fetch.ts";
+import { lintRecord, RENDER_EXCLUDED } from "../corpus/lint.ts";
 import { parseList } from "../corpus/list.ts";
 import { chromiumArgs } from "../corpus/render.ts";
 import { disallowsRoot, TOKEN } from "../corpus/robots.ts";
 import { eachLimited, recordFile } from "../corpus/snapshot.ts";
+import type { SnapshotRecord } from "../corpus/types.ts";
+import { compileForRun } from "../packages/cli/lint.ts";
+import { loadRules } from "../packages/rules/load.ts";
 import { wilson } from "../corpus/stats.ts";
 
 const round4 = ([lo, hi]: [number, number]): [number, number] => [Math.round(lo * 1e4) / 1e4, Math.round(hi * 1e4) / 1e4];
@@ -170,4 +175,60 @@ test("snapshot: at most n tasks at once, every item once", async () => {
   assert.equal(peak, 3);
   assert.deepEqual(seen.sort((a, b) => a - b), [1, 2, 3, 4, 5, 6, 7]);
   assert.equal(recordFile("d", 42, "example.org"), "d/00042-example.org.json.gz");
+});
+
+const page = (head: string): string =>
+  `<!doctype html><html lang="en"><head>${head}<title>Home</title><meta name="viewport" content="width=device-width"></head><body><p>${"x".repeat(20_000)}</p></body></html>`;
+
+const record = (raw: string | null, rendered: string | null, overrides: Partial<SnapshotRecord> = {}): SnapshotRecord => ({
+  rank: 7,
+  domain: "example.org",
+  listId: "TEST",
+  fetchedAt: "2026-10-02T00:00:00.000Z",
+  robots: "allowed",
+  tried: ["https://example.org/"],
+  finalUrl: "https://www.example.org/",
+  status: 200,
+  contentType: "text/html",
+  bytes: raw === null ? 0 : Buffer.byteLength(raw),
+  truncated: false,
+  error: null,
+  errorMessage: null,
+  raw: raw === null ? null : Buffer.from(raw).toString("base64"),
+  rendered,
+  renderError: null,
+  ms: { robots: 1, raw: 1, render: 1 },
+  ...overrides,
+});
+
+test("lint: raw and rendered counts per rule, source-position rules left out of rendered", async () => {
+  const compiled = compileForRun(await loadRules(), {});
+  // charset after the first 1024 bytes trips head/charset-position in raw HTML.
+  const html = page(`<!-- ${"p".repeat(1100)} --><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge">`);
+  const { line } = lintRecord(record(html, html), compiled);
+  assert.equal(line.raw.outcome, "linted");
+  assert.equal(line.rendered.outcome, "linted");
+  assert.equal(line.finalOrigin, "https://www.example.org");
+  assert.equal(line.raw.counts?.["meta/http-equiv-x-ua-compatible"], 1);
+  assert.equal(line.rendered.counts?.["meta/http-equiv-x-ua-compatible"], 1);
+  assert.equal(line.raw.counts?.["head/charset-position"], 1);
+  assert.equal(line.rendered.counts?.["head/charset-position"], undefined);
+});
+
+test("lint: no counts for a site that was not linted", async () => {
+  const compiled = compileForRun(await loadRules(), {});
+  const skipped = lintRecord(record(null, null, { robots: "disallowed", tried: [], finalUrl: null, status: null }), compiled).line;
+  assert.equal(skipped.raw.outcome, "skipped");
+  assert.equal(skipped.raw.counts, null);
+  assert.equal(skipped.rendered.outcome, "not-rendered");
+  const failedRender = lintRecord(record(page(""), null, { renderError: "timeout" }), compiled).line;
+  assert.equal(failedRender.rendered.outcome, "failed");
+  assert.equal(failedRender.rendered.counts, null);
+});
+
+test("lint: the rendered exclusions match the conformance suite's source-dependent rules", async () => {
+  const source = await readFile(new URL("conformance/adapters.test.ts", import.meta.url), "utf8");
+  const literal = /const SOURCE_DEPENDENT = new Set\((\[[^\]]*\])\)/.exec(source)?.[1];
+  assert.ok(literal, "SOURCE_DEPENDENT not found in test/conformance/adapters.test.ts");
+  assert.deepEqual([...RENDER_EXCLUDED].sort(), (JSON.parse(literal) as string[]).sort());
 });
