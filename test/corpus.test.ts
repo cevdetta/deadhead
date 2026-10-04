@@ -4,6 +4,7 @@ import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
 import test from "node:test";
 
+import { aggregate } from "../corpus/aggregate.ts";
 import { classifyRaw, duplicateRanks, isBlocked, type RawFacts } from "../corpus/classify.ts";
 import { errorKind, fetchSite, USER_AGENT } from "../corpus/fetch.ts";
 import { lintRecord, RENDER_EXCLUDED } from "../corpus/lint.ts";
@@ -11,7 +12,7 @@ import { parseList } from "../corpus/list.ts";
 import { chromiumArgs } from "../corpus/render.ts";
 import { disallowsRoot, TOKEN } from "../corpus/robots.ts";
 import { eachLimited, recordFile } from "../corpus/snapshot.ts";
-import type { SnapshotRecord } from "../corpus/types.ts";
+import type { LintLine, SnapshotRecord } from "../corpus/types.ts";
 import { compileForRun } from "../packages/cli/lint.ts";
 import { loadRules } from "../packages/rules/load.ts";
 import { wilson } from "../corpus/stats.ts";
@@ -231,4 +232,40 @@ test("lint: the rendered exclusions match the conformance suite's source-depende
   const literal = /const SOURCE_DEPENDENT = new Set\((\[[^\]]*\])\)/.exec(source)?.[1];
   assert.ok(literal, "SOURCE_DEPENDENT not found in test/conformance/adapters.test.ts");
   assert.deepEqual([...RENDER_EXCLUDED].sort(), (JSON.parse(literal) as string[]).sort());
+});
+
+const lintLine = (rank: number, raw: LintLine["raw"], origin: string | null = `https://site${rank}.test`): LintLine => ({
+  rank,
+  domain: `site${rank}.test`,
+  fetchedAt: `2026-10-02T00:00:0${rank % 10}.000Z`,
+  finalOrigin: origin,
+  raw,
+  rendered: raw.outcome === "linted" ? { outcome: "linted", counts: raw.counts } : { outcome: "not-rendered", counts: null },
+});
+
+test("aggregate: rates, bands, duplicates, zero-hit rules and no domain names", () => {
+  const lines = [
+    lintLine(1, { outcome: "linted", counts: { "a/rule": 2 } }),
+    lintLine(2, { outcome: "linted", counts: {} }),
+    lintLine(3, { outcome: "linted", counts: { "a/rule": 1 } }, "https://site1.test"),
+    lintLine(4, { outcome: "skipped", counts: null }, null),
+    lintLine(1500, { outcome: "linted", counts: { "a/rule": 1 } }),
+  ];
+  const result = aggregate(lines, ["a/rule", "b/rule"], { listId: "TEST", listCreated: "2026-09-30", n: 10_000, version: "0.2.0", commit: "abc1234" });
+  assert.deepEqual(result.coverage.raw, { linted: 3, duplicate: 1, skipped: 1 });
+  const a = result.rules["a/rule"];
+  assert.ok(a);
+  assert.equal(a.raw.sites, 2);
+  assert.equal(a.raw.rate, 0.6667);
+  assert.deepEqual(a.raw.top1k, { linted: 2, sites: 1, rate: 0.5 });
+  assert.deepEqual(a.raw.rest, { linted: 1, sites: 1, rate: 1 });
+  assert.equal(result.rules["b/rule"]?.raw.sites, 0);
+  assert.deepEqual(result.snapshot, { first: "2026-10-02T00:00:00.000Z", last: "2026-10-02T00:00:04.000Z" });
+  const serialized = JSON.stringify(result);
+  for (const line of lines) assert.ok(!serialized.includes(line.domain), `${line.domain} leaked`);
+});
+
+test("aggregate: the second band is null for a 1,000-site pilot", () => {
+  const result = aggregate([lintLine(1, { outcome: "linted", counts: {} })], ["a/rule"], { listId: "T", listCreated: null, n: 1000, version: "0.2.0", commit: "x" });
+  assert.equal(result.rules["a/rule"]?.raw.rest, null);
 });
