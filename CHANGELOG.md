@@ -5,7 +5,7 @@ Adding or renaming a rule is a minor release; prose-only and fix-only changes
 are patches. Rule ids are permanent from 0.1.0: a rename leaves a redirect and
 is marked as breaking.
 
-## 0.2.1 - 2026-10-04
+## 0.2.1 - 2026-10-05
 
 Fixes from the first corpus run. Deadhead 0.2.0 linted the home pages of the Tranco top
 10,000, and a review of 20 findings per rule found autofixes that changed what a page does,
