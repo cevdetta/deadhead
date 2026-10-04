@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import { classifyRaw, duplicateRanks, isBlocked, type RawFacts } from "../corpus/classify.ts";
 import { disallowsRoot, TOKEN } from "../corpus/robots.ts";
 import { wilson } from "../corpus/stats.ts";
 
@@ -32,4 +33,45 @@ test("robots: a group naming the token wins over *", () => {
 test("robots: an equal Allow beats Disallow, and agents in one group share its rules", () => {
   assert.equal(disallowsRoot("User-agent: *\nDisallow: /\nAllow: /"), false);
   assert.equal(disallowsRoot("User-agent: Googlebot\nUser-agent: *\nDisallow: /"), true);
+});
+
+const facts = (overrides: Partial<RawFacts>): RawFacts => ({
+  robots: "allowed",
+  error: null,
+  status: 200,
+  contentType: "text/html; charset=utf-8",
+  bytes: 200_000,
+  head: "<!doctype html><title>Home</title>",
+  ...overrides,
+});
+
+test("classify: each outcome from its facts", () => {
+  assert.equal(classifyRaw(facts({})), "linted");
+  assert.equal(classifyRaw(facts({ robots: "disallowed" })), "skipped");
+  assert.equal(classifyRaw(facts({ error: "dns", status: null })), "no-site");
+  assert.equal(classifyRaw(facts({ error: "connect", status: null })), "no-site");
+  assert.equal(classifyRaw(facts({ error: "tls", status: null })), "no-site");
+  assert.equal(classifyRaw(facts({ error: "timeout", status: null })), "failed");
+  assert.equal(classifyRaw(facts({ status: 503 })), "failed");
+  assert.equal(classifyRaw(facts({ contentType: "application/json" })), "failed");
+  assert.equal(classifyRaw(facts({ contentType: null })), "failed");
+});
+
+test("classify: both blocked thresholds", () => {
+  assert.equal(isBlocked(9_999, "<html>"), true, "under 10 kB");
+  assert.equal(isBlocked(50_000, "<title>Just a moment...</title>"), true, "challenge marker under 60 kB");
+  assert.equal(isBlocked(50_000, "<title>Home</title>"), false);
+  assert.equal(isBlocked(80_000, "<title>Just a moment...</title>"), false, "60 kB and up is a page that mentions it");
+  assert.equal(classifyRaw(facts({ bytes: 4_000 })), "blocked");
+});
+
+test("classify: a final origin counts once, at the best rank", () => {
+  const dup = duplicateRanks([
+    { rank: 5, finalOrigin: "https://aws.amazon.com" },
+    { rank: 2, finalOrigin: "https://aws.amazon.com" },
+    { rank: 3, finalOrigin: null },
+    { rank: 4, finalOrigin: null },
+    { rank: 1, finalOrigin: "https://www.google.com" },
+  ]);
+  assert.deepEqual([...dup], [5]);
 });
