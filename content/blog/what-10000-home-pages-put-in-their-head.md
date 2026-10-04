@@ -2,7 +2,7 @@
 title: "What 10,000 home pages put in their head"
 description: "Deadhead 0.2.1 on the Tranco top 10,000 home pages, as served and after scripts ran: what the most visited sites ship, with the data behind every number."
 pubDate: "2026-10-05"
-draft: true
+draft: false
 results: "2026-10-04-top10000.json"
 ---
 
