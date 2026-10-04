@@ -6,7 +6,9 @@ import test from "node:test";
 import { classifyRaw, duplicateRanks, isBlocked, type RawFacts } from "../corpus/classify.ts";
 import { errorKind, fetchSite, USER_AGENT } from "../corpus/fetch.ts";
 import { parseList } from "../corpus/list.ts";
+import { chromiumArgs } from "../corpus/render.ts";
 import { disallowsRoot, TOKEN } from "../corpus/robots.ts";
+import { eachLimited, recordFile } from "../corpus/snapshot.ts";
 import { wilson } from "../corpus/stats.ts";
 
 const round4 = ([lo, hi]: [number, number]): [number, number] => [Math.round(lo * 1e4) / 1e4, Math.round(hi * 1e4) / 1e4];
@@ -143,4 +145,29 @@ test("fetch: robots.txt, the www retry, redirects and the user agent", async (t)
   assert.equal(blocked.robots, "disallowed");
   assert.deepEqual(blocked.tried, []);
   assert.equal(blocked.body, null);
+});
+
+test("render: Chromium runs headless, isolated, with the project's user agent", () => {
+  const args = chromiumArgs("https://example.org/", "/tmp/p1");
+  assert.ok(args.includes("--headless=new"));
+  assert.ok(args.includes("--dump-dom"));
+  assert.ok(args.includes("--user-data-dir=/tmp/p1"));
+  assert.ok(args.includes(`--user-agent=${USER_AGENT}`));
+  assert.equal(args.at(-1), "https://example.org/");
+});
+
+test("snapshot: at most n tasks at once, every item once", async () => {
+  let running = 0;
+  let peak = 0;
+  const seen: number[] = [];
+  await eachLimited([1, 2, 3, 4, 5, 6, 7], 3, async (item) => {
+    running++;
+    peak = Math.max(peak, running);
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    seen.push(item);
+    running--;
+  });
+  assert.equal(peak, 3);
+  assert.deepEqual(seen.sort((a, b) => a - b), [1, 2, 3, 4, 5, 6, 7]);
+  assert.equal(recordFile("d", 42, "example.org"), "d/00042-example.org.json.gz");
 });
