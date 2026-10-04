@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
+import { createServer } from "node:http";
+import type { AddressInfo } from "node:net";
 import test from "node:test";
 
 import { classifyRaw, duplicateRanks, isBlocked, type RawFacts } from "../corpus/classify.ts";
+import { errorKind, fetchSite, USER_AGENT } from "../corpus/fetch.ts";
 import { parseList } from "../corpus/list.ts";
 import { disallowsRoot, TOKEN } from "../corpus/robots.ts";
 import { wilson } from "../corpus/stats.ts";
@@ -83,4 +86,61 @@ test("list: Tranco CSV rows, CRLF and blank lines tolerated", () => {
     { rank: 2, domain: "cloudflare.com" },
   ]);
   assert.deepEqual(parseList("rank,domain\nx,broken\n3,example.org"), [{ rank: 3, domain: "example.org" }]);
+});
+
+test("fetch: errors sort into the classes classify needs", () => {
+  const withCode = (code: string) => Object.assign(new TypeError("fetch failed"), { cause: Object.assign(new Error(code), { code }) });
+  assert.equal(errorKind(withCode("ENOTFOUND")), "dns");
+  assert.equal(errorKind(withCode("ECONNREFUSED")), "connect");
+  assert.equal(errorKind(withCode("ERR_TLS_CERT_ALTNAME_INVALID")), "tls");
+  assert.equal(errorKind(withCode("UND_ERR_CONNECT_TIMEOUT")), "timeout");
+  assert.equal(errorKind(Object.assign(new Error("t"), { name: "TimeoutError" })), "timeout");
+  assert.equal(errorKind(new Error("other")), "other");
+});
+
+test("fetch: robots.txt, the www retry, redirects and the user agent", async (t) => {
+  const seen: string[] = [];
+  const server = createServer((req, res) => {
+    seen.push(`${req.headers["user-agent"] ?? ""} ${req.url ?? ""}`);
+    const host = new URL(req.url ?? "/", "http://x").searchParams.get("host");
+    if (req.url?.startsWith("/robots.txt")) {
+      res.writeHead(200, { "content-type": "text/plain" });
+      res.end(host === "blocked.test" ? "User-agent: *\nDisallow: /" : "User-agent: *\nDisallow: /admin");
+      return;
+    }
+    if (req.url?.startsWith("/?")) {
+      res.writeHead(302, { location: `/home?host=${host}` });
+      res.end();
+      return;
+    }
+    res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
+    res.end("<!doctype html><title>Home</title>");
+  });
+  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+  t.after(() => server.close());
+  const { port } = server.address() as AddressInfo;
+  // A port that was free a moment ago; fetch refuses port 1 as a bad port before connecting.
+  const closed = createServer();
+  await new Promise<void>((resolve) => closed.listen(0, "127.0.0.1", resolve));
+  const closedPort = (closed.address() as AddressInfo).port;
+  await new Promise<void>((resolve) => closed.close(() => resolve()));
+  // The apex points at a closed port, so it fails to connect and the www host is tried.
+  const url = (host: string, path: string) =>
+    host.startsWith("www.") || path === "/robots.txt"
+      ? `http://127.0.0.1:${port}${path}${path.includes("?") ? "&" : "?"}host=${host}`
+      : `http://127.0.0.1:${closedPort}${path}`;
+
+  const ok = await fetchSite("example.test", { url });
+  assert.equal(ok.robots, "allowed");
+  assert.equal(ok.tried.length, 2);
+  assert.equal(ok.status, 200);
+  assert.match(ok.finalUrl ?? "", /\/home\?host=www\.example\.test$/);
+  assert.equal(ok.body?.toString("utf8"), "<!doctype html><title>Home</title>");
+  assert.equal(ok.error, null);
+  assert.ok(seen.every((line) => line.startsWith(USER_AGENT)));
+
+  const blocked = await fetchSite("blocked.test", { url });
+  assert.equal(blocked.robots, "disallowed");
+  assert.deepEqual(blocked.tried, []);
+  assert.equal(blocked.body, null);
 });
