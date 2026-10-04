@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { classifyRaw, duplicateRanks, isBlocked, type RawFacts } from "../corpus/classify.ts";
+import { parseList } from "../corpus/list.ts";
 import { disallowsRoot, TOKEN } from "../corpus/robots.ts";
 import { wilson } from "../corpus/stats.ts";
 
@@ -74,4 +75,12 @@ test("classify: a final origin counts once, at the best rank", () => {
     { rank: 1, finalOrigin: "https://www.google.com" },
   ]);
   assert.deepEqual([...dup], [5]);
+});
+
+test("list: Tranco CSV rows, CRLF and blank lines tolerated", () => {
+  assert.deepEqual(parseList("1,google.com\r\n2,cloudflare.com\r\n\r\n"), [
+    { rank: 1, domain: "google.com" },
+    { rank: 2, domain: "cloudflare.com" },
+  ]);
+  assert.deepEqual(parseList("rank,domain\nx,broken\n3,example.org"), [{ rank: 3, domain: "example.org" }]);
 });
