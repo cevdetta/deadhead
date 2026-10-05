@@ -8,12 +8,14 @@ import assert from "node:assert/strict";
 import { randomBytes } from "node:crypto";
 import test from "node:test";
 
+import { parseHTML } from "linkedom";
+
 import { SITE_URL } from "../../packages/core/vocabulary.ts";
 import { decodeHandoff } from "../../packages/browser/handoff.ts";
-import { readSource, sendToTry, serializeDocument, type Get, type Tab } from "../../packages/browser/send.ts";
+import { PANEL, readSource, sendToTry, serializeDocument, type Get, type Tab } from "../../packages/browser/send.ts";
 
 const doc = (characterSet = "UTF-8", doctype: object | null = { name: "html", publicId: "", systemId: "" }): Document =>
-  ({ characterSet, doctype, documentElement: { outerHTML: "<html><head></head><body>dom</body></html>" } }) as unknown as Document;
+  ({ characterSet, doctype, documentElement: { cloneNode: () => ({ outerHTML: "<html><head></head><body>dom</body></html>", querySelectorAll: () => [] }) } }) as unknown as Document;
 const serve = (body: BodyInit, init?: ResponseInit): Get => async () => new Response(body, init);
 const tab = (): Tab & { closed: boolean } => ({ opener: {}, location: { href: "" }, closed: false, close() { this.closed = true; } });
 
@@ -23,6 +25,13 @@ test("serializeDocument: the doctype, public and system ids included, then the r
   assert.match(serializeDocument(xhtml), /^<!DOCTYPE html PUBLIC "-\/\/W3C\/\/DTD XHTML 1\.0 Strict\/\/EN" "http:\/\/www\.w3\.org\/TR\/xhtml1\/DTD\/xhtml1-strict\.dtd">\n<html>/);
   assert.match(serializeDocument(doc("UTF-8", { name: "html", publicId: "", systemId: "about:legacy-compat" })), /^<!DOCTYPE html SYSTEM "about:legacy-compat">\n/);
   assert.equal(serializeDocument(doc("UTF-8", null)), "<html><head></head><body>dom</body></html>");
+});
+
+test("serializeDocument: leaves out the panel, which is ours and not the page's, and keeps the live page intact", () => {
+  const { document } = parseHTML("<!doctype html><html lang=en><head><title>t</title></head><body><p>page</p></body></html>");
+  document.body.append(document.createElement(PANEL));
+  assert.equal(serializeDocument(document), '<!DOCTYPE html>\n<html lang="en"><head><title>t</title></head><body><p>page</p></body></html>');
+  assert.ok(document.querySelector(PANEL), "the panel stays on the page");
 });
 
 test("readSource: the server's bytes, decoded with the page's own encoding", async () => {

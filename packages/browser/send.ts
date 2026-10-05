@@ -12,16 +12,21 @@ export type Tab = { opener: unknown; location: { href: string }; close(): void }
 
 export type Get = (url: string, init: RequestInit) => Promise<Response>;
 
-/** The document as HTML: its doctype, then the root element's markup. */
+/** The panel's host element. The bookmarklet appends it to the page; it is not the page's markup. */
+export const PANEL = "deadhead-panel";
+
+/** The document as HTML: its doctype, then the root element's markup, without the panel. */
 export function serializeDocument(doc: Document): string {
+  const root = doc.documentElement.cloneNode(true) as Element;
+  for (const panel of root.querySelectorAll(PANEL)) panel.remove();
   const type = doc.doctype;
-  if (type === null) return doc.documentElement.outerHTML;
+  if (type === null) return root.outerHTML;
   const ids = type.publicId
     ? ` PUBLIC "${type.publicId}"${type.systemId ? ` "${type.systemId}"` : ""}`
     : type.systemId
       ? ` SYSTEM "${type.systemId}"`
       : "";
-  return `<!DOCTYPE ${type.name}${ids}>\n${doc.documentElement.outerHTML}`;
+  return `<!DOCTYPE ${type.name}${ids}>\n${root.outerHTML}`;
 }
 
 /**

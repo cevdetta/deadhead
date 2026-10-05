@@ -13,9 +13,7 @@
 import { type Rule, run } from "../core/index.ts";
 import type { CheckFn, Finding, MatchFn, RuleMeta } from "../core/index.ts";
 import { fromDocument } from "./adapter.ts";
-import { sendToTry } from "./send.ts";
-
-const HOST = "deadhead-panel";
+import { PANEL as HOST, sendToTry } from "./send.ts";
 
 /**
  * Styles for the shadow root. The shadow boundary keeps the page's CSS out
