@@ -3,6 +3,7 @@
  * textContent: snippets come from the visitor's HTML and must never be parsed
  * as markup.
  */
+import { decodeHandoff } from "../../../packages/browser/handoff.ts";
 import { compileForRun } from "../../../packages/cli/source.ts";
 import { loadRules } from "../../../packages/rules/load.ts";
 import { decodeShare, encodeShare, lintHtml, SHARE_LIMIT, type LintView } from "../lib/playground.ts";
@@ -22,6 +23,7 @@ const results = $<HTMLElement>("try-results");
 const fixedBox = $<HTMLDetailsElement>("try-fixed");
 const output = $<HTMLTextAreaElement>("try-output");
 const copy = $<HTMLButtonElement>("try-copy");
+const from = $<HTMLParagraphElement>("try-from");
 
 const compiled = compileForRun(await loadRules(), {});
 
@@ -109,6 +111,20 @@ copy.addEventListener("click", async () => {
   status.textContent = "Fixed HTML copied.";
 });
 
-const shared = await decodeShare(location.hash);
-if (shared !== null) input.value = shared;
+input.addEventListener("input", () => (from.hidden = true), { once: true });
+
+const handed = await decodeHandoff(location.hash);
+if (handed !== null) {
+  input.value = handed.html;
+  from.textContent =
+    handed.source === "raw"
+      ? `HTML of ${handed.url}, as its server sent it.`
+      : `HTML of ${handed.url}, read from the rendered DOM: the page blocked re-reading its source, so scripts may have added or changed markup.`;
+  from.hidden = false;
+  // The fragment holds the whole page: keep it out of the address bar and out of a copied link.
+  history.replaceState(null, "", location.pathname + location.search);
+} else {
+  const shared = await decodeShare(location.hash);
+  if (shared !== null) input.value = shared;
+}
 run();
