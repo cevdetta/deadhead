@@ -75,8 +75,9 @@ const fromBase64Url = (text: string): Uint8Array => {
   return Uint8Array.from(binary, (char) => char.charCodeAt(0));
 };
 
+// `new Uint8Array(bytes)` copies into a plain ArrayBuffer, the BlobPart the DOM types accept.
 const pipe = async (bytes: Uint8Array, stream: CompressionStream | DecompressionStream): Promise<Uint8Array> =>
-  new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(stream)).arrayBuffer());
+  new Uint8Array(await new Response(new Blob([new Uint8Array(bytes)]).stream().pipeThrough(stream)).arrayBuffer());
 
 /** The pasted HTML as a link fragment: deflate-raw, then base64url. Nothing leaves the browser. */
 export async function encodeShare(html: string): Promise<string> {
