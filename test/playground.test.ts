@@ -8,7 +8,7 @@ import test from "node:test";
 
 import { collectFiles, compileForRun, lintSource } from "../packages/cli/lint.ts";
 import { loadRules } from "../packages/rules/load.ts";
-import { lintHtml } from "../site/src/lib/playground.ts";
+import { decodeShare, encodeShare, lintHtml, SHARE_LIMIT } from "../site/src/lib/playground.ts";
 
 const compiled = compileForRun(await loadRules(), {});
 const fixtures = await collectFiles(["test/fixtures"]);
@@ -54,4 +54,25 @@ test("lintHtml: an empty paste has nothing to report and nothing to fix", () => 
   assert.deepEqual(view.findings, []);
   assert.equal(view.output, "");
   assert.equal(view.fixed, 0);
+});
+
+test("share: HTML survives the round trip through the fragment, Unicode included", async () => {
+  const html = '<!doctype html><html lang="ja"><head><title>日本語 &amp; ü</title></head><body></body></html>';
+  const fragment = await encodeShare(html);
+  assert.match(fragment, /^#html=[A-Za-z0-9_-]+$/, "base64url, safe in a link");
+  assert.equal(await decodeShare(fragment), html);
+});
+
+test("share: compression keeps a typical head well under the limit", async () => {
+  const head = `<!doctype html><html lang="en"><head>${'<meta name="x" content="y">'.repeat(200)}</head><body></body></html>`;
+  const fragment = await encodeShare(head);
+  assert.ok(fragment.length < head.length / 4, `${fragment.length} characters for ${head.length}`);
+  assert.ok(SHARE_LIMIT >= 16_000);
+});
+
+test("share: a fragment with no HTML, or a corrupt one, yields null", async () => {
+  assert.equal(await decodeShare(""), null);
+  assert.equal(await decodeShare("#section"), null);
+  assert.equal(await decodeShare("#html=not*base64"), null);
+  assert.equal(await decodeShare("#html=AAAA"), null, "valid base64url, not a deflate stream");
 });

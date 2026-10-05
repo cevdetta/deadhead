@@ -54,3 +54,43 @@ export function lintHtml(html: string, compiled: CompiledRules): LintView {
   for (const finding of findings) counts[finding.severity]++;
   return { findings, counts, fixed, output };
 }
+
+/**
+ * Longest fragment the share button writes. Browsers accept far longer
+ * addresses, but chat apps and issue trackers truncate long links; past this
+ * the page says so instead of handing out a broken link.
+ */
+export const SHARE_LIMIT = 16_000;
+
+const PREFIX = "#html=";
+
+const toBase64Url = (bytes: Uint8Array): string => {
+  let binary = "";
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+};
+
+const fromBase64Url = (text: string): Uint8Array => {
+  const binary = atob(text.replace(/-/g, "+").replace(/_/g, "/"));
+  return Uint8Array.from(binary, (char) => char.charCodeAt(0));
+};
+
+const pipe = async (bytes: Uint8Array, stream: CompressionStream | DecompressionStream): Promise<Uint8Array> =>
+  new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(stream)).arrayBuffer());
+
+/** The pasted HTML as a link fragment: deflate-raw, then base64url. Nothing leaves the browser. */
+export async function encodeShare(html: string): Promise<string> {
+  return PREFIX + toBase64Url(await pipe(new TextEncoder().encode(html), new CompressionStream("deflate-raw")));
+}
+
+/** The HTML a fragment carries, or null when it carries none or cannot be read. */
+export async function decodeShare(fragment: string): Promise<string | null> {
+  if (!fragment.startsWith(PREFIX)) return null;
+  const payload = fragment.slice(PREFIX.length);
+  if (!/^[A-Za-z0-9_-]+$/.test(payload)) return null;
+  try {
+    return new TextDecoder("utf-8", { fatal: true }).decode(await pipe(fromBase64Url(payload), new DecompressionStream("deflate-raw")));
+  } catch {
+    return null;
+  }
+}
