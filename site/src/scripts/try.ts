@@ -31,35 +31,39 @@ const el = <K extends keyof HTMLElementTagNameMap>(tag: K, text?: string): HTMLE
   return node;
 };
 
+/** A severity badge, colored by the site's `[data-severity]` styles. */
+const badge = (severity: string, text: string): HTMLSpanElement => {
+  const span = el("span", text);
+  span.dataset["severity"] = severity;
+  return span;
+};
+
 function render(view: LintView): void {
   results.replaceChildren();
   const total = view.findings.length;
-  const { harmful, deprecated, unnecessary } = view.counts;
-  if (total === 0) status.textContent = "No findings.";
+  if (total === 0) status.textContent = "No findings. Nothing here for deadhead to report.";
   else {
-    status.replaceChildren(
-      `${total} finding${total === 1 ? "" : "s"}: ${harmful} harmful, ${deprecated} deprecated, ${unnecessary} unnecessary. `,
-      el("code", "--fix"),
-      ` removes ${view.fixed}.`,
-    );
-  }
-  if (total > 0) {
+    status.replaceChildren(`${total} finding${total === 1 ? "" : "s"}`);
+    for (const severity of ["harmful", "deprecated", "unnecessary"] as const) {
+      if (view.counts[severity] > 0) status.append(badge(severity, `${view.counts[severity]} ${severity}`));
+    }
+    status.append(" · ", el("code", "--fix"), ` removes ${view.fixed}`);
     const list = el("ol");
+    list.className = "rules";
     for (const finding of view.findings) {
       const item = el("li");
-      const head = el("p");
-      const where = finding.line === null ? "" : `${finding.line}:${finding.col} `;
-      head.append(el("strong", `${where}${finding.severity}${finding.possible ? " (possible)" : ""}`), " ");
       const link = el("a");
       link.href = finding.url;
       link.append(el("code", finding.ruleId));
-      head.append(link, ` ${finding.message}`);
+      const message = el("p");
+      if (finding.line !== null) message.append(el("code", `${finding.line}:${finding.col}`), " ");
+      message.append(finding.message);
       const snippet = el("pre");
       snippet.append(el("code", finding.snippet));
       const advice = el("p", finding.replacement);
       if (finding.fixable) advice.append(" Fixed by ", el("code", "--fix"), ".");
       if (finding.detail !== null) advice.append(el("br"), el("small", finding.detail));
-      item.append(head, snippet, advice);
+      item.append(link, badge(finding.severity, `${finding.severity}${finding.possible ? ", possible" : ""}`), message, snippet, advice);
       list.append(item);
     }
     results.append(list);
